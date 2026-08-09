@@ -32,15 +32,16 @@ class WP_Spin_Wheel_Meta_Box {
     public function render_settings_meta_box( $post ) {
         wp_nonce_field( 'spin_wheel_save', 'spin_wheel_nonce' );
 
-        $background   = get_post_meta( $post->ID, '_spin_wheel_background', true );
-        $logo         = get_post_meta( $post->ID, '_spin_wheel_logo', true );
-        $music        = get_post_meta( $post->ID, '_spin_wheel_music', true );
-        $sound        = get_post_meta( $post->ID, '_spin_wheel_sound', true );
-        $effect       = get_post_meta( $post->ID, '_spin_wheel_effect', true );
-        $spin_limit   = get_post_meta( $post->ID, '_spin_wheel_limit', true );
-        $form_fields  = get_post_meta( $post->ID, '_spin_wheel_form_fields', true );
-        $preset_id    = get_post_meta( $post->ID, '_spin_wheel_preset_id', true );
-        $form_fields  = is_array( $form_fields ) ? $form_fields : array();
+        $settings = WP_Spin_Wheel_Helper::get_wheel_settings( $post->ID );
+        $background = $settings['background'] ?? array( 'type' => 'color', 'value' => '#ffffff', 'image' => '' );
+        $logo = $settings['logo'] ?? '';
+        $music = $settings['music'] ?? '';
+        $sound = $settings['sound'] ?? '';
+        $effect = $settings['effect'] ?? '';
+        $spin_limit = $settings['spin_limit'] ?? 0;
+        $spin_limit_type = $settings['spin_limit_type'] ?? 'none';
+        $form_fields = is_array( $settings['form_fields'] ) ? $settings['form_fields'] : array();
+        $preset_id = $settings['preset_id'] ?? 0;
 
         $presets = get_posts( array(
             'post_type'      => 'spin_wheel_preset',
@@ -83,6 +84,15 @@ class WP_Spin_Wheel_Meta_Box {
             <label for="spin_wheel_limit"><?php esc_html_e( 'Spin limit', 'wp-spin-wheel' ); ?></label><br />
             <input type="number" id="spin_wheel_limit" name="spin_wheel_limit" value="<?php echo esc_attr( $spin_limit ); ?>" class="small-text" min="0" />
         </p>
+        <p>
+            <label for="spin_wheel_limit_type"><?php esc_html_e( 'Limit type', 'wp-spin-wheel' ); ?></label><br />
+            <select id="spin_wheel_limit_type" name="spin_wheel_limit_type" class="widefat">
+                <option value="none" <?php selected( $spin_limit_type, 'none' ); ?>><?php esc_html_e( 'None', 'wp-spin-wheel' ); ?></option>
+                <option value="per_ip" <?php selected( $spin_limit_type, 'per_ip' ); ?>><?php esc_html_e( 'Per IP', 'wp-spin-wheel' ); ?></option>
+                <option value="per_email" <?php selected( $spin_limit_type, 'per_email' ); ?>><?php esc_html_e( 'Per Email', 'wp-spin-wheel' ); ?></option>
+                <option value="per_phone" <?php selected( $spin_limit_type, 'per_phone' ); ?>><?php esc_html_e( 'Per Phone', 'wp-spin-wheel' ); ?></option>
+            </select>
+        </p>
         <fieldset>
             <legend><?php esc_html_e( 'Form fields', 'wp-spin-wheel' ); ?></legend>
             <?php foreach ( array( 'name' => 'Họ tên', 'email' => 'Email', 'phone' => 'SĐT', 'address' => 'Địa chỉ', 'company' => 'Công ty' ) as $key => $label ) : ?>
@@ -98,7 +108,7 @@ class WP_Spin_Wheel_Meta_Box {
     }
 
     public function render_prizes_meta_box( $post ) {
-        $prizes = get_post_meta( $post->ID, '_spin_wheel_prizes', true );
+        $prizes = WP_Spin_Wheel_Prize::get_prizes( $post->ID );
         $prizes = is_array( $prizes ) ? $prizes : array();
         ?>
         <div id="spin-wheel-prizes">
@@ -191,66 +201,68 @@ class WP_Spin_Wheel_Meta_Box {
 
         if ( isset( $_POST['spin_wheel_preset_id'] ) ) {
             $preset_id = absint( wp_unslash( $_POST['spin_wheel_preset_id'] ) );
-            update_post_meta( $post_id, '_spin_wheel_preset_id', $preset_id );
+            if ( $preset_id && get_post_type( $preset_id ) === 'spin_wheel_preset' ) {
+                update_post_meta( $post_id, '_spin_wheel_preset_id', $preset_id );
+            } else {
+                $preset_id = 0;
+                delete_post_meta( $post_id, '_spin_wheel_preset_id' );
+            }
         } else {
             $preset_id = 0;
             delete_post_meta( $post_id, '_spin_wheel_preset_id' );
         }
 
-        $manual_design = array();
+        $overrides = array();
 
         if ( isset( $_POST['spin_wheel_background'] ) ) {
             $background = sanitize_text_field( wp_unslash( $_POST['spin_wheel_background'] ) );
-            update_post_meta( $post_id, '_spin_wheel_background', $background );
-            $manual_design['background'] = array( 'type' => 'color', 'value' => $background );
+            $overrides['background'] = array( 'type' => 'color', 'value' => $background );
         }
         if ( isset( $_POST['spin_wheel_logo'] ) ) {
             $logo = esc_url_raw( wp_unslash( $_POST['spin_wheel_logo'] ) );
-            update_post_meta( $post_id, '_spin_wheel_logo', $logo );
-            $manual_design['logo'] = $logo;
+            $overrides['logo'] = $logo;
         }
         if ( isset( $_POST['spin_wheel_music'] ) ) {
             $music = esc_url_raw( wp_unslash( $_POST['spin_wheel_music'] ) );
-            update_post_meta( $post_id, '_spin_wheel_music', $music );
-            $manual_design['music'] = $music;
+            $overrides['music'] = $music;
         }
         if ( isset( $_POST['spin_wheel_sound'] ) ) {
             $sound = esc_url_raw( wp_unslash( $_POST['spin_wheel_sound'] ) );
-            update_post_meta( $post_id, '_spin_wheel_sound', $sound );
-            $manual_design['sound'] = $sound;
+            $overrides['sound'] = $sound;
         }
         if ( isset( $_POST['spin_wheel_effect'] ) ) {
             $effect = sanitize_text_field( wp_unslash( $_POST['spin_wheel_effect'] ) );
-            update_post_meta( $post_id, '_spin_wheel_effect', $effect );
-            $manual_design['effect'] = $effect;
+            $overrides['effect'] = $effect;
         }
         if ( isset( $_POST['spin_wheel_limit'] ) ) {
             $spin_limit = intval( wp_unslash( $_POST['spin_wheel_limit'] ) );
-            update_post_meta( $post_id, '_spin_wheel_limit', $spin_limit );
-            $manual_design['spin_limit'] = $spin_limit;
+            $overrides['spin_limit'] = $spin_limit;
+        }
+        if ( isset( $_POST['spin_wheel_limit_type'] ) ) {
+            $limit_type = sanitize_text_field( wp_unslash( $_POST['spin_wheel_limit_type'] ) );
+            if ( in_array( $limit_type, array( 'none', 'per_ip', 'per_email', 'per_phone', 'per_cookie' ), true ) ) {
+                $overrides['spin_limit_type'] = $limit_type;
+            }
         }
         if ( isset( $_POST['spin_wheel_form_fields'] ) && is_array( $_POST['spin_wheel_form_fields'] ) ) {
             $fields = array_map( 'sanitize_text_field', wp_unslash( $_POST['spin_wheel_form_fields'] ) );
-            update_post_meta( $post_id, '_spin_wheel_form_fields', $fields );
-            $manual_design['form_fields'] = $fields;
-        } else {
-            delete_post_meta( $post_id, '_spin_wheel_form_fields' );
+            $overrides['form_fields'] = $fields;
         }
 
-        if ( ! empty( $preset_id ) && get_post_type( $preset_id ) === 'spin_wheel_preset' ) {
-            $preset_config = WP_Spin_Wheel_Helper::get_preset_config( $preset_id );
-            if ( ! empty( $preset_config ) ) {
-                $preset_config['preset_id'] = $preset_id;
-                if ( ! empty( $manual_design ) ) {
-                    $preset_config = array_replace_recursive( $preset_config, $manual_design );
-                }
-                update_post_meta( $post_id, '_spin_wheel_design', wp_json_encode( $preset_config ) );
-            }
-        } elseif ( ! empty( $manual_design ) ) {
-            update_post_meta( $post_id, '_spin_wheel_design', wp_json_encode( $manual_design ) );
+        if ( ! empty( $overrides ) ) {
+            update_post_meta( $post_id, '_spin_wheel_overrides', wp_json_encode( $overrides ) );
         } else {
-            delete_post_meta( $post_id, '_spin_wheel_design' );
+            delete_post_meta( $post_id, '_spin_wheel_overrides' );
         }
+
+        delete_post_meta( $post_id, '_spin_wheel_design' );
+        delete_post_meta( $post_id, '_spin_wheel_background' );
+        delete_post_meta( $post_id, '_spin_wheel_logo' );
+        delete_post_meta( $post_id, '_spin_wheel_music' );
+        delete_post_meta( $post_id, '_spin_wheel_sound' );
+        delete_post_meta( $post_id, '_spin_wheel_effect' );
+        delete_post_meta( $post_id, '_spin_wheel_limit' );
+        delete_post_meta( $post_id, '_spin_wheel_form_fields' );
 
         if ( isset( $_POST['spin_wheel_prizes'] ) && is_array( $_POST['spin_wheel_prizes'] ) ) {
             $prizes = array();
@@ -275,14 +287,7 @@ class WP_Spin_Wheel_Meta_Box {
             $this->delete_prizes_from_db( $post_id );
         }
 
-        if ( ! empty( $preset_id ) && get_post_type( $preset_id ) === 'spin_wheel_preset' ) {
-            $preset_config = WP_Spin_Wheel_Helper::get_preset_config( $preset_id );
-            if ( ! empty( $preset_config ) ) {
-                update_post_meta( $post_id, '_spin_wheel_design', wp_json_encode( $preset_config ) );
-            }
-        } else {
-            delete_post_meta( $post_id, '_spin_wheel_design' );
-        }
+        delete_post_meta( $post_id, '_spin_wheel_design' );
     }
 
     private function sync_prizes_to_db( $post_id, $prizes ) {

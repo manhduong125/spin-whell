@@ -476,11 +476,11 @@ class WP_Spin_Wheel_Admin {
             wp_send_json_error( array( 'message' => __( 'Unable to create preset.', 'wp-spin-wheel' ) ) );
         }
 
-        $preset_design = $this->merge_library_config( $config );
-        $preset_design['preset_id'] = $preset_id;
+        $preset_overrides = $this->merge_library_config( $config );
 
         update_post_meta( $wheel_id, '_spin_wheel_preset_id', $preset_id );
-        update_post_meta( $wheel_id, '_spin_wheel_design', wp_json_encode( $preset_design ) );
+        update_post_meta( $wheel_id, '_spin_wheel_overrides', wp_json_encode( $preset_overrides ) );
+        delete_post_meta( $wheel_id, '_spin_wheel_design' );
 
         wp_send_json_success( array( 'message' => __( 'Preset applied to wheel.', 'wp-spin-wheel' ), 'preset_id' => $preset_id ) );
     }

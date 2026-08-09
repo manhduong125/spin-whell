@@ -37,7 +37,18 @@ class WP_Spin_Wheel_Preset {
             'supports'           => array( 'title', 'editor', 'thumbnail' ),
             'has_archive'        => false,
             'rewrite'            => false,
-            'capability_type'    => 'post',
+            'capability_type'    => array( 'spin_wheel_preset', 'spin_wheel_presets' ),
+            'map_meta_cap'       => true,
+            'capabilities'       => array(
+                'edit_post'          => 'edit_spin_wheel_preset',
+                'read_post'          => 'read_spin_wheel_preset',
+                'delete_post'        => 'delete_spin_wheel_preset',
+                'edit_posts'         => 'edit_spin_wheel_presets',
+                'edit_others_posts'  => 'edit_others_spin_wheel_presets',
+                'publish_posts'      => 'publish_spin_wheel_presets',
+                'read_private_posts' => 'read_private_spin_wheel_presets',
+                'create_posts'       => 'create_spin_wheel_presets',
+            ),
         ) );
     }
 

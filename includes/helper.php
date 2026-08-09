@@ -20,26 +20,40 @@ class WP_Spin_Wheel_Helper {
         return is_array( $config ) ? $config : array();
     }
 
-    public static function get_wheel_design( $post_id ) {
-        $design = self::get_post_meta( $post_id, '_spin_wheel_design', true );
-        if ( is_string( $design ) ) {
-            $design = json_decode( $design, true );
-        }
-        return is_array( $design ) ? $design : array();
+    public static function get_wheel_preset_id( $post_id ) {
+        return absint( self::get_post_meta( $post_id, '_spin_wheel_preset_id', true ) );
     }
 
-    public static function get_wheel_settings( $post_id ) {
-        $design = self::get_wheel_design( $post_id );
-        $preset_id = intval( $design['preset_id'] ?? self::get_post_meta( $post_id, '_spin_wheel_preset_id' ) );
+    public static function get_wheel_overrides( $post_id ) {
+        $overrides = self::get_post_meta( $post_id, '_spin_wheel_overrides', true );
+        if ( is_string( $overrides ) ) {
+            $overrides = json_decode( $overrides, true );
+        }
+        if ( ! is_array( $overrides ) ) {
+            $overrides = array();
+        }
 
-        if ( empty( $design ) && $preset_id && get_post_type( $preset_id ) === 'spin_wheel_preset' ) {
-            $preset_config = self::get_preset_config( $preset_id );
-            if ( ! empty( $preset_config ) ) {
-                $design = $preset_config;
-                $design['preset_id'] = $preset_id;
+        if ( empty( $overrides ) ) {
+            $legacy_design = self::get_post_meta( $post_id, '_spin_wheel_design', true );
+            if ( is_string( $legacy_design ) ) {
+                $legacy_design = json_decode( $legacy_design, true );
+            }
+            if ( is_array( $legacy_design ) ) {
+                $overrides = $legacy_design;
             }
         }
 
+        return $overrides;
+    }
+
+    public static function get_wheel_settings( $post_id ) {
+        $preset_id = self::get_wheel_preset_id( $post_id );
+        $preset_config = array();
+        if ( $preset_id && get_post_type( $preset_id ) === 'spin_wheel_preset' ) {
+            $preset_config = self::get_preset_config( $preset_id );
+        }
+
+        $overrides = self::get_wheel_overrides( $post_id );
         $preset_title = '';
         $preset_thumbnail = '';
 
@@ -57,6 +71,7 @@ class WP_Spin_Wheel_Helper {
             'sound'        => '',
             'effect'       => '',
             'spin_limit'   => 0,
+            'spin_limit_type' => 'none',
             'form_fields'  => array(),
             'preset_id'    => $preset_id,
             'preset_title' => $preset_title,
@@ -70,7 +85,7 @@ class WP_Spin_Wheel_Helper {
             'custom_css'   => '',
         );
 
-        $settings = array_replace_recursive( $defaults, $design );
+        $settings = array_replace_recursive( $defaults, $preset_config, $overrides );
         $settings['preset_id'] = $preset_id;
         $settings['preset_title'] = $preset_title;
         $settings['preset_thumbnail'] = $preset_thumbnail;
