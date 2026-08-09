@@ -357,10 +357,11 @@ jQuery(document).ready(function($) {
             normalizedRotation += Math.PI * 2;
         }
 
-        var targetAngle = Math.PI * 2 - (targetIndex + 0.5) * angleStep;
+        var pointerAngle = -Math.PI / 2;
+        var targetAngle = pointerAngle - (targetIndex + 0.5) * angleStep;
         var rotations = 4;
         var totalRotation = rotations * Math.PI * 2 + targetAngle - normalizedRotation;
-        if ( totalRotation < 0 ) {
+        while ( totalRotation < 0 ) {
             totalRotation += Math.PI * 2;
         }
 
