@@ -32,7 +32,7 @@ class WP_Spin_Wheel_Post_Type {
             'show_in_menu'       => true,
             'menu_position'      => 25,
             'menu_icon'          => 'dashicons-chart-pie',
-            'supports'           => array( 'title', 'editor', 'thumbnail' ),
+            'supports'           => array( 'title', 'editor', 'thumbnail', 'author' ),
             'has_archive'        => false,
             'rewrite'            => false,
             'capability_type'    => array( 'spin_wheel', 'spin_wheels' ),

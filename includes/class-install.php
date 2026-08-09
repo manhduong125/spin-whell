@@ -36,7 +36,10 @@ class WP_Spin_Wheel_Install {
             updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             PRIMARY KEY  (id),
             KEY wheel_id (wheel_id),
+            KEY wheel_status (wheel_id, status),
             KEY wheel_stock (wheel_id, stock),
+            KEY wheel_status_stock (wheel_id, status, stock),
+            KEY wheel_sort (wheel_id, sort_order),
             KEY status (status)
         ) {$charset_collate};";
 
@@ -52,7 +55,9 @@ class WP_Spin_Wheel_Install {
             updated_at datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             PRIMARY KEY  (id),
             KEY email (email),
-            KEY phone (phone)
+            KEY phone (phone),
+            KEY ip (ip),
+            KEY created_at (created_at)
         ) {$charset_collate};";
 
         $sql_history = "CREATE TABLE {$table_history} (
@@ -76,12 +81,40 @@ class WP_Spin_Wheel_Install {
             KEY created_at (created_at),
             KEY wheel_created_at (wheel_id, created_at),
             KEY email (email),
-            KEY phone (phone)
+            KEY phone (phone),
+            KEY reward_code (reward_code),
+            KEY cookie (cookie),
+            KEY ip (ip)
         ) {$charset_collate};";
 
         dbDelta( $sql_prizes );
         dbDelta( $sql_players );
         dbDelta( $sql_history );
+        // ensure capabilities are assigned after tables are created
+        self::add_capabilities();
+    }
+
+    public static function add_capabilities() {
+        $roles = array( 'administrator', 'editor' );
+        $caps = array(
+            'edit_spin_wheel', 'read_spin_wheel', 'delete_spin_wheel',
+            'edit_spin_wheels', 'edit_others_spin_wheels', 'publish_spin_wheels', 'read_private_spin_wheels', 'create_spin_wheels',
+            'edit_spin_wheel_preset', 'read_spin_wheel_preset', 'delete_spin_wheel_preset',
+            'edit_spin_wheel_presets', 'edit_others_spin_wheel_presets', 'publish_spin_wheel_presets', 'read_private_spin_wheel_presets', 'create_spin_wheel_presets',
+        );
+
+        foreach ( $roles as $role_name ) {
+            $role = get_role( $role_name );
+            if ( ! $role ) {
+                continue;
+            }
+
+            foreach ( $caps as $cap ) {
+                if ( ! $role->has_cap( $cap ) ) {
+                    $role->add_cap( $cap );
+                }
+            }
+        }
     }
 
     public static function flush_rewrite() {

@@ -7,6 +7,7 @@ jQuery(document).ready(function($) {
     var wheelSettings = {};
     var wheelPrizes = [];
     var spinning = false;
+    var pendingRequest = false;
     var currentRotation = 0;
 
     function parseJson(value, fallback) {
@@ -436,7 +437,7 @@ jQuery(document).ready(function($) {
     });
 
     $('#spin').on('click', function() {
-        if ( spinning ) {
+        if ( spinning || pendingRequest ) {
             return;
         }
 
@@ -460,26 +461,37 @@ jQuery(document).ready(function($) {
             }
         });
 
-        $.ajax({
-            url: wp_spin_wheel_params.ajax_url,
-            type: 'POST',
-            dataType: 'json',
-            data: {
-                action: 'spin_wheel_spin',
-                wheel_id: wheelId,
-                nonce: nonce,
-                form: form,
+        // Use REST API for spin (server decides winner)
+        pendingRequest = true;
+        var restBase = (wp_spin_wheel_params && wp_spin_wheel_params.rest_url) ? wp_spin_wheel_params.rest_url.replace(/\/$/, '') : (window.location.origin + '/wp-json/spin-wheel/v1');
+        var endpoint = restBase + '/wheels/' + wheelId + '/spin';
+
+        fetch(endpoint, {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-WP-Nonce': (wp_spin_wheel_params && wp_spin_wheel_params.nonce) ? wp_spin_wheel_params.nonce : ''
             },
-            success: function(response) {
-                if ( response.success ) {
-                    handleSpinSuccess(response.data.prize);
-                } else {
-                    alert(response.data.message || wp_spin_wheel_params.text_error);
-                }
-            },
-            error: function() {
-                alert(wp_spin_wheel_params.text_error);
+            body: JSON.stringify({ form: form })
+        }).then(function(res) {
+            pendingRequest = false;
+            if ( ! res.ok ) {
+                return res.json().then(function(err) { throw err; }).catch(function() { throw { message: wp_spin_wheel_params.text_error }; });
             }
+            return res.json();
+        }).then(function(data) {
+            if ( data && data.prize ) {
+                handleSpinSuccess(data.prize);
+            } else if ( data && data.message ) {
+                alert( data.message || wp_spin_wheel_params.text_error );
+            } else {
+                alert( wp_spin_wheel_params.text_error );
+            }
+        }).catch(function(err) {
+            var msg = (err && err.message) ? err.message : (err && err.data && err.data.message) ? err.data.message : wp_spin_wheel_params.text_error;
+            alert( msg );
+            pendingRequest = false;
         });
     });
 

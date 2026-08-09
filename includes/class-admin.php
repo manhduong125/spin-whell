@@ -18,6 +18,7 @@ class WP_Spin_Wheel_Admin {
         $screen_id = $screen ? $screen->id : '';
         $allowed_screens = array(
             'spin_wheel_page_wp-spin-wheel-library',
+            'settings_page_wp-spin-wheel-settings',
             'post.php',
             'post-new.php',
             'edit-spin_wheel',
@@ -41,6 +42,7 @@ class WP_Spin_Wheel_Admin {
         wp_localize_script( 'wp-spin-wheel-admin', 'wp_spin_wheel_admin_params', array(
             'ajax_url' => admin_url( 'admin-ajax.php' ),
             'nonce'    => wp_create_nonce( 'spin_wheel_admin' ),
+            'rest_url' => esc_url( rest_url( 'spin-wheel/v1' ) ),
             'text_saved' => __( 'Preset đã lưu.', 'wp-spin-wheel' ),
             'text_applied' => __( 'Đã áp dụng vào vòng quay.', 'wp-spin-wheel' ),
             'text_select_wheel' => __( 'Vui lòng chọn một vòng quay.', 'wp-spin-wheel' ),
@@ -48,6 +50,14 @@ class WP_Spin_Wheel_Admin {
             'text_delete_confirm' => __( 'Bạn có chắc muốn xóa preset này không?', 'wp-spin-wheel' ),
             'media_title' => __( 'Chọn tệp phương tiện', 'wp-spin-wheel' ),
             'media_button' => __( 'Chọn', 'wp-spin-wheel' ),
+        ) );
+
+        // admin settings script: handles settings page REST load/save
+        wp_enqueue_script( 'wp-spin-wheel-admin-settings', WP_SPIN_WHEEL_URL . 'assets/js/admin-settings.js', array( 'jquery' ), WP_SPIN_WHEEL_VERSION, true );
+        wp_localize_script( 'wp-spin-wheel-admin-settings', 'wp_spin_wheel_settings_params', array(
+            'rest_url' => esc_url( rest_url( 'spin-wheel/v1' ) ),
+            'nonce' => wp_create_nonce( 'wp_rest' ),
+            'text_saved' => __( 'Settings saved.', 'wp-spin-wheel' ),
         ) );
     }
 
