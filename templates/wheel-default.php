@@ -1,0 +1,126 @@
+<?php
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
+
+$default_settings = array(
+    'background' => array(
+        'type'  => 'color',
+        'value' => '#f8fafc',
+    ),
+    'wheel' => array(
+        'size'         => 520,
+        'border'       => 12,
+        'border_color' => '#ffffff',
+        'shadow'       => true,
+    ),
+    'button' => array(
+        'text'       => __( 'Quay ngay', 'wp-spin-wheel' ),
+        'color'      => '#3b82f6',
+        'text_color' => '#ffffff',
+        'radius'     => 40,
+    ),
+    'pointer' => array(
+        'image' => '',
+        'size'  => 90,
+    ),
+    'font' => array(
+        'family' => 'Poppins',
+        'size'   => 18,
+    ),
+    'animation' => array(
+        'duration' => 6,
+        'confetti' => true,
+    ),
+);
+
+$default_prizes = array(
+    array( 'title' => __( 'Tuấn', 'wp-spin-wheel' ), 'color' => '#ef4444' ),
+    array( 'title' => __( 'Linh', 'wp-spin-wheel' ), 'color' => '#f59e0b' ),
+    array( 'title' => __( 'Trang', 'wp-spin-wheel' ), 'color' => '#10b981' ),
+    array( 'title' => __( 'Nga', 'wp-spin-wheel' ), 'color' => '#3b82f6' ),
+    array( 'title' => __( 'Thiện', 'wp-spin-wheel' ), 'color' => '#8b5cf6' ),
+    array( 'title' => __( 'Kiên', 'wp-spin-wheel' ), 'color' => '#ec4899' ),
+    array( 'title' => __( 'Hùng', 'wp-spin-wheel' ), 'color' => '#14b8a6' ),
+    array( 'title' => __( 'Nam', 'wp-spin-wheel' ), 'color' => '#f97316' ),
+);
+?>
+<div class="container-fluid noads wp-spin-wheel-wrapper" id="wheel-wrapper" data-wheel-id="0" data-wheel-settings="<?php echo esc_attr( wp_json_encode( $default_settings ) ); ?>" data-wheel-prizes="<?php echo esc_attr( wp_json_encode( $default_prizes ) ); ?>">
+    <div class="row" id="row-wheel">
+        <div class="col-xl-3" id="wheel-left">
+            <div class="vqmm-entry mb-4">
+                <div id="vqmm-content" class="text-center text-xl-start vqmm-content">
+                    <div class="wp-block-heading has-x-large-font-size" id="vqmm-title"><?php esc_html_e( 'Vòng quay may mắn', 'wp-spin-wheel' ); ?></div>
+                    <p id="vqmm-desc"><?php esc_html_e( 'Quay để nhận quà ngẫu nhiên.', 'wp-spin-wheel' ); ?></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-6 text-center mb-3" id="wheel-center">
+            <div id="wheel-container">
+                <div id="wheelOfFortune">
+                    <canvas id="wheel" width="700" height="700"></canvas>
+                    <div id="spin"><?php esc_html_e( 'Quay', 'wp-spin-wheel' ); ?></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3" id="wheel-right">
+            <div class="wrc mb-3 bg-light" id="wrc">
+                <nav>
+                    <div class="nav nav-tabs" id="main-tab" role="tablist">
+                        <button class="nav-link w-50 active" id="tab-entries" data-bs-toggle="tab" data-bs-target="#tab-content-entries" type="button" role="tab" aria-controls="tab-content-entries" aria-selected="true"><?php esc_html_e( 'Mục', 'wp-spin-wheel' ); ?> <span class="badge bg-primary text-light rounded-pill" id="entries_count"><?php echo esc_html( count( $default_prizes ) ); ?></span></button>
+                        <button class="nav-link w-50" id="tab-result" data-bs-toggle="tab" data-bs-target="#tab-content-result" type="button" role="tab" aria-controls="tab-content-result" aria-selected="false"><?php esc_html_e( 'Kết quả', 'wp-spin-wheel' ); ?> <span class="badge bg-primary text-light rounded-pill" id="result_count">0</span></button>
+                    </div>
+                </nav>
+                <div class="tab-content" id="nav-tabContent">
+                    <div class="tab-pane py-3 fade show active" id="tab-content-entries" role="tabpanel" aria-labelledby="tab-entries">
+                        <div class="d-flex flex-wrap w-100 justify-content-start align-items-center mb-3" id="top-tool">
+                            <button type="button" class="btn btn-outline-secondary btn-sm me-1" id="btn-shuffle-wheel">
+                                <img decoding="async" src="https://vongquaymayman.co/wp-content/themes/twentytwentythree-child/assets/icons/shuffle.png" class="custom-icon" width="20" height="20" alt="shuffle" loading="lazy">
+                                Trộn
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm me-1 mb-1" id="btn-sort-wheel-az">⇣ AZ</button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm me-1 mb-1 d-none" id="btn-sort-wheel-za">⇣ ZA</button>
+                            <label class="btn btn-outline-secondary btn-sm btn-upanh me-1 mb-1" for="inputImage" title="Upload image file">
+                                <input type="file" class="d-none" id="inputImage" name="file" accept=".jpg,.jpeg,.png,.gif" multiple>
+                                <span data-feather="image"></span>
+                                <span id="input-image-txt">Thêm ảnh</span>
+                            </label>
+                            <button type="button" class="btn btn-outline-danger btn-sm me-1 mb-1" id="btn-clear-entry">
+                                <span data-feather="x" style="width:20px;height:20px;"></span>
+                                Xoá
+                            </button>
+                            <div class="form-check ms-1 me-0">
+                                <label class="form-check-label" for="is_advance">Nâng cao</label>
+                                <input class="form-check-input" type="checkbox" role="checkbox" id="is_advance" value="0">
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="input-group input-group-sm mb-2">
+                                <input type="text" id="new_prize_title" class="form-control" placeholder="<?php echo esc_attr__( 'Nhập mục mới', 'wp-spin-wheel' ); ?>">
+                                <input type="color" id="new_prize_color" class="form-control form-control-color" value="#10b981" title="<?php echo esc_attr__( 'Màu phần thưởng', 'wp-spin-wheel' ); ?>">
+                                <button class="btn btn-primary" type="button" id="btn-add-prize"><?php esc_html_e( 'Thêm', 'wp-spin-wheel' ); ?></button>
+                            </div>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" id="btn-restore-defaults"><?php esc_html_e( 'Khôi phục mặc định', 'wp-spin-wheel' ); ?></button>
+                        </div>
+                        <div class="mb-3">
+                            <div id="sector_list" class="form-control section-list rounded-0" readonly placeholder="<?php esc_attr_e( 'Danh sách phần thưởng', 'wp-spin-wheel' ); ?>">
+                                <?php foreach ( $default_prizes as $prize ) : ?>
+                                    <div><?php echo esc_html( $prize['title'] ); ?></div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane py-3 fade" id="tab-content-result" role="tabpanel" aria-labelledby="tab-result">
+                        <div class="d-flex justify-content-start mb-3">
+                            <button type="button" class="btn btn-outline-secondary btn-sm me-2" id="btn-sort-result"><?php esc_html_e( 'Sắp xếp', 'wp-spin-wheel' ); ?></button>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="btn-clear-result"><?php esc_html_e( 'Xóa kết quả', 'wp-spin-wheel' ); ?></button>
+                        </div>
+                        <div id="wheel_result" class="form-control rounded-0 section-list" readonly placeholder="<?php esc_attr_e( 'Kết quả quay', 'wp-spin-wheel' ); ?>"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
