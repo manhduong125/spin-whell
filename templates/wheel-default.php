@@ -44,11 +44,14 @@ $default_prizes = array(
     array( 'title' => __( 'Hùng', 'wp-spin-wheel' ), 'color' => '#14b8a6' ),
     array( 'title' => __( 'Nam', 'wp-spin-wheel' ), 'color' => '#f97316' ),
 );
+$default_title = __( '', 'wp-spin-wheel' );
+$default_description = __( '', 'wp-spin-wheel' );
 ?>
 <div class="container-fluid noads wp-spin-wheel-wrapper" id="wheel-wrapper" data-wheel-id="0"
     data-wheel-settings="<?php echo esc_attr( wp_json_encode( $default_settings ) ); ?>"
     data-wheel-prizes="<?php echo esc_attr( wp_json_encode( $default_prizes ) ); ?>">
     <div class="row" id="row-wheel">
+
         <div class="col-xl-3 toggle-show-hide" id="wheel-left">
             <div class="vqmm-entry mb-4"> <a href="javascript:void(0);" data-bs-toggle="tooltip"
                     data-bs-title="Chỉnh sửa tiêu đề và mô tả" class="btn-edit toggle-show-hide" id="edit-content"
@@ -60,8 +63,8 @@ $default_prizes = array(
                         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                     </svg></a> <span id="edit-mode-txt"></span>
                 <div id="vqmm-content" class="text-center text-xl-start vqmm-content">
-                    <div class="wp-block-heading has-x-large-font-size toggle-show-hide" id="vqmm-title"></div>
-                    <p class="toggle-show-hide" id="vqmm-desc"></p>
+                    <div class="wp-block-heading has-x-large-font-size toggle-show-hide" id="vqmm-title"><?php echo esc_html( $default_title ); ?></div>
+                    <p class="toggle-show-hide" id="vqmm-desc"><?php echo esc_html( $default_description ); ?></p>
                 </div>
             </div>
         </div>
@@ -155,14 +158,14 @@ $default_prizes = array(
     </div>
 </div>
 
-<div class="modal" id="myModal" tabindex="-1" aria-modal="true" role="dialog">
+<div class="modal" id="myModal" tabindex="-1" style="display: none;" aria-modal="true" aria-hidden="true" role="dialog">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" id="modal-dialog">
         <div class="modal-content" id="modal-content">
             <div class="modal-header" id="modal-header">
                 <h5 class="modal-title" id="modal-title"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                         stroke-linejoin="round" class="feather feather-edit"
-                        style="width: 30px;heigh:30px;vertical-align: middle;">
+                        style="width: 30px; height: 30px; vertical-align: middle;">
                         <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                     </svg> Sửa tiêu đề và mô tả</h5> <button type="button" id="modal-close" class="btn-close"
@@ -170,10 +173,10 @@ $default_prizes = array(
             </div>
             <div class="modal-body py-3" id="modal-body">
                 <div class="mb-2"><label for="editTitle" class="form-label">Tiêu đề</label><input type="text"
-                        class="form-control" value="" data-maxlength="60" id="editTitle"
+                        class="form-control" value="<?php echo esc_attr( $default_title ); ?>" data-maxlength="60" id="editTitle"
                         placeholder="Tiêu đề vòng quay"></div>
                 <div class="mb-3"><label for="editDesc" class="form-label">Mô tả</label><textarea class="form-control"
-                        id="editDesc" placeholder="Mô tả vòng quay" data-maxlength="160" rows="3"></textarea></div>
+                        id="editDesc" placeholder="Mô tả vòng quay" data-maxlength="160" rows="3"><?php echo esc_textarea( $default_description ); ?></textarea></div>
             </div>
             <div class="modal-footer" id="modal-footer"><button type="button" class="btn btn-secondary"
                     data-bs-dismiss="modal">Đóng</button><button type="button" id="saveTitleDesc"

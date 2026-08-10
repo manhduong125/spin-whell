@@ -80,6 +80,64 @@ jQuery(document).ready(function($) {
         return 'wp_spin_wheel_default_prizes';
     }
 
+    function openTitleDescriptionEditor() {
+        var title = $.trim($('#vqmm-title').text());
+        var description = $.trim($('#vqmm-desc').text());
+
+        $('#editTitle').val(title || 'Vòng quay may mắn');
+        $('#editDesc').val(description || 'Nhấn vào nút quay để bắt đầu.');
+        $('#edit-mode-txt').text('Đang chỉnh sửa...');
+        $('#myModal').show().attr('aria-hidden', 'false');
+    }
+
+    function closeTitleDescriptionEditor() {
+        $('#myModal').hide().attr('aria-hidden', 'true');
+    }
+
+    function saveTitleDesc() {
+        var title = $.trim($('#editTitle').val());
+        var description = $.trim($('#editDesc').val());
+
+        if ( ! title ) {
+            title = 'Vòng quay may mắn';
+        }
+
+        $('#vqmm-title').text(title);
+        if ( description ) {
+            $('#vqmm-desc').html(description.replace(/\n/g, '<br>'));
+        } else {
+            $('#vqmm-desc').empty();
+        }
+
+        if ( wheelId && nonce ) {
+            $.ajax({
+                url: wp_spin_wheel_params.rest_url + 'wheels/' + wheelId,
+                type: 'PUT',
+                dataType: 'json',
+                contentType: 'application/json',
+                headers: {
+                    'x_wp_nonce': nonce,
+                },
+                data: JSON.stringify({
+                    title: title,
+                    content: description,
+                    settings: {},
+                    prizes: wheelPrizes,
+                }),
+                success: function() {
+                    $('#edit-mode-txt').text('Đã lưu');
+                },
+                error: function() {
+                    $('#edit-mode-txt').text('Lưu thất bại');
+                },
+            });
+        } else {
+            $('#edit-mode-txt').text('Đã cập nhật');
+        }
+
+        closeTitleDescriptionEditor();
+    }
+
     function normalizePrize(prize, index) {
         prize = prize || {};
         return {
@@ -493,6 +551,33 @@ jQuery(document).ready(function($) {
             alert( msg );
             pendingRequest = false;
         });
+    });
+
+    $('#edit-content').on('click', function(e) {
+        e.preventDefault();
+        openTitleDescriptionEditor();
+    });
+
+    $('#saveTitleDesc').on('click', function(e) {
+        e.preventDefault();
+        saveTitleDesc();
+    });
+
+    $('#modal-close, #myModal .btn-secondary').on('click', function(e) {
+        e.preventDefault();
+        closeTitleDescriptionEditor();
+    });
+
+    $('#myModal').on('click', function(e) {
+        if ( $(e.target).is('#myModal') ) {
+            closeTitleDescriptionEditor();
+        }
+    });
+
+    $(document).on('keydown', function(e) {
+        if ( e.key === 'Escape' ) {
+            closeTitleDescriptionEditor();
+        }
     });
 
     $('#btn-clear-result').on('click', function() {

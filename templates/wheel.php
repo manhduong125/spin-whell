@@ -7,7 +7,8 @@ $settings = WP_Spin_Wheel_Helper::get_wheel_settings( $post_id );
 $prizes = WP_Spin_Wheel_Prize::get_prizes( $post_id );
 $nonce = wp_create_nonce( 'spin_wheel_nonce' );
 $entries_count = count( $prizes );
-$description = ! empty( $settings['description'] ) ? $settings['description'] : '';
+$current_title = ! empty( $settings['title'] ) ? $settings['title'] : __( 'Vòng quay may mắn', 'wp-spin-wheel' );
+$description = ! empty( $settings['description'] ) ? $settings['description'] : __( 'Nhấn vào nút quay để bắt đầu.', 'wp-spin-wheel' );
 ?>
 <div class="container-fluid noads wp-spin-wheel-wrapper" id="wheel-wrapper" data-wheel-id="<?php echo esc_attr( $post_id ); ?>" data-nonce="<?php echo esc_attr( $nonce ); ?>" data-wheel-settings="<?php echo esc_attr( wp_json_encode( $settings ) ); ?>" data-wheel-prizes="<?php echo esc_attr( wp_json_encode( $prizes ) ); ?>">
     <div class="row" id="row-wheel">
@@ -18,7 +19,7 @@ $description = ! empty( $settings['description'] ) ? $settings['description'] : 
                 </a>
                 <span id="edit-mode-txt"></span>
                 <div id="vqmm-content" class="text-center text-xl-start vqmm-content">
-                    <div class="wp-block-heading has-x-large-font-size toggle-show-hide" id="vqmm-title"><?php echo esc_html( $settings['title'] ); ?></div>
+                    <div class="wp-block-heading has-x-large-font-size toggle-show-hide" id="vqmm-title"><?php echo esc_html( $current_title ); ?></div>
                     <p class="toggle-show-hide" id="vqmm-desc"><?php echo nl2br( esc_html( $description ) ); ?></p>
                 </div>
             </div>
