@@ -90,10 +90,6 @@ class WP_Spin_Wheel_Helper {
             return 'buttons';
         }
 
-        if ( in_array( $type, array( 'font', 'fonts', 'spin_wheel_font' ), true ) ) {
-            return 'fonts';
-        }
-
         if ( in_array( $type, array( 'pointer', 'pointers', 'spin_wheel_pointer' ), true ) ) {
             return 'pointers';
         }
@@ -155,7 +151,6 @@ class WP_Spin_Wheel_Helper {
             'wheel'        => array( 'size' => 500, 'border' => 8, 'border_color' => '#ffffff', 'shadow' => true ),
             'button'       => array( 'text' => __( 'QUAY', 'wp-spin-wheel' ), 'color' => '#ff0000', 'text_color' => '#ffffff', 'radius' => 50, 'background_image' => '' ),
             'pointer'      => array( 'image' => '', 'size' => 80 ),
-            'font'         => array( 'family' => 'Arial', 'size' => 20 ),
             'animation'    => array( 'duration' => 6, 'confetti' => true ),
             'audio'        => array( 'spin' => '', 'win' => '' ),
             'custom_css'   => '',
@@ -201,19 +196,6 @@ class WP_Spin_Wheel_Helper {
             }
             if ( ! empty( $global_settings['wheel_button_text_color'] ) ) {
                 $settings['button']['text_color'] = sanitize_hex_color( $global_settings['wheel_button_text_color'] );
-            }
-        }
-
-        $selected_font_item = self::get_setting_item_config( 'font', $overrides['selected_font_id'] ?? '' );
-        if ( ! empty( $selected_font_item ) ) {
-            $settings['font'] = array_replace_recursive( $settings['font'], array(
-                'family' => ! empty( $selected_font_item['family'] ) ? sanitize_text_field( $selected_font_item['family'] ) : $settings['font']['family'],
-                'size'   => ! empty( $selected_font_item['size'] ) ? intval( $selected_font_item['size'] ) : $settings['font']['size'],
-            ) );
-        } elseif ( ! empty( $global_settings['wheel_font_family'] ) ) {
-            $settings['font']['family'] = sanitize_text_field( $global_settings['wheel_font_family'] );
-            if ( ! empty( $global_settings['wheel_font_size'] ) ) {
-                $settings['font']['size'] = intval( $global_settings['wheel_font_size'] );
             }
         }
 

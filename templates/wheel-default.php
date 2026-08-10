@@ -24,10 +24,6 @@ $default_settings = array(
         'image' => '',
         'size'  => 90,
     ),
-    'font' => array(
-        'family' => 'Poppins',
-        'size'   => 18,
-    ),
     'animation' => array(
         'duration' => 6,
         'confetti' => true,

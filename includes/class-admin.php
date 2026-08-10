@@ -4,7 +4,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 class WP_Spin_Wheel_Admin {
+    private $settings;
+
     public function __construct() {
+        $this->settings = new WP_Spin_Wheel_Settings();
+
         add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
         add_action( 'admin_menu', array( $this, 'register_dashboard_page' ) );
         add_action( 'wp_ajax_spin_wheel_get_stats', array( $this, 'ajax_get_stats' ) );
@@ -73,11 +77,11 @@ class WP_Spin_Wheel_Admin {
 
         add_submenu_page(
             'edit.php?post_type=spin_wheel',
-            __( 'Preset Library', 'wp-spin-wheel' ),
-            __( 'Preset Library', 'wp-spin-wheel' ),
+            __( 'Spin Wheel Settings', 'wp-spin-wheel' ),
+            __( 'Settings', 'wp-spin-wheel' ),
             'manage_options',
-            'wp-spin-wheel-library',
-            array( $this, 'render_library_page' )
+            'wp-spin-wheel-settings',
+            array( $this->settings, 'render_settings_page' )
         );
     }
 
@@ -106,7 +110,7 @@ class WP_Spin_Wheel_Admin {
                 <div class="row mb-4">
                     <div class="col-12">
                         <h1 class="display-6"><?php esc_html_e( 'Preset Library', 'wp-spin-wheel' ); ?></h1>
-                        <p class="text-muted"><?php esc_html_e( 'Browse wheel styles, backgrounds, buttons, pointers, fonts, sounds, and animations.', 'wp-spin-wheel' ); ?></p>
+                        <p class="text-muted"><?php esc_html_e( 'Browse wheel styles, backgrounds, buttons, pointers, sounds, and animations.', 'wp-spin-wheel' ); ?></p>
                     </div>
                 </div>
                 <div class="row mb-4">
@@ -216,10 +220,6 @@ class WP_Spin_Wheel_Admin {
                             'text_color' => '#ffffff',
                             'radius' => 30,
                         ),
-                        'font' => array(
-                            'family' => 'Inter',
-                            'size' => 20,
-                        ),
                     ),
                 ),
                 array(
@@ -237,10 +237,6 @@ class WP_Spin_Wheel_Admin {
                             'color' => '#ec4899',
                             'text_color' => '#ffffff',
                             'radius' => 35,
-                        ),
-                        'font' => array(
-                            'family' => 'Poppins',
-                            'size' => 22,
                         ),
                     ),
                 ),
@@ -357,28 +353,6 @@ class WP_Spin_Wheel_Admin {
                         'pointer' => array(
                             'image' => '',
                             'size' => 90,
-                        ),
-                    ),
-                ),
-            ),
-            __( 'Fonts', 'wp-spin-wheel' ) => array(
-                array(
-                    'title' => __( 'Arial', 'wp-spin-wheel' ),
-                    'subtitle' => __( 'Clean sans-serif for easy readability.', 'wp-spin-wheel' ),
-                    'config' => array(
-                        'font' => array(
-                            'family' => 'Arial',
-                            'size' => 20,
-                        ),
-                    ),
-                ),
-                array(
-                    'title' => __( 'Poppins', 'wp-spin-wheel' ),
-                    'subtitle' => __( 'Friendly geometric typeface.', 'wp-spin-wheel' ),
-                    'config' => array(
-                        'font' => array(
-                            'family' => 'Poppins',
-                            'size' => 22,
                         ),
                     ),
                 ),

@@ -24,12 +24,6 @@ class WP_Spin_Wheel_Preset {
                 'menu'    => __( 'Buttons', 'wp-spin-wheel' ),
                 'icon'    => 'dashicons-button',
             ),
-            'spin_wheel_font' => array(
-                'singular' => __( 'Wheel Font', 'wp-spin-wheel' ),
-                'plural'  => __( 'Wheel Fonts', 'wp-spin-wheel' ),
-                'menu'    => __( 'Fonts', 'wp-spin-wheel' ),
-                'icon'    => 'dashicons-editor-textcolor',
-            ),
             'spin_wheel_pointer' => array(
                 'singular' => __( 'Wheel Pointer', 'wp-spin-wheel' ),
                 'plural'  => __( 'Wheel Pointers', 'wp-spin-wheel' ),
@@ -225,17 +219,6 @@ class WP_Spin_Wheel_Preset {
             </p>
         </fieldset>
         <fieldset>
-            <legend><?php esc_html_e( 'Font', 'wp-spin-wheel' ); ?></legend>
-            <p>
-                <label for="spin_wheel_preset_font_family"><?php esc_html_e( 'Font family', 'wp-spin-wheel' ); ?></label><br />
-                <input type="text" id="spin_wheel_preset_font_family" name="spin_wheel_preset_font_family" value="<?php echo esc_attr( $font_family ); ?>" class="widefat" />
-            </p>
-            <p>
-                <label for="spin_wheel_preset_font_size"><?php esc_html_e( 'Font size', 'wp-spin-wheel' ); ?></label><br />
-                <input type="number" id="spin_wheel_preset_font_size" name="spin_wheel_preset_font_size" value="<?php echo esc_attr( $font_size ); ?>" class="small-text" min="10" />
-            </p>
-        </fieldset>
-        <fieldset>
             <legend><?php esc_html_e( 'Animation', 'wp-spin-wheel' ); ?></legend>
             <p>
                 <label for="spin_wheel_preset_animation_duration"><?php esc_html_e( 'Duration (seconds)', 'wp-spin-wheel' ); ?></label><br />
@@ -311,10 +294,6 @@ class WP_Spin_Wheel_Preset {
                     'image' => esc_url_raw( wp_unslash( $_POST['spin_wheel_preset_pointer_image'] ?? '' ) ),
                     'size'  => max( 20, intval( wp_unslash( $_POST['spin_wheel_preset_pointer_size'] ?? 80 ) ) ),
                 ),
-                'font' => array(
-                    'family' => sanitize_text_field( wp_unslash( $_POST['spin_wheel_preset_font_family'] ?? 'Arial' ) ),
-                    'size'   => max( 10, intval( wp_unslash( $_POST['spin_wheel_preset_font_size'] ?? 20 ) ) ),
-                ),
                 'animation' => array(
                     'duration' => max( 1, intval( wp_unslash( $_POST['spin_wheel_preset_animation_duration'] ?? 6 ) ) ),
                     'confetti' => isset( $_POST['spin_wheel_preset_animation_confetti'] ) ? true : false,
@@ -330,7 +309,7 @@ class WP_Spin_Wheel_Preset {
             return;
         }
 
-        if ( ! in_array( $post_type, array( 'spin_wheel_background', 'spin_wheel_button', 'spin_wheel_font', 'spin_wheel_pointer' ), true ) ) {
+        if ( ! in_array( $post_type, array( 'spin_wheel_background', 'spin_wheel_button', 'spin_wheel_pointer' ), true ) ) {
             return;
         }
 
@@ -352,11 +331,6 @@ class WP_Spin_Wheel_Preset {
                 'text_color'         => sanitize_text_field( wp_unslash( $_POST['spin_wheel_setting_button_text_color'] ?? '#ffffff' ) ),
                 'radius'             => max( 0, intval( wp_unslash( $_POST['spin_wheel_setting_button_radius'] ?? 50 ) ) ),
                 'background_image'   => esc_url_raw( wp_unslash( $_POST['spin_wheel_setting_button_background_image'] ?? '' ) ),
-            );
-        } elseif ( 'spin_wheel_font' === $post_type ) {
-            $config = array(
-                'family' => sanitize_text_field( wp_unslash( $_POST['spin_wheel_setting_font_family'] ?? 'Arial' ) ),
-                'size'   => max( 10, intval( wp_unslash( $_POST['spin_wheel_setting_font_size'] ?? 20 ) ) ),
             );
         } elseif ( 'spin_wheel_pointer' === $post_type ) {
             $config = array(
@@ -390,12 +364,6 @@ class WP_Spin_Wheel_Preset {
                 array(
                     'title'  => 'Primary Button',
                     'config' => array( 'text' => 'QUAY', 'color' => '#2563eb', 'text_color' => '#ffffff', 'radius' => 50, 'background_image' => '' ),
-                ),
-            ),
-            'spin_wheel_font' => array(
-                array(
-                    'title'  => 'Default Font',
-                    'config' => array( 'family' => 'Arial', 'size' => 20 ),
                 ),
             ),
             'spin_wheel_pointer' => array(
@@ -460,7 +428,6 @@ class WP_Spin_Wheel_Preset {
                     'wheel'      => array( 'size' => 500, 'border' => 8, 'border_color' => '#ffffff', 'shadow' => true ),
                     'button'     => array( 'text' => 'QUAY', 'color' => '#d32f2f', 'text_color' => '#ffffff', 'radius' => 50 ),
                     'pointer'    => array( 'image' => '', 'size' => 80 ),
-                    'font'       => array( 'family' => 'Arial', 'size' => 20 ),
                     'animation'  => array( 'duration' => 6, 'confetti' => true ),
                     'audio'      => array( 'spin' => '', 'win' => '' ),
                 ),
@@ -473,7 +440,6 @@ class WP_Spin_Wheel_Preset {
                     'wheel'      => array( 'size' => 500, 'border' => 8, 'border_color' => '#ffd700', 'shadow' => true ),
                     'button'     => array( 'text' => 'QUAY', 'color' => '#c62828', 'text_color' => '#ffffff', 'radius' => 45 ),
                     'pointer'    => array( 'image' => '', 'size' => 80 ),
-                    'font'       => array( 'family' => 'Arial', 'size' => 20 ),
                     'animation'  => array( 'duration' => 6, 'confetti' => true ),
                     'audio'      => array( 'spin' => '', 'win' => '' ),
                 ),
@@ -486,7 +452,6 @@ class WP_Spin_Wheel_Preset {
                     'wheel'      => array( 'size' => 500, 'border' => 8, 'border_color' => '#ffc107', 'shadow' => true ),
                     'button'     => array( 'text' => 'QUAY', 'color' => '#000000', 'text_color' => '#ffffff', 'radius' => 45 ),
                     'pointer'    => array( 'image' => '', 'size' => 80 ),
-                    'font'       => array( 'family' => 'Arial', 'size' => 20 ),
                     'animation'  => array( 'duration' => 6, 'confetti' => true ),
                     'audio'      => array( 'spin' => '', 'win' => '' ),
                 ),
@@ -499,7 +464,6 @@ class WP_Spin_Wheel_Preset {
                     'wheel'      => array( 'size' => 500, 'border' => 8, 'border_color' => '#ff80ab', 'shadow' => true ),
                     'button'     => array( 'text' => 'QUAY', 'color' => '#8e24aa', 'text_color' => '#ffffff', 'radius' => 45 ),
                     'pointer'    => array( 'image' => '', 'size' => 80 ),
-                    'font'       => array( 'family' => 'Arial', 'size' => 20 ),
                     'animation'  => array( 'duration' => 6, 'confetti' => true ),
                     'audio'      => array( 'spin' => '', 'win' => '' ),
                 ),
@@ -512,7 +476,6 @@ class WP_Spin_Wheel_Preset {
                     'wheel'      => array( 'size' => 500, 'border' => 8, 'border_color' => '#dddddd', 'shadow' => true ),
                     'button'     => array( 'text' => 'QUAY', 'color' => '#2196f3', 'text_color' => '#ffffff', 'radius' => 45 ),
                     'pointer'    => array( 'image' => '', 'size' => 80 ),
-                    'font'       => array( 'family' => 'Arial', 'size' => 20 ),
                     'animation'  => array( 'duration' => 6, 'confetti' => false ),
                     'audio'      => array( 'spin' => '', 'win' => '' ),
                 ),
@@ -525,7 +488,6 @@ class WP_Spin_Wheel_Preset {
                     'wheel'      => array( 'size' => 500, 'border' => 8, 'border_color' => '#ffffff', 'shadow' => false ),
                     'button'     => array( 'text' => 'QUAY', 'color' => '#4caf50', 'text_color' => '#ffffff', 'radius' => 45 ),
                     'pointer'    => array( 'image' => '', 'size' => 80 ),
-                    'font'       => array( 'family' => 'Arial', 'size' => 20 ),
                     'animation'  => array( 'duration' => 6, 'confetti' => false ),
                     'audio'      => array( 'spin' => '', 'win' => '' ),
                 ),

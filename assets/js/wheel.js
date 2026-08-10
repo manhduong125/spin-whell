@@ -61,10 +61,6 @@ jQuery(document).ready(function($) {
                 image: '',
                 size: 80,
             },
-            font: settings.font || {
-                family: 'Arial',
-                size: 20,
-            },
             animation: settings.animation || {
                 duration: 6,
                 confetti: true,
@@ -376,13 +372,13 @@ jQuery(document).ready(function($) {
             ctx.translate(centerX + Math.cos(textAngle) * textRadius, centerY + Math.sin(textAngle) * textRadius);
             ctx.rotate(textAngle + Math.PI / 2);
             ctx.fillStyle = '#ffffff';
-            ctx.font = wheelSettings.font.size + 'px ' + wheelSettings.font.family;
+            ctx.font = '16px sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             var text = prize.title || prize.name || 'Prize';
             var lines = text.split('\n');
             lines.forEach(function(line, lineIndex) {
-                ctx.fillText(line, 0, (lineIndex - (lines.length - 1) / 2) * (wheelSettings.font.size + 2));
+                ctx.fillText(line, 0, (lineIndex - (lines.length - 1) / 2) * 18);
             });
             ctx.restore();
         });

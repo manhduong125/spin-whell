@@ -61,7 +61,6 @@ function wp_spin_wheel_init() {
     new WP_Spin_Wheel_Player();
     new WP_Spin_Wheel_History();
     new WP_Spin_Wheel_REST_API();
-    new WP_Spin_Wheel_Settings();
 }
 add_action( 'plugins_loaded', 'wp_spin_wheel_init' );
 add_action( 'init', array( 'WP_Spin_Wheel_Preset', 'create_default_presets' ), 20 );

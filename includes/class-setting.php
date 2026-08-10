@@ -47,13 +47,6 @@ class WP_Spin_Wheel_Settings {
                     'config' => array( 'text' => __( 'QUAY', 'wp-spin-wheel' ), 'color' => '#2563eb', 'text_color' => '#ffffff', 'radius' => 50, 'background_image' => '' ),
                 ),
             ),
-            'fonts' => array(
-                array(
-                    'id'     => 'font-default',
-                    'name'   => __( 'Default Font', 'wp-spin-wheel' ),
-                    'config' => array( 'family' => 'Arial', 'size' => 20 ),
-                ),
-            ),
             'pointers' => array(
                 array(
                     'id'     => 'pointer-default',
@@ -73,10 +66,6 @@ class WP_Spin_Wheel_Settings {
 
         if ( in_array( $type, array( 'button', 'buttons', 'spin_wheel_button' ), true ) ) {
             return 'buttons';
-        }
-
-        if ( in_array( $type, array( 'font', 'fonts', 'spin_wheel_font' ), true ) ) {
-            return 'fonts';
         }
 
         if ( in_array( $type, array( 'pointer', 'pointers', 'spin_wheel_pointer' ), true ) ) {
@@ -134,13 +123,6 @@ class WP_Spin_Wheel_Settings {
             );
         }
 
-        if ( 'fonts' === $group_key ) {
-            return array(
-                'family' => sanitize_text_field( wp_unslash( $payload['spin_wheel_setting_font_family'] ?? 'Arial' ) ),
-                'size'   => max( 10, intval( wp_unslash( $payload['spin_wheel_setting_font_size'] ?? 20 ) ) ),
-            );
-        }
-
         if ( 'pointers' === $group_key ) {
             return array(
                 'image' => esc_url_raw( wp_unslash( $payload['spin_wheel_setting_pointer_image'] ?? '' ) ),
@@ -163,7 +145,7 @@ class WP_Spin_Wheel_Settings {
         $action = sanitize_text_field( wp_unslash( $_POST['spin_wheel_setting_item_action'] ) );
         $group_key = $this->get_group_key_from_type( wp_unslash( $_POST['spin_wheel_setting_item_group'] ?? '' ) );
 
-        if ( ! in_array( $group_key, array( 'backgrounds', 'buttons', 'fonts', 'pointers' ), true ) ) {
+        if ( ! in_array( $group_key, array( 'backgrounds', 'buttons', 'pointers' ), true ) ) {
             return;
         }
 
@@ -218,13 +200,9 @@ class WP_Spin_Wheel_Settings {
     }
 
     public function add_admin_menu() {
-        add_options_page(
-            __( 'Spin Wheel Settings', 'wp-spin-wheel' ),
-            __( 'Spin Wheel', 'wp-spin-wheel' ),
-            'manage_options',
-            'wp-spin-wheel-settings',
-            array( $this, 'render_settings_page' )
-        );
+        if ( ! is_admin() ) {
+            return;
+        }
     }
 
     public function register_settings() {
@@ -280,17 +258,13 @@ class WP_Spin_Wheel_Settings {
             'wheel_background_image' => array( 'type' => 'image', 'default' => '' ),
             'wheel_pointer_image' => array( 'type' => 'image', 'default' => '' ),
             'wheel_pointer_size' => array( 'type' => 'text', 'default' => '90' ),
-            'wheel_font_family' => array( 'type' => 'text', 'default' => 'Poppins' ),
-            'wheel_font_size' => array( 'type' => 'text', 'default' => '18' ),
             'wheel_animation_duration' => array( 'type' => 'text', 'default' => '6' ),
             'wheel_confetti' => array( 'type' => 'checkbox', 'default' => 1 ),
             'wheel_background_presets' => array( 'type' => 'json', 'default' => array() ),
             'wheel_button_presets' => array( 'type' => 'json', 'default' => array() ),
-            'wheel_font_presets' => array( 'type' => 'json', 'default' => array() ),
             'wheel_pointer_presets' => array( 'type' => 'json', 'default' => array() ),
             'wheel_selected_background_preset' => array( 'type' => 'text', 'default' => '' ),
             'wheel_selected_button_preset' => array( 'type' => 'text', 'default' => '' ),
-            'wheel_selected_font_preset' => array( 'type' => 'text', 'default' => '' ),
             'wheel_selected_pointer_preset' => array( 'type' => 'text', 'default' => '' ),
             'wheel_segment_colors' => array( 'type' => 'json', 'default' => array() ),
             'wheel_extra_config' => array( 'type' => 'json', 'default' => array() ),
@@ -551,14 +525,6 @@ class WP_Spin_Wheel_Settings {
                                             <input type="number" class="form-control" id="wheel_pointer_size" name="<?php echo esc_attr( self::OPTION_KEY . '[wheel_pointer_size]' ); ?>" value="<?php echo esc_attr( $options['wheel_pointer_size'] ); ?>" />
                                         </div>
                                         <div class="col-md-3">
-                                            <label class="form-label" for="wheel_font_family"><?php esc_html_e( 'Font chữ', 'wp-spin-wheel' ); ?></label>
-                                            <input type="text" class="form-control" id="wheel_font_family" name="<?php echo esc_attr( self::OPTION_KEY . '[wheel_font_family]' ); ?>" value="<?php echo esc_attr( $options['wheel_font_family'] ); ?>" />
-                                        </div>
-                                        <div class="col-md-3">
-                                            <label class="form-label" for="wheel_font_size"><?php esc_html_e( 'Cỡ chữ', 'wp-spin-wheel' ); ?></label>
-                                            <input type="number" class="form-control" id="wheel_font_size" name="<?php echo esc_attr( self::OPTION_KEY . '[wheel_font_size]' ); ?>" value="<?php echo esc_attr( $options['wheel_font_size'] ); ?>" />
-                                        </div>
-                                        <div class="col-md-3">
                                             <label class="form-label" for="wheel_animation_duration"><?php esc_html_e( 'Thời gian quay', 'wp-spin-wheel' ); ?></label>
                                             <input type="number" step="0.1" class="form-control" id="wheel_animation_duration" name="<?php echo esc_attr( self::OPTION_KEY . '[wheel_animation_duration]' ); ?>" value="<?php echo esc_attr( $options['wheel_animation_duration'] ); ?>" />
                                         </div>
@@ -585,15 +551,6 @@ class WP_Spin_Wheel_Settings {
                                             <label class="form-label" for="wheel_button_presets"><?php esc_html_e( 'Danh sách preset nút (JSON)', 'wp-spin-wheel' ); ?></label>
                                             <textarea class="form-control" id="wheel_button_presets" name="<?php echo esc_attr( self::OPTION_KEY . '[wheel_button_presets]' ); ?>" rows="4"><?php echo esc_textarea( is_array( $options['wheel_button_presets'] ) ? wp_json_encode( $options['wheel_button_presets'] ) : (string) $options['wheel_button_presets'] ); ?></textarea>
                                             <small class="text-muted">Ví dụ: [{"id":"btn-1","name":"Nút xanh","text":"Quay","color":"#2563eb","text_color":"#ffffff"}]</small>
-                                        </div>
-                                        <div class="col-12">
-                                            <label class="form-label" for="wheel_selected_font_preset"><?php esc_html_e( 'Preset font đang dùng (ID)', 'wp-spin-wheel' ); ?></label>
-                                            <input type="text" class="form-control" id="wheel_selected_font_preset" name="<?php echo esc_attr( self::OPTION_KEY . '[wheel_selected_font_preset]' ); ?>" value="<?php echo esc_attr( $options['wheel_selected_font_preset'] ); ?>" />
-                                        </div>
-                                        <div class="col-12">
-                                            <label class="form-label" for="wheel_font_presets"><?php esc_html_e( 'Danh sách preset font (JSON)', 'wp-spin-wheel' ); ?></label>
-                                            <textarea class="form-control" id="wheel_font_presets" name="<?php echo esc_attr( self::OPTION_KEY . '[wheel_font_presets]' ); ?>" rows="4"><?php echo esc_textarea( is_array( $options['wheel_font_presets'] ) ? wp_json_encode( $options['wheel_font_presets'] ) : (string) $options['wheel_font_presets'] ); ?></textarea>
-                                            <small class="text-muted">Ví dụ: [{"id":"font-1","name":"Poppins","family":"Poppins","size":18}]</small>
                                         </div>
                                         <div class="col-12">
                                             <label class="form-label" for="wheel_selected_pointer_preset"><?php esc_html_e( 'Preset pointer đang dùng (ID)', 'wp-spin-wheel' ); ?></label>
@@ -647,10 +604,6 @@ class WP_Spin_Wheel_Settings {
                             'title' => __( 'Button items', 'wp-spin-wheel' ),
                             'name'  => __( 'Button', 'wp-spin-wheel' ),
                         ),
-                        'fonts' => array(
-                            'title' => __( 'Font items', 'wp-spin-wheel' ),
-                            'name'  => __( 'Font', 'wp-spin-wheel' ),
-                        ),
                         'pointers' => array(
                             'title' => __( 'Pointer items', 'wp-spin-wheel' ),
                             'name'  => __( 'Pointer', 'wp-spin-wheel' ),
@@ -694,8 +647,8 @@ class WP_Spin_Wheel_Settings {
                                                     echo esc_html( $config['type'] ?? '' );
                                                 } elseif ( 'buttons' === $group_key ) {
                                                     echo esc_html( $config['text'] ?? '' );
-                                                } elseif ( 'fonts' === $group_key ) {
-                                                    echo esc_html( $config['family'] ?? '' );
+                                                } elseif ( 'pointers' === $group_key ) {
+                                                    echo esc_html( $config['image'] ?? '' );
                                                 } else {
                                                     echo esc_html( $config['image'] ?? '' );
                                                 }
@@ -764,15 +717,6 @@ class WP_Spin_Wheel_Settings {
                                 <p>
                                     <label><?php esc_html_e( 'Background image', 'wp-spin-wheel' ); ?><br />
                                     <input type="text" name="spin_wheel_setting_button_background_image" value="<?php echo esc_attr( $editing_item['config']['background_image'] ?? '' ); ?>" class="widefat" /></label>
-                                </p>
-                            <?php elseif ( 'fonts' === $group_key ) : ?>
-                                <p>
-                                    <label><?php esc_html_e( 'Font family', 'wp-spin-wheel' ); ?><br />
-                                    <input type="text" name="spin_wheel_setting_font_family" value="<?php echo esc_attr( $editing_item['config']['family'] ?? 'Arial' ); ?>" class="widefat" /></label>
-                                </p>
-                                <p>
-                                    <label><?php esc_html_e( 'Font size', 'wp-spin-wheel' ); ?><br />
-                                    <input type="number" name="spin_wheel_setting_font_size" value="<?php echo esc_attr( $editing_item['config']['size'] ?? 20 ); ?>" class="small-text" /></label>
                                 </p>
                             <?php elseif ( 'pointers' === $group_key ) : ?>
                                 <p>
