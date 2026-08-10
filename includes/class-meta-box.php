@@ -10,6 +10,12 @@ class WP_Spin_Wheel_Meta_Box {
     }
 
     public function register_meta_boxes() {
+        global $post;
+
+        if ( $this->is_new_spin_wheel( $post ) ) {
+            return;
+        }
+
         add_meta_box(
             'spin_wheel_settings',
             __( 'Wheel Settings', 'wp-spin-wheel' ),
@@ -29,6 +35,14 @@ class WP_Spin_Wheel_Meta_Box {
         );
     }
 
+    private function is_new_spin_wheel( $post ) {
+        if ( ! $post || 'spin_wheel' !== get_post_type( $post ) ) {
+            return false;
+        }
+
+        return empty( $post->ID ) || 'auto-draft' === $post->post_status;
+    }
+
     public function render_settings_meta_box( $post ) {
         wp_nonce_field( 'spin_wheel_save', 'spin_wheel_nonce' );
 
@@ -41,28 +55,10 @@ class WP_Spin_Wheel_Meta_Box {
         $spin_limit = $settings['spin_limit'] ?? 0;
         $spin_limit_type = $settings['spin_limit_type'] ?? 'none';
         $form_fields = is_array( $settings['form_fields'] ) ? $settings['form_fields'] : array();
-        $preset_id = $settings['preset_id'] ?? 0;
         $selected_background_id = sanitize_text_field( wp_unslash( $settings['selected_background_id'] ?? '' ) );
         $selected_button_id = sanitize_text_field( wp_unslash( $settings['selected_button_id'] ?? '' ) );
         $selected_pointer_id = sanitize_text_field( wp_unslash( $settings['selected_pointer_id'] ?? '' ) );
-
-        $presets = get_posts( array(
-            'post_type'      => 'spin_wheel_preset',
-            'post_status'    => 'publish',
-            'posts_per_page' => -1,
-            'orderby'        => 'title',
-            'order'          => 'ASC',
-        ) );
         ?>
-        <p>
-            <label for="spin_wheel_preset_id"><?php esc_html_e( 'Preset', 'wp-spin-wheel' ); ?></label><br />
-            <select id="spin_wheel_preset_id" name="spin_wheel_preset_id" class="widefat">
-                <option value=""><?php esc_html_e( 'Select preset', 'wp-spin-wheel' ); ?></option>
-                <?php foreach ( $presets as $preset ) : ?>
-                    <option value="<?php echo esc_attr( $preset->ID ); ?>" <?php selected( $preset_id, $preset->ID ); ?>><?php echo esc_html( $preset->post_title ); ?></option>
-                <?php endforeach; ?>
-            </select>
-        </p>
         <p>
             <label for="spin_wheel_selected_background_id"><?php esc_html_e( 'Background item', 'wp-spin-wheel' ); ?></label><br />
             <select id="spin_wheel_selected_background_id" name="spin_wheel_selected_background_id" class="widefat">
@@ -230,19 +226,6 @@ class WP_Spin_Wheel_Meta_Box {
 
         if ( empty( $_POST['spin_wheel_nonce'] ) || ! wp_verify_nonce( wp_unslash( $_POST['spin_wheel_nonce'] ), 'spin_wheel_save' ) ) {
             return;
-        }
-
-        if ( isset( $_POST['spin_wheel_preset_id'] ) ) {
-            $preset_id = absint( wp_unslash( $_POST['spin_wheel_preset_id'] ) );
-            if ( $preset_id && get_post_type( $preset_id ) === 'spin_wheel_preset' ) {
-                update_post_meta( $post_id, '_spin_wheel_preset_id', $preset_id );
-            } else {
-                $preset_id = 0;
-                delete_post_meta( $post_id, '_spin_wheel_preset_id' );
-            }
-        } else {
-            $preset_id = 0;
-            delete_post_meta( $post_id, '_spin_wheel_preset_id' );
         }
 
         $overrides = array();

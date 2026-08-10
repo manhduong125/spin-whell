@@ -260,12 +260,6 @@ class WP_Spin_Wheel_Settings {
             'wheel_pointer_size' => array( 'type' => 'text', 'default' => '90' ),
             'wheel_animation_duration' => array( 'type' => 'text', 'default' => '6' ),
             'wheel_confetti' => array( 'type' => 'checkbox', 'default' => 1 ),
-            'wheel_background_presets' => array( 'type' => 'json', 'default' => array() ),
-            'wheel_button_presets' => array( 'type' => 'json', 'default' => array() ),
-            'wheel_pointer_presets' => array( 'type' => 'json', 'default' => array() ),
-            'wheel_selected_background_preset' => array( 'type' => 'text', 'default' => '' ),
-            'wheel_selected_button_preset' => array( 'type' => 'text', 'default' => '' ),
-            'wheel_selected_pointer_preset' => array( 'type' => 'text', 'default' => '' ),
             'wheel_segment_colors' => array( 'type' => 'json', 'default' => array() ),
             'wheel_extra_config' => array( 'type' => 'json', 'default' => array() ),
         );
@@ -533,33 +527,6 @@ class WP_Spin_Wheel_Settings {
                                                 <input class="form-check-input" type="checkbox" id="wheel_confetti" name="<?php echo esc_attr( self::OPTION_KEY . '[wheel_confetti]' ); ?>" value="1" <?php checked( $options['wheel_confetti'], 1 ); ?> />
                                                 <label class="form-check-label" for="wheel_confetti"><?php esc_html_e( 'Bật hiệu ứng confetti', 'wp-spin-wheel' ); ?></label>
                                             </div>
-                                        </div>
-                                        <div class="col-12">
-                                            <label class="form-label" for="wheel_selected_background_preset"><?php esc_html_e( 'Preset nền đang dùng (ID)', 'wp-spin-wheel' ); ?></label>
-                                            <input type="text" class="form-control" id="wheel_selected_background_preset" name="<?php echo esc_attr( self::OPTION_KEY . '[wheel_selected_background_preset]' ); ?>" value="<?php echo esc_attr( $options['wheel_selected_background_preset'] ); ?>" />
-                                        </div>
-                                        <div class="col-12">
-                                            <label class="form-label" for="wheel_background_presets"><?php esc_html_e( 'Danh sách preset nền (JSON)', 'wp-spin-wheel' ); ?></label>
-                                            <textarea class="form-control" id="wheel_background_presets" name="<?php echo esc_attr( self::OPTION_KEY . '[wheel_background_presets]' ); ?>" rows="4"><?php echo esc_textarea( is_array( $options['wheel_background_presets'] ) ? wp_json_encode( $options['wheel_background_presets'] ) : (string) $options['wheel_background_presets'] ); ?></textarea>
-                                            <small class="text-muted">Ví dụ: [{"id":"bg-1","name":"Nền xanh","image":"https://...","color":"#0f766e"}]</small>
-                                        </div>
-                                        <div class="col-12">
-                                            <label class="form-label" for="wheel_selected_button_preset"><?php esc_html_e( 'Preset nút đang dùng (ID)', 'wp-spin-wheel' ); ?></label>
-                                            <input type="text" class="form-control" id="wheel_selected_button_preset" name="<?php echo esc_attr( self::OPTION_KEY . '[wheel_selected_button_preset]' ); ?>" value="<?php echo esc_attr( $options['wheel_selected_button_preset'] ); ?>" />
-                                        </div>
-                                        <div class="col-12">
-                                            <label class="form-label" for="wheel_button_presets"><?php esc_html_e( 'Danh sách preset nút (JSON)', 'wp-spin-wheel' ); ?></label>
-                                            <textarea class="form-control" id="wheel_button_presets" name="<?php echo esc_attr( self::OPTION_KEY . '[wheel_button_presets]' ); ?>" rows="4"><?php echo esc_textarea( is_array( $options['wheel_button_presets'] ) ? wp_json_encode( $options['wheel_button_presets'] ) : (string) $options['wheel_button_presets'] ); ?></textarea>
-                                            <small class="text-muted">Ví dụ: [{"id":"btn-1","name":"Nút xanh","text":"Quay","color":"#2563eb","text_color":"#ffffff"}]</small>
-                                        </div>
-                                        <div class="col-12">
-                                            <label class="form-label" for="wheel_selected_pointer_preset"><?php esc_html_e( 'Preset pointer đang dùng (ID)', 'wp-spin-wheel' ); ?></label>
-                                            <input type="text" class="form-control" id="wheel_selected_pointer_preset" name="<?php echo esc_attr( self::OPTION_KEY . '[wheel_selected_pointer_preset]' ); ?>" value="<?php echo esc_attr( $options['wheel_selected_pointer_preset'] ); ?>" />
-                                        </div>
-                                        <div class="col-12">
-                                            <label class="form-label" for="wheel_pointer_presets"><?php esc_html_e( 'Danh sách preset pointer (JSON)', 'wp-spin-wheel' ); ?></label>
-                                            <textarea class="form-control" id="wheel_pointer_presets" name="<?php echo esc_attr( self::OPTION_KEY . '[wheel_pointer_presets]' ); ?>" rows="4"><?php echo esc_textarea( is_array( $options['wheel_pointer_presets'] ) ? wp_json_encode( $options['wheel_pointer_presets'] ) : (string) $options['wheel_pointer_presets'] ); ?></textarea>
-                                            <small class="text-muted">Ví dụ: [{"id":"ptr-1","name":"Pointer đỏ","image":"https://...","size":90}]</small>
                                         </div>
                                         <div class="col-12">
                                             <label class="form-label" for="wheel_segment_colors"><?php esc_html_e( 'Màu các phần (JSON)', 'wp-spin-wheel' ); ?></label>

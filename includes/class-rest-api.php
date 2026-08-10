@@ -135,9 +135,6 @@ class WP_Spin_Wheel_REST_API {
             return new WP_Error( 'create_failed', __( 'Unable to create wheel.', 'wp-spin-wheel' ), array( 'status' => 500 ) );
         }
 
-        if ( isset( $settings['preset_id'] ) ) {
-            update_post_meta( $post_id, '_spin_wheel_preset_id', absint( $settings['preset_id'] ) );
-        }
         if ( ! empty( $settings['overrides'] ) && is_array( $settings['overrides'] ) ) {
             update_post_meta( $post_id, '_spin_wheel_overrides', wp_json_encode( $settings['overrides'] ) );
         }
@@ -174,9 +171,6 @@ class WP_Spin_Wheel_REST_API {
         }
         wp_update_post( $update );
 
-        if ( isset( $settings['preset_id'] ) ) {
-            update_post_meta( $wheel_id, '_spin_wheel_preset_id', absint( $settings['preset_id'] ) );
-        }
         if ( isset( $settings['overrides'] ) && is_array( $settings['overrides'] ) ) {
             update_post_meta( $wheel_id, '_spin_wheel_overrides', wp_json_encode( $settings['overrides'] ) );
         }

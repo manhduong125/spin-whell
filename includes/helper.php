@@ -12,18 +12,6 @@ class WP_Spin_Wheel_Helper {
         return get_post_meta( $post_id, $meta_key, $single );
     }
 
-    public static function get_preset_config( $post_id ) {
-        $config = self::get_post_meta( $post_id, '_spin_wheel_preset_config', true );
-        if ( is_string( $config ) ) {
-            $config = json_decode( $config, true );
-        }
-        return is_array( $config ) ? $config : array();
-    }
-
-    public static function get_wheel_preset_id( $post_id ) {
-        return absint( self::get_post_meta( $post_id, '_spin_wheel_preset_id', true ) );
-    }
-
     public static function get_wheel_overrides( $post_id ) {
         $overrides = self::get_post_meta( $post_id, '_spin_wheel_overrides', true );
         if ( is_string( $overrides ) ) {
@@ -49,20 +37,6 @@ class WP_Spin_Wheel_Helper {
     public static function get_global_settings() {
         $settings = get_option( 'wp_spin_wheel_settings', array() );
         return is_array( $settings ) ? $settings : array();
-    }
-
-    public static function resolve_preset_by_id( $presets, $selected_id ) {
-        if ( ! is_array( $presets ) ) {
-            return array();
-        }
-
-        foreach ( $presets as $preset ) {
-            if ( is_array( $preset ) && ! empty( $preset['id'] ) && $preset['id'] === $selected_id ) {
-                return $preset;
-            }
-        }
-
-        return array();
     }
 
     public static function get_setting_items( $type ) {
@@ -117,21 +91,7 @@ class WP_Spin_Wheel_Helper {
     }
 
     public static function get_wheel_settings( $post_id ) {
-        $preset_id = self::get_wheel_preset_id( $post_id );
-        $preset_config = array();
-        if ( $preset_id && get_post_type( $preset_id ) === 'spin_wheel_preset' ) {
-            $preset_config = self::get_preset_config( $preset_id );
-        }
-
         $overrides = self::get_wheel_overrides( $post_id );
-        $preset_title = '';
-        $preset_thumbnail = '';
-
-        if ( $preset_id && get_post_type( $preset_id ) === 'spin_wheel_preset' ) {
-            $preset_title = get_the_title( $preset_id );
-            $preset_thumbnail = get_the_post_thumbnail_url( $preset_id, 'full' );
-        }
-
         $global_settings = self::get_global_settings();
 
         $defaults = array(
@@ -145,9 +105,6 @@ class WP_Spin_Wheel_Helper {
             'spin_limit'   => 0,
             'spin_limit_type' => 'none',
             'form_fields'  => array(),
-            'preset_id'    => $preset_id,
-            'preset_title' => $preset_title,
-            'preset_thumbnail' => $preset_thumbnail,
             'wheel'        => array( 'size' => 500, 'border' => 8, 'border_color' => '#ffffff', 'shadow' => true ),
             'button'       => array( 'text' => __( 'QUAY', 'wp-spin-wheel' ), 'color' => '#ff0000', 'text_color' => '#ffffff', 'radius' => 50, 'background_image' => '' ),
             'pointer'      => array( 'image' => '', 'size' => 80 ),
@@ -156,7 +113,7 @@ class WP_Spin_Wheel_Helper {
             'custom_css'   => '',
         );
 
-        $settings = array_replace_recursive( $defaults, $preset_config, $overrides );
+        $settings = array_replace_recursive( $defaults, $overrides );
 
         if ( ! empty( $global_settings['wheel_title'] ) ) {
             $settings['title'] = sanitize_text_field( $global_settings['wheel_title'] );
@@ -218,10 +175,6 @@ class WP_Spin_Wheel_Helper {
         if ( isset( $global_settings['wheel_confetti'] ) ) {
             $settings['animation']['confetti'] = ! empty( $global_settings['wheel_confetti'] );
         }
-
-        $settings['preset_id'] = $preset_id;
-        $settings['preset_title'] = $preset_title;
-        $settings['preset_thumbnail'] = $preset_thumbnail;
 
         return $settings;
     }

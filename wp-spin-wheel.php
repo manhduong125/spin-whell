@@ -32,7 +32,6 @@ if ( ! defined( 'WP_SPIN_WHEEL_URL' ) ) {
 require_once WP_SPIN_WHEEL_PATH . 'includes/helper.php';
 require_once WP_SPIN_WHEEL_PATH . 'includes/class-install.php';
 require_once WP_SPIN_WHEEL_PATH . 'includes/class-post-type.php';
-require_once WP_SPIN_WHEEL_PATH . 'includes/class-preset.php';
 require_once WP_SPIN_WHEEL_PATH . 'includes/class-meta-box.php';
 require_once WP_SPIN_WHEEL_PATH . 'includes/class-admin.php';
 require_once WP_SPIN_WHEEL_PATH . 'includes/class-frontend.php';
@@ -49,7 +48,6 @@ require_once WP_SPIN_WHEEL_PATH . 'includes/class-setting.php';
 
 function wp_spin_wheel_init() {
     new WP_Spin_Wheel_Post_Type();
-    new WP_Spin_Wheel_Preset();
     new WP_Spin_Wheel_Meta_Box();
     new WP_Spin_Wheel_Admin();
     new WP_Spin_Wheel_Frontend();
@@ -63,7 +61,6 @@ function wp_spin_wheel_init() {
     new WP_Spin_Wheel_REST_API();
 }
 add_action( 'plugins_loaded', 'wp_spin_wheel_init' );
-add_action( 'init', array( 'WP_Spin_Wheel_Preset', 'create_default_presets' ), 20 );
 
 function wp_spin_wheel_activate() {
     WP_Spin_Wheel_Install::activate();

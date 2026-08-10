@@ -1,3 +1,7 @@
+.wp-spin-wheel-wrapper {
+    height: calc(100vh - 90px);
+}
+
 #wheelOfFortune {
     display: block;
     width: -webkit-fit-content;

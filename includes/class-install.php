@@ -99,8 +99,6 @@ class WP_Spin_Wheel_Install {
         $caps = array(
             'edit_spin_wheel', 'read_spin_wheel', 'delete_spin_wheel',
             'edit_spin_wheels', 'edit_others_spin_wheels', 'publish_spin_wheels', 'read_private_spin_wheels', 'create_spin_wheels',
-            'edit_spin_wheel_preset', 'read_spin_wheel_preset', 'delete_spin_wheel_preset',
-            'edit_spin_wheel_presets', 'edit_others_spin_wheel_presets', 'publish_spin_wheel_presets', 'read_private_spin_wheel_presets', 'create_spin_wheel_presets',
         );
 
         foreach ( $roles as $role_name ) {
