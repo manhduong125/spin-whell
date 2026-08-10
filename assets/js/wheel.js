@@ -9,6 +9,7 @@ jQuery(document).ready(function($) {
     var spinning = false;
     var pendingRequest = false;
     var currentRotation = 0;
+    var pointerImageCache = {};
 
     function parseJson(value, fallback) {
         if ( ! value ) {
@@ -177,7 +178,7 @@ jQuery(document).ready(function($) {
 
         wheelPrizes.forEach(function(prize, index) {
             var item = $('<div/>', {
-                'class': 'wheel-prize-item d-flex justify-content-between align-items-center mb-1',
+                'class': 'wheel-prize-item d-flex justify-content-between align-items-center',
                 'data-index': index,
                 'data-id': prize.id,
             });
@@ -281,6 +282,28 @@ jQuery(document).ready(function($) {
     }
 
     function drawPointer(ctx, centerX, centerY, radius) {
+        var pointer = wheelSettings.pointer || {};
+        var size = Math.max(24, parseInt(pointer.size, 10) || 80);
+        var imageUrl = pointer.image || '';
+
+        if ( imageUrl ) {
+            if ( pointerImageCache[ imageUrl ] ) {
+                ctx.save();
+                ctx.translate(centerX, centerY - radius - size / 2 - 8);
+                ctx.drawImage(pointerImageCache[ imageUrl ], -size / 2, -size / 2, size, size);
+                ctx.restore();
+                return;
+            }
+
+            var pointerImage = new Image();
+            pointerImage.onload = function() {
+                pointerImageCache[ imageUrl ] = pointerImage;
+                drawWheelCanvas(currentRotation);
+            };
+            pointerImage.src = imageUrl;
+            return;
+        }
+
         ctx.save();
         ctx.fillStyle = '#111';
         ctx.beginPath();
@@ -324,7 +347,7 @@ jQuery(document).ready(function($) {
 
         ctx.beginPath();
         ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-        ctx.fillStyle = wheelSettings.background;
+        ctx.fillStyle = wheelSettings.background.color || '#ffffff';
         ctx.fill();
         ctx.lineWidth = wheelSettings.wheel.border;
         ctx.strokeStyle = wheelSettings.wheel.border_color;

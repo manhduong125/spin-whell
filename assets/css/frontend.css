@@ -31,8 +31,6 @@
 
 #sector_list,.section-list {
     border: 1px solid #EEEEEE;
-    -webkit-box-shadow: 1px 1px 0 #DDDDDD;
-    box-shadow: 1px 1px 0 #DDDDDD;
     font-family: sans-serif,cursive;
     font-size: 22px;
     line-height: 50px;
@@ -115,6 +113,25 @@
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.wp-spin-wheel-wrapper .badge {
+    height: auto;
+}
+
+.wheel-prize-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.wheel-prize-item button {
+    margin: 0;
+}
+
+.wrc {
+    padding: 10px;
+    border-radius: 0.25rem
 }
 
 @media screen and (max-width: 991px) {

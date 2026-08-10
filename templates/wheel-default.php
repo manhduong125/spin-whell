@@ -79,7 +79,7 @@ $default_description = __( '', 'wp-spin-wheel' );
         </div>
 
         <div class="col-xl-3" id="wheel-right">
-            <div class="wrc mb-3 bg-light" id="wrc">
+            <div class="wrc bg-light" id="wrc">
                 <nav>
                     <div class="nav nav-tabs" id="main-tab" role="tablist">
                         <button class="nav-link w-50 active" id="tab-entries" data-bs-toggle="tab"
@@ -105,11 +105,13 @@ $default_description = __( '', 'wp-spin-wheel' );
                                     class="custom-icon" width="20" height="20" alt="shuffle" loading="lazy">
                                 Trộn
                             </button>
-                            <button type="button" class="btn btn-outline-secondary btn-sm me-1 mb-1"
+                            <button type="button" class="btn btn-outline-secondary btn-sm me-1"
                                 id="btn-sort-wheel-az">⇣ AZ</button>
-                            <button type="button" class="btn btn-outline-secondary btn-sm me-1 mb-1 d-none"
+                            <button type="button" class="btn btn-outline-secondary btn-sm me-1 d-none"
                                 id="btn-sort-wheel-za">⇣ ZA</button>
-                            <button type="button" class="btn btn-outline-danger btn-sm me-1 mb-1" id="btn-clear-entry">
+                            <button type="button" class="btn btn-sm btn-outline-secondary"
+                                id="btn-restore-defaults"><?php esc_html_e( 'Khôi phục', 'wp-spin-wheel' ); ?></button>
+                            <button type="button" class="btn btn-outline-danger btn-sm me-1" id="btn-clear-entry">
                                 <span data-feather="x" style="width:20px;height:20px;"></span>
                                 Xoá
                             </button>
@@ -129,8 +131,7 @@ $default_description = __( '', 'wp-spin-wheel' );
                                 <button class="btn btn-primary" type="button"
                                     id="btn-add-prize"><?php esc_html_e( 'Thêm', 'wp-spin-wheel' ); ?></button>
                             </div>
-                            <button type="button" class="btn btn-sm btn-outline-secondary"
-                                id="btn-restore-defaults"><?php esc_html_e( 'Khôi phục mặc định', 'wp-spin-wheel' ); ?></button>
+                            
                         </div>
                         <div class="mb-3">
                             <div id="sector_list" class="form-control section-list rounded-0" readonly
