@@ -42,6 +42,10 @@ class WP_Spin_Wheel_Meta_Box {
         $spin_limit_type = $settings['spin_limit_type'] ?? 'none';
         $form_fields = is_array( $settings['form_fields'] ) ? $settings['form_fields'] : array();
         $preset_id = $settings['preset_id'] ?? 0;
+        $selected_background_id = sanitize_text_field( wp_unslash( $settings['selected_background_id'] ?? '' ) );
+        $selected_button_id = sanitize_text_field( wp_unslash( $settings['selected_button_id'] ?? '' ) );
+        $selected_font_id = sanitize_text_field( wp_unslash( $settings['selected_font_id'] ?? '' ) );
+        $selected_pointer_id = sanitize_text_field( wp_unslash( $settings['selected_pointer_id'] ?? '' ) );
 
         $presets = get_posts( array(
             'post_type'      => 'spin_wheel_preset',
@@ -61,7 +65,47 @@ class WP_Spin_Wheel_Meta_Box {
             </select>
         </p>
         <p>
-            <label for="spin_wheel_background"><?php esc_html_e( 'Background color', 'wp-spin-wheel' ); ?></label><br />
+            <label for="spin_wheel_selected_background_id"><?php esc_html_e( 'Background item', 'wp-spin-wheel' ); ?></label><br />
+            <select id="spin_wheel_selected_background_id" name="spin_wheel_selected_background_id" class="widefat">
+                <option value=""><?php esc_html_e( 'Use default', 'wp-spin-wheel' ); ?></option>
+                <?php $background_items = WP_Spin_Wheel_Helper::get_setting_items( 'background' ); ?>
+                <?php foreach ( $background_items as $item ) : ?>
+                    <option value="<?php echo esc_attr( $item['id'] ?? '' ); ?>" <?php selected( $selected_background_id, $item['id'] ?? '' ); ?>><?php echo esc_html( $item['name'] ?? '' ); ?></option>
+                <?php endforeach; ?>
+            </select>
+        </p>
+        <p>
+            <label for="spin_wheel_selected_button_id"><?php esc_html_e( 'Button item', 'wp-spin-wheel' ); ?></label><br />
+            <select id="spin_wheel_selected_button_id" name="spin_wheel_selected_button_id" class="widefat">
+                <option value=""><?php esc_html_e( 'Use default', 'wp-spin-wheel' ); ?></option>
+                <?php $button_items = WP_Spin_Wheel_Helper::get_setting_items( 'button' ); ?>
+                <?php foreach ( $button_items as $item ) : ?>
+                    <option value="<?php echo esc_attr( $item['id'] ?? '' ); ?>" <?php selected( $selected_button_id, $item['id'] ?? '' ); ?>><?php echo esc_html( $item['name'] ?? '' ); ?></option>
+                <?php endforeach; ?>
+            </select>
+        </p>
+        <p>
+            <label for="spin_wheel_selected_font_id"><?php esc_html_e( 'Font item', 'wp-spin-wheel' ); ?></label><br />
+            <select id="spin_wheel_selected_font_id" name="spin_wheel_selected_font_id" class="widefat">
+                <option value=""><?php esc_html_e( 'Use default', 'wp-spin-wheel' ); ?></option>
+                <?php $font_items = WP_Spin_Wheel_Helper::get_setting_items( 'font' ); ?>
+                <?php foreach ( $font_items as $item ) : ?>
+                    <option value="<?php echo esc_attr( $item['id'] ?? '' ); ?>" <?php selected( $selected_font_id, $item['id'] ?? '' ); ?>><?php echo esc_html( $item['name'] ?? '' ); ?></option>
+                <?php endforeach; ?>
+            </select>
+        </p>
+        <p>
+            <label for="spin_wheel_selected_pointer_id"><?php esc_html_e( 'Pointer item', 'wp-spin-wheel' ); ?></label><br />
+            <select id="spin_wheel_selected_pointer_id" name="spin_wheel_selected_pointer_id" class="widefat">
+                <option value=""><?php esc_html_e( 'Use default', 'wp-spin-wheel' ); ?></option>
+                <?php $pointer_items = WP_Spin_Wheel_Helper::get_setting_items( 'pointer' ); ?>
+                <?php foreach ( $pointer_items as $item ) : ?>
+                    <option value="<?php echo esc_attr( $item['id'] ?? '' ); ?>" <?php selected( $selected_pointer_id, $item['id'] ?? '' ); ?>><?php echo esc_html( $item['name'] ?? '' ); ?></option>
+                <?php endforeach; ?>
+            </select>
+        </p>
+        <p>
+            <label for="spin_wheel_background"><?php esc_html_e( 'Background color fallback', 'wp-spin-wheel' ); ?></label><br />
             <input type="text" id="spin_wheel_background" name="spin_wheel_background" value="<?php echo esc_attr( $background ); ?>" class="widefat" />
         </p>
         <p>
@@ -217,6 +261,22 @@ class WP_Spin_Wheel_Meta_Box {
         if ( isset( $_POST['spin_wheel_background'] ) ) {
             $background = sanitize_text_field( wp_unslash( $_POST['spin_wheel_background'] ) );
             $overrides['background'] = array( 'type' => 'color', 'value' => $background );
+        }
+        if ( isset( $_POST['spin_wheel_selected_background_id'] ) ) {
+            $selected_background_id = sanitize_text_field( wp_unslash( $_POST['spin_wheel_selected_background_id'] ) );
+            $overrides['selected_background_id'] = $selected_background_id;
+        }
+        if ( isset( $_POST['spin_wheel_selected_button_id'] ) ) {
+            $selected_button_id = sanitize_text_field( wp_unslash( $_POST['spin_wheel_selected_button_id'] ) );
+            $overrides['selected_button_id'] = $selected_button_id;
+        }
+        if ( isset( $_POST['spin_wheel_selected_font_id'] ) ) {
+            $selected_font_id = sanitize_text_field( wp_unslash( $_POST['spin_wheel_selected_font_id'] ) );
+            $overrides['selected_font_id'] = $selected_font_id;
+        }
+        if ( isset( $_POST['spin_wheel_selected_pointer_id'] ) ) {
+            $selected_pointer_id = sanitize_text_field( wp_unslash( $_POST['spin_wheel_selected_pointer_id'] ) );
+            $overrides['selected_pointer_id'] = $selected_pointer_id;
         }
         if ( isset( $_POST['spin_wheel_logo'] ) ) {
             $logo = esc_url_raw( wp_unslash( $_POST['spin_wheel_logo'] ) );

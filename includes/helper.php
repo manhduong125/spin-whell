@@ -65,6 +65,61 @@ class WP_Spin_Wheel_Helper {
         return array();
     }
 
+    public static function get_setting_items( $type ) {
+        $stored = get_option( 'wp_spin_wheel_setting_items', array() );
+        if ( ! is_array( $stored ) ) {
+            return array();
+        }
+
+        $group_key = self::normalize_setting_group( $type );
+        if ( ! is_array( $stored[ $group_key ] ?? null ) ) {
+            return array();
+        }
+
+        return $stored[ $group_key ];
+    }
+
+    private static function normalize_setting_group( $type ) {
+        $type = is_string( $type ) ? sanitize_key( $type ) : '';
+
+        if ( in_array( $type, array( 'background', 'backgrounds', 'spin_wheel_background' ), true ) ) {
+            return 'backgrounds';
+        }
+
+        if ( in_array( $type, array( 'button', 'buttons', 'spin_wheel_button' ), true ) ) {
+            return 'buttons';
+        }
+
+        if ( in_array( $type, array( 'font', 'fonts', 'spin_wheel_font' ), true ) ) {
+            return 'fonts';
+        }
+
+        if ( in_array( $type, array( 'pointer', 'pointers', 'spin_wheel_pointer' ), true ) ) {
+            return 'pointers';
+        }
+
+        return $type;
+    }
+
+    public static function get_setting_item_config( $type, $item_id ) {
+        $item_id = (string) $item_id;
+        if ( '' === $item_id ) {
+            return array();
+        }
+
+        foreach ( self::get_setting_items( $type ) as $item ) {
+            if ( ! is_array( $item ) ) {
+                continue;
+            }
+
+            if ( (string) ( $item['id'] ?? '' ) === $item_id ) {
+                return is_array( $item['config'] ?? null ) ? $item['config'] : array();
+            }
+        }
+
+        return array();
+    }
+
     public static function get_wheel_settings( $post_id ) {
         $preset_id = self::get_wheel_preset_id( $post_id );
         $preset_config = array();
@@ -115,12 +170,12 @@ class WP_Spin_Wheel_Helper {
             $settings['description'] = sanitize_textarea_field( $global_settings['wheel_description'] );
         }
 
-        $background_preset = self::resolve_preset_by_id( ! empty( $global_settings['wheel_background_presets'] ) ? $global_settings['wheel_background_presets'] : array(), ! empty( $global_settings['wheel_selected_background_preset'] ) ? $global_settings['wheel_selected_background_preset'] : '' );
-        if ( ! empty( $background_preset ) ) {
+        $selected_background_item = self::get_setting_item_config( 'background', $overrides['selected_background_id'] ?? '' );
+        if ( ! empty( $selected_background_item ) ) {
             $settings['background'] = array(
-                'type'  => ! empty( $background_preset['image'] ) ? 'image' : 'color',
-                'value' => ! empty( $background_preset['color'] ) ? sanitize_hex_color( $background_preset['color'] ) : ( isset( $settings['background']['value'] ) ? $settings['background']['value'] : '#ffffff' ),
-                'image' => ! empty( $background_preset['image'] ) ? esc_url_raw( $background_preset['image'] ) : '',
+                'type'  => ! empty( $selected_background_item['image'] ) ? 'image' : ( ! empty( $selected_background_item['type'] ) ? $selected_background_item['type'] : 'color' ),
+                'value' => ! empty( $selected_background_item['value'] ) ? sanitize_hex_color( $selected_background_item['value'] ) : ( isset( $settings['background']['value'] ) ? $settings['background']['value'] : '#ffffff' ),
+                'image' => ! empty( $selected_background_item['image'] ) ? esc_url_raw( $selected_background_item['image'] ) : '',
             );
         } elseif ( ! empty( $global_settings['wheel_background_color'] ) ) {
             $settings['background'] = array(
@@ -130,13 +185,14 @@ class WP_Spin_Wheel_Helper {
             );
         }
 
-        $button_preset = self::resolve_preset_by_id( ! empty( $global_settings['wheel_button_presets'] ) ? $global_settings['wheel_button_presets'] : array(), ! empty( $global_settings['wheel_selected_button_preset'] ) ? $global_settings['wheel_selected_button_preset'] : '' );
-        if ( ! empty( $button_preset ) ) {
+        $selected_button_item = self::get_setting_item_config( 'button', $overrides['selected_button_id'] ?? '' );
+        if ( ! empty( $selected_button_item ) ) {
             $settings['button'] = array_replace_recursive( $settings['button'], array(
-                'text'       => ! empty( $button_preset['text'] ) ? sanitize_text_field( $button_preset['text'] ) : $settings['button']['text'],
-                'color'      => ! empty( $button_preset['color'] ) ? sanitize_hex_color( $button_preset['color'] ) : $settings['button']['color'],
-                'text_color' => ! empty( $button_preset['text_color'] ) ? sanitize_hex_color( $button_preset['text_color'] ) : $settings['button']['text_color'],
-                'radius'     => ! empty( $button_preset['radius'] ) ? intval( $button_preset['radius'] ) : $settings['button']['radius'],
+                'text'             => ! empty( $selected_button_item['text'] ) ? sanitize_text_field( $selected_button_item['text'] ) : $settings['button']['text'],
+                'color'            => ! empty( $selected_button_item['color'] ) ? sanitize_hex_color( $selected_button_item['color'] ) : $settings['button']['color'],
+                'text_color'       => ! empty( $selected_button_item['text_color'] ) ? sanitize_hex_color( $selected_button_item['text_color'] ) : $settings['button']['text_color'],
+                'radius'           => ! empty( $selected_button_item['radius'] ) ? intval( $selected_button_item['radius'] ) : $settings['button']['radius'],
+                'background_image' => ! empty( $selected_button_item['background_image'] ) ? esc_url_raw( $selected_button_item['background_image'] ) : $settings['button']['background_image'],
             ) );
         } elseif ( ! empty( $global_settings['wheel_button_text'] ) ) {
             $settings['button']['text'] = sanitize_text_field( $global_settings['wheel_button_text'] );
@@ -148,11 +204,11 @@ class WP_Spin_Wheel_Helper {
             }
         }
 
-        $font_preset = self::resolve_preset_by_id( ! empty( $global_settings['wheel_font_presets'] ) ? $global_settings['wheel_font_presets'] : array(), ! empty( $global_settings['wheel_selected_font_preset'] ) ? $global_settings['wheel_selected_font_preset'] : '' );
-        if ( ! empty( $font_preset ) ) {
+        $selected_font_item = self::get_setting_item_config( 'font', $overrides['selected_font_id'] ?? '' );
+        if ( ! empty( $selected_font_item ) ) {
             $settings['font'] = array_replace_recursive( $settings['font'], array(
-                'family' => ! empty( $font_preset['family'] ) ? sanitize_text_field( $font_preset['family'] ) : $settings['font']['family'],
-                'size'   => ! empty( $font_preset['size'] ) ? intval( $font_preset['size'] ) : $settings['font']['size'],
+                'family' => ! empty( $selected_font_item['family'] ) ? sanitize_text_field( $selected_font_item['family'] ) : $settings['font']['family'],
+                'size'   => ! empty( $selected_font_item['size'] ) ? intval( $selected_font_item['size'] ) : $settings['font']['size'],
             ) );
         } elseif ( ! empty( $global_settings['wheel_font_family'] ) ) {
             $settings['font']['family'] = sanitize_text_field( $global_settings['wheel_font_family'] );
@@ -161,11 +217,11 @@ class WP_Spin_Wheel_Helper {
             }
         }
 
-        $pointer_preset = self::resolve_preset_by_id( ! empty( $global_settings['wheel_pointer_presets'] ) ? $global_settings['wheel_pointer_presets'] : array(), ! empty( $global_settings['wheel_selected_pointer_preset'] ) ? $global_settings['wheel_selected_pointer_preset'] : '' );
-        if ( ! empty( $pointer_preset ) ) {
+        $selected_pointer_item = self::get_setting_item_config( 'pointer', $overrides['selected_pointer_id'] ?? '' );
+        if ( ! empty( $selected_pointer_item ) ) {
             $settings['pointer'] = array_replace_recursive( $settings['pointer'], array(
-                'image' => ! empty( $pointer_preset['image'] ) ? esc_url_raw( $pointer_preset['image'] ) : $settings['pointer']['image'],
-                'size'  => ! empty( $pointer_preset['size'] ) ? intval( $pointer_preset['size'] ) : $settings['pointer']['size'],
+                'image' => ! empty( $selected_pointer_item['image'] ) ? esc_url_raw( $selected_pointer_item['image'] ) : $settings['pointer']['image'],
+                'size'  => ! empty( $selected_pointer_item['size'] ) ? intval( $selected_pointer_item['size'] ) : $settings['pointer']['size'],
             ) );
         } elseif ( ! empty( $global_settings['wheel_pointer_image'] ) ) {
             $settings['pointer']['image'] = esc_url_raw( $global_settings['wheel_pointer_image'] );

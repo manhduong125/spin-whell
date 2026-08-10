@@ -10,6 +10,67 @@ class WP_Spin_Wheel_Preset {
         add_action( 'save_post', array( $this, 'save_meta_boxes' ) );
     }
 
+    public function register_setting_post_types() {
+        $post_types = array(
+            'spin_wheel_background' => array(
+                'singular' => __( 'Wheel Background', 'wp-spin-wheel' ),
+                'plural'  => __( 'Wheel Backgrounds', 'wp-spin-wheel' ),
+                'menu'    => __( 'Backgrounds', 'wp-spin-wheel' ),
+                'icon'    => 'dashicons-format-image',
+            ),
+            'spin_wheel_button' => array(
+                'singular' => __( 'Wheel Button', 'wp-spin-wheel' ),
+                'plural'  => __( 'Wheel Buttons', 'wp-spin-wheel' ),
+                'menu'    => __( 'Buttons', 'wp-spin-wheel' ),
+                'icon'    => 'dashicons-button',
+            ),
+            'spin_wheel_font' => array(
+                'singular' => __( 'Wheel Font', 'wp-spin-wheel' ),
+                'plural'  => __( 'Wheel Fonts', 'wp-spin-wheel' ),
+                'menu'    => __( 'Fonts', 'wp-spin-wheel' ),
+                'icon'    => 'dashicons-editor-textcolor',
+            ),
+            'spin_wheel_pointer' => array(
+                'singular' => __( 'Wheel Pointer', 'wp-spin-wheel' ),
+                'plural'  => __( 'Wheel Pointers', 'wp-spin-wheel' ),
+                'menu'    => __( 'Pointers', 'wp-spin-wheel' ),
+                'icon'    => 'dashicons-arrow-up-alt',
+            ),
+        );
+
+        foreach ( $post_types as $post_type => $args ) {
+            $labels = array(
+                'name'                  => $args['plural'],
+                'singular_name'         => $args['singular'],
+                'menu_name'             => $args['menu'],
+                'name_admin_bar'        => $args['singular'],
+                'add_new'               => __( 'Add New', 'wp-spin-wheel' ),
+                'add_new_item'          => sprintf( __( 'Add New %s', 'wp-spin-wheel' ), $args['singular'] ),
+                'new_item'              => sprintf( __( 'New %s', 'wp-spin-wheel' ), $args['singular'] ),
+                'edit_item'             => sprintf( __( 'Edit %s', 'wp-spin-wheel' ), $args['singular'] ),
+                'view_item'             => sprintf( __( 'View %s', 'wp-spin-wheel' ), $args['singular'] ),
+                'all_items'             => sprintf( __( 'All %s', 'wp-spin-wheel' ), $args['plural'] ),
+                'search_items'          => sprintf( __( 'Search %s', 'wp-spin-wheel' ), $args['plural'] ),
+                'not_found'             => sprintf( __( 'No %s found.', 'wp-spin-wheel' ), $args['plural'] ),
+                'not_found_in_trash'    => sprintf( __( 'No %s found in trash.', 'wp-spin-wheel' ), $args['plural'] ),
+            );
+
+            register_post_type( $post_type, array(
+                'labels'             => $labels,
+                'public'             => false,
+                'show_ui'            => true,
+                'show_in_menu'       => 'edit.php?post_type=spin_wheel',
+                'menu_position'      => 27,
+                'menu_icon'          => $args['icon'],
+                'supports'           => array( 'title', 'editor', 'thumbnail' ),
+                'has_archive'        => false,
+                'rewrite'            => false,
+                'capability_type'    => 'post',
+                'map_meta_cap'       => true,
+            ) );
+        }
+    }
+
     public function register_post_type() {
         $labels = array(
             'name'                  => __( 'Presets', 'wp-spin-wheel' ),
@@ -215,58 +276,162 @@ class WP_Spin_Wheel_Preset {
             return;
         }
 
-        if ( empty( $_POST['spin_wheel_preset_nonce'] ) || ! wp_verify_nonce( wp_unslash( $_POST['spin_wheel_preset_nonce'] ), 'spin_wheel_preset_save' ) ) {
+        $post_type = get_post_type( $post_id );
+
+        if ( 'spin_wheel_preset' === $post_type ) {
+            if ( empty( $_POST['spin_wheel_preset_nonce'] ) || ! wp_verify_nonce( wp_unslash( $_POST['spin_wheel_preset_nonce'] ), 'spin_wheel_preset_save' ) ) {
+                return;
+            }
+
+            $background_type = sanitize_text_field( wp_unslash( $_POST['spin_wheel_preset_background_type'] ?? 'color' ) );
+            if ( ! in_array( $background_type, array( 'color', 'image' ), true ) ) {
+                $background_type = 'color';
+            }
+
+            $config = array(
+                'background' => array(
+                    'type'  => $background_type,
+                    'value' => sanitize_text_field( wp_unslash( $_POST['spin_wheel_preset_background_color'] ?? '#ffffff' ) ),
+                    'image' => esc_url_raw( wp_unslash( $_POST['spin_wheel_preset_background_image'] ?? '' ) ),
+                ),
+                'wheel' => array(
+                    'size'         => max( 100, intval( wp_unslash( $_POST['spin_wheel_preset_wheel_size'] ?? 500 ) ) ),
+                    'border'       => max( 0, intval( wp_unslash( $_POST['spin_wheel_preset_wheel_border'] ?? 8 ) ) ),
+                    'border_color' => sanitize_text_field( wp_unslash( $_POST['spin_wheel_preset_wheel_border_color'] ?? '#ffffff' ) ),
+                    'shadow'       => isset( $_POST['spin_wheel_preset_wheel_shadow'] ) ? true : false,
+                ),
+                'button' => array(
+                    'text'             => sanitize_text_field( wp_unslash( $_POST['spin_wheel_preset_button_text'] ?? __( 'QUAY', 'wp-spin-wheel' ) ) ),
+                    'color'            => sanitize_text_field( wp_unslash( $_POST['spin_wheel_preset_button_color'] ?? '#ff0000' ) ),
+                    'text_color'       => sanitize_text_field( wp_unslash( $_POST['spin_wheel_preset_button_text_color'] ?? '#ffffff' ) ),
+                    'radius'           => max( 0, intval( wp_unslash( $_POST['spin_wheel_preset_button_radius'] ?? 50 ) ) ),
+                    'background_image' => esc_url_raw( wp_unslash( $_POST['spin_wheel_preset_button_background_image'] ?? '' ) ),
+                ),
+                'pointer' => array(
+                    'image' => esc_url_raw( wp_unslash( $_POST['spin_wheel_preset_pointer_image'] ?? '' ) ),
+                    'size'  => max( 20, intval( wp_unslash( $_POST['spin_wheel_preset_pointer_size'] ?? 80 ) ) ),
+                ),
+                'font' => array(
+                    'family' => sanitize_text_field( wp_unslash( $_POST['spin_wheel_preset_font_family'] ?? 'Arial' ) ),
+                    'size'   => max( 10, intval( wp_unslash( $_POST['spin_wheel_preset_font_size'] ?? 20 ) ) ),
+                ),
+                'animation' => array(
+                    'duration' => max( 1, intval( wp_unslash( $_POST['spin_wheel_preset_animation_duration'] ?? 6 ) ) ),
+                    'confetti' => isset( $_POST['spin_wheel_preset_animation_confetti'] ) ? true : false,
+                ),
+                'audio' => array(
+                    'spin' => esc_url_raw( wp_unslash( $_POST['spin_wheel_preset_audio_spin'] ?? '' ) ),
+                    'win'  => esc_url_raw( wp_unslash( $_POST['spin_wheel_preset_audio_win'] ?? '' ) ),
+                ),
+                'custom_css' => sanitize_textarea_field( wp_unslash( $_POST['spin_wheel_preset_custom_css'] ?? '' ) ),
+            );
+
+            update_post_meta( $post_id, '_spin_wheel_preset_config', wp_json_encode( $config ) );
             return;
         }
 
-        if ( get_post_type( $post_id ) !== 'spin_wheel_preset' ) {
+        if ( ! in_array( $post_type, array( 'spin_wheel_background', 'spin_wheel_button', 'spin_wheel_font', 'spin_wheel_pointer' ), true ) ) {
             return;
         }
 
-        $background_type = sanitize_text_field( wp_unslash( $_POST['spin_wheel_preset_background_type'] ?? 'color' ) );
-        if ( ! in_array( $background_type, array( 'color', 'image' ), true ) ) {
-            $background_type = 'color';
+        if ( empty( $_POST['spin_wheel_setting_nonce'] ) || ! wp_verify_nonce( wp_unslash( $_POST['spin_wheel_setting_nonce'] ), 'spin_wheel_setting_save' ) ) {
+            return;
         }
 
-        $config = array(
-            'background' => array(
-                'type'  => $background_type,
-                'value' => sanitize_text_field( wp_unslash( $_POST['spin_wheel_preset_background_color'] ?? '#ffffff' ) ),
-                'image' => esc_url_raw( wp_unslash( $_POST['spin_wheel_preset_background_image'] ?? '' ) ),
+        $config = array();
+        if ( 'spin_wheel_background' === $post_type ) {
+            $config = array(
+                'type'  => sanitize_text_field( wp_unslash( $_POST['spin_wheel_setting_background_type'] ?? 'color' ) ),
+                'value' => sanitize_text_field( wp_unslash( $_POST['spin_wheel_setting_background_color'] ?? '#ffffff' ) ),
+                'image' => esc_url_raw( wp_unslash( $_POST['spin_wheel_setting_background_image'] ?? '' ) ),
+            );
+        } elseif ( 'spin_wheel_button' === $post_type ) {
+            $config = array(
+                'text'               => sanitize_text_field( wp_unslash( $_POST['spin_wheel_setting_button_text'] ?? __( 'QUAY', 'wp-spin-wheel' ) ) ),
+                'color'              => sanitize_text_field( wp_unslash( $_POST['spin_wheel_setting_button_color'] ?? '#ff0000' ) ),
+                'text_color'         => sanitize_text_field( wp_unslash( $_POST['spin_wheel_setting_button_text_color'] ?? '#ffffff' ) ),
+                'radius'             => max( 0, intval( wp_unslash( $_POST['spin_wheel_setting_button_radius'] ?? 50 ) ) ),
+                'background_image'   => esc_url_raw( wp_unslash( $_POST['spin_wheel_setting_button_background_image'] ?? '' ) ),
+            );
+        } elseif ( 'spin_wheel_font' === $post_type ) {
+            $config = array(
+                'family' => sanitize_text_field( wp_unslash( $_POST['spin_wheel_setting_font_family'] ?? 'Arial' ) ),
+                'size'   => max( 10, intval( wp_unslash( $_POST['spin_wheel_setting_font_size'] ?? 20 ) ) ),
+            );
+        } elseif ( 'spin_wheel_pointer' === $post_type ) {
+            $config = array(
+                'image' => esc_url_raw( wp_unslash( $_POST['spin_wheel_setting_pointer_image'] ?? '' ) ),
+                'size'  => max( 20, intval( wp_unslash( $_POST['spin_wheel_setting_pointer_size'] ?? 80 ) ) ),
+            );
+        }
+
+        if ( ! empty( $config ) ) {
+            update_post_meta( $post_id, '_spin_wheel_setting_config', wp_json_encode( $config ) );
+        }
+    }
+
+    public function create_default_setting_items() {
+        if ( get_option( 'wp_spin_wheel_default_setting_items_created' ) ) {
+            return;
+        }
+
+        $defaults = array(
+            'spin_wheel_background' => array(
+                array(
+                    'title'  => 'Default Background',
+                    'config' => array( 'type' => 'color', 'value' => '#f8fafc', 'image' => '' ),
+                ),
+                array(
+                    'title'  => 'Dark Background',
+                    'config' => array( 'type' => 'color', 'value' => '#111827', 'image' => '' ),
+                ),
             ),
-            'wheel' => array(
-                'size'         => max( 100, intval( wp_unslash( $_POST['spin_wheel_preset_wheel_size'] ?? 500 ) ) ),
-                'border'       => max( 0, intval( wp_unslash( $_POST['spin_wheel_preset_wheel_border'] ?? 8 ) ) ),
-                'border_color' => sanitize_text_field( wp_unslash( $_POST['spin_wheel_preset_wheel_border_color'] ?? '#ffffff' ) ),
-                'shadow'       => isset( $_POST['spin_wheel_preset_wheel_shadow'] ) ? true : false,
+            'spin_wheel_button' => array(
+                array(
+                    'title'  => 'Primary Button',
+                    'config' => array( 'text' => 'QUAY', 'color' => '#2563eb', 'text_color' => '#ffffff', 'radius' => 50, 'background_image' => '' ),
+                ),
             ),
-            'button' => array(
-                'text'             => sanitize_text_field( wp_unslash( $_POST['spin_wheel_preset_button_text'] ?? __( 'QUAY', 'wp-spin-wheel' ) ) ),
-                'color'            => sanitize_text_field( wp_unslash( $_POST['spin_wheel_preset_button_color'] ?? '#ff0000' ) ),
-                'text_color'       => sanitize_text_field( wp_unslash( $_POST['spin_wheel_preset_button_text_color'] ?? '#ffffff' ) ),
-                'radius'           => max( 0, intval( wp_unslash( $_POST['spin_wheel_preset_button_radius'] ?? 50 ) ) ),
-                'background_image' => esc_url_raw( wp_unslash( $_POST['spin_wheel_preset_button_background_image'] ?? '' ) ),
+            'spin_wheel_font' => array(
+                array(
+                    'title'  => 'Default Font',
+                    'config' => array( 'family' => 'Arial', 'size' => 20 ),
+                ),
             ),
-            'pointer' => array(
-                'image' => esc_url_raw( wp_unslash( $_POST['spin_wheel_preset_pointer_image'] ?? '' ) ),
-                'size'  => max( 20, intval( wp_unslash( $_POST['spin_wheel_preset_pointer_size'] ?? 80 ) ) ),
+            'spin_wheel_pointer' => array(
+                array(
+                    'title'  => 'Default Pointer',
+                    'config' => array( 'image' => '', 'size' => 80 ),
+                ),
             ),
-            'font' => array(
-                'family' => sanitize_text_field( wp_unslash( $_POST['spin_wheel_preset_font_family'] ?? 'Arial' ) ),
-                'size'   => max( 10, intval( wp_unslash( $_POST['spin_wheel_preset_font_size'] ?? 20 ) ) ),
-            ),
-            'animation' => array(
-                'duration' => max( 1, intval( wp_unslash( $_POST['spin_wheel_preset_animation_duration'] ?? 6 ) ) ),
-                'confetti' => isset( $_POST['spin_wheel_preset_animation_confetti'] ) ? true : false,
-            ),
-            'audio' => array(
-                'spin' => esc_url_raw( wp_unslash( $_POST['spin_wheel_preset_audio_spin'] ?? '' ) ),
-                'win'  => esc_url_raw( wp_unslash( $_POST['spin_wheel_preset_audio_win'] ?? '' ) ),
-            ),
-            'custom_css' => sanitize_textarea_field( wp_unslash( $_POST['spin_wheel_preset_custom_css'] ?? '' ) ),
         );
 
-        update_post_meta( $post_id, '_spin_wheel_preset_config', wp_json_encode( $config ) );
+        foreach ( $defaults as $post_type => $items ) {
+            $existing = get_posts( array(
+                'post_type'      => $post_type,
+                'post_status'    => 'any',
+                'posts_per_page' => 1,
+                'fields'         => 'ids',
+            ) );
+            if ( ! empty( $existing ) ) {
+                continue;
+            }
+
+            foreach ( $items as $item ) {
+                $post_id = wp_insert_post( array(
+                    'post_title'   => $item['title'],
+                    'post_content' => '',
+                    'post_status'  => 'publish',
+                    'post_type'    => $post_type,
+                ) );
+
+                if ( $post_id && ! is_wp_error( $post_id ) ) {
+                    update_post_meta( $post_id, '_spin_wheel_setting_config', wp_json_encode( $item['config'] ) );
+                }
+            }
+        }
+
+        update_option( 'wp_spin_wheel_default_setting_items_created', 1 );
     }
 
     public static function create_default_presets() {

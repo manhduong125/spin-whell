@@ -5,11 +5,216 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class WP_Spin_Wheel_Settings {
     const OPTION_KEY = 'wp_spin_wheel_settings';
+    const ITEM_OPTION_KEY = 'wp_spin_wheel_setting_items';
 
     public function __construct() {
         add_action( 'admin_menu', array( $this, 'add_admin_menu' ) );
         add_action( 'admin_init', array( $this, 'register_settings' ) );
+        add_action( 'admin_init', array( $this, 'handle_setting_item_form' ) );
+        add_action( 'init', array( $this, 'ensure_default_setting_items' ), 20 );
         add_action( 'rest_api_init', array( $this, 'register_rest_routes' ) );
+    }
+
+    public function ensure_default_setting_items() {
+        $items = $this->get_item_option();
+        $changed = false;
+
+        foreach ( $this->get_default_item_groups() as $group_key => $defaults ) {
+            if ( empty( $items[ $group_key ] ) || ! is_array( $items[ $group_key ] ) ) {
+                $items[ $group_key ] = $defaults;
+                $changed = true;
+            }
+        }
+
+        if ( $changed ) {
+            update_option( self::ITEM_OPTION_KEY, $items );
+        }
+    }
+
+    private function get_default_item_groups() {
+        return array(
+            'backgrounds' => array(
+                array(
+                    'id'     => 'background-default',
+                    'name'   => __( 'Default Background', 'wp-spin-wheel' ),
+                    'config' => array( 'type' => 'color', 'value' => '#f8fafc', 'image' => '' ),
+                ),
+            ),
+            'buttons' => array(
+                array(
+                    'id'     => 'button-default',
+                    'name'   => __( 'Primary Button', 'wp-spin-wheel' ),
+                    'config' => array( 'text' => __( 'QUAY', 'wp-spin-wheel' ), 'color' => '#2563eb', 'text_color' => '#ffffff', 'radius' => 50, 'background_image' => '' ),
+                ),
+            ),
+            'fonts' => array(
+                array(
+                    'id'     => 'font-default',
+                    'name'   => __( 'Default Font', 'wp-spin-wheel' ),
+                    'config' => array( 'family' => 'Arial', 'size' => 20 ),
+                ),
+            ),
+            'pointers' => array(
+                array(
+                    'id'     => 'pointer-default',
+                    'name'   => __( 'Default Pointer', 'wp-spin-wheel' ),
+                    'config' => array( 'image' => '', 'size' => 80 ),
+                ),
+            ),
+        );
+    }
+
+    private function get_group_key_from_type( $type ) {
+        $type = is_string( $type ) ? sanitize_key( $type ) : '';
+
+        if ( in_array( $type, array( 'background', 'backgrounds', 'spin_wheel_background' ), true ) ) {
+            return 'backgrounds';
+        }
+
+        if ( in_array( $type, array( 'button', 'buttons', 'spin_wheel_button' ), true ) ) {
+            return 'buttons';
+        }
+
+        if ( in_array( $type, array( 'font', 'fonts', 'spin_wheel_font' ), true ) ) {
+            return 'fonts';
+        }
+
+        if ( in_array( $type, array( 'pointer', 'pointers', 'spin_wheel_pointer' ), true ) ) {
+            return 'pointers';
+        }
+
+        return $type;
+    }
+
+    public function get_item_option() {
+        $saved = get_option( self::ITEM_OPTION_KEY, array() );
+        if ( ! is_array( $saved ) ) {
+            $saved = array();
+        }
+
+        return $saved;
+    }
+
+    public function get_setting_items( $type ) {
+        $group_key = $this->get_group_key_from_type( $type );
+        $items = $this->get_item_option();
+
+        if ( ! is_array( $items[ $group_key ] ?? null ) ) {
+            return array();
+        }
+
+        return $items[ $group_key ];
+    }
+
+    public function save_setting_items( $type, $items ) {
+        $group_key = $this->get_group_key_from_type( $type );
+        $stored = $this->get_item_option();
+        $stored[ $group_key ] = is_array( $items ) ? $items : array();
+        update_option( self::ITEM_OPTION_KEY, $stored );
+    }
+
+    private function build_item_config( $group_key, $payload ) {
+        $payload = is_array( $payload ) ? $payload : array();
+
+        if ( 'backgrounds' === $group_key ) {
+            return array(
+                'type'  => sanitize_text_field( wp_unslash( $payload['spin_wheel_setting_background_type'] ?? 'color' ) ),
+                'value' => sanitize_text_field( wp_unslash( $payload['spin_wheel_setting_background_color'] ?? '#ffffff' ) ),
+                'image' => esc_url_raw( wp_unslash( $payload['spin_wheel_setting_background_image'] ?? '' ) ),
+            );
+        }
+
+        if ( 'buttons' === $group_key ) {
+            return array(
+                'text'             => sanitize_text_field( wp_unslash( $payload['spin_wheel_setting_button_text'] ?? __( 'QUAY', 'wp-spin-wheel' ) ) ),
+                'color'            => sanitize_text_field( wp_unslash( $payload['spin_wheel_setting_button_color'] ?? '#2563eb' ) ),
+                'text_color'       => sanitize_text_field( wp_unslash( $payload['spin_wheel_setting_button_text_color'] ?? '#ffffff' ) ),
+                'radius'           => max( 0, intval( wp_unslash( $payload['spin_wheel_setting_button_radius'] ?? 50 ) ) ),
+                'background_image' => esc_url_raw( wp_unslash( $payload['spin_wheel_setting_button_background_image'] ?? '' ) ),
+            );
+        }
+
+        if ( 'fonts' === $group_key ) {
+            return array(
+                'family' => sanitize_text_field( wp_unslash( $payload['spin_wheel_setting_font_family'] ?? 'Arial' ) ),
+                'size'   => max( 10, intval( wp_unslash( $payload['spin_wheel_setting_font_size'] ?? 20 ) ) ),
+            );
+        }
+
+        if ( 'pointers' === $group_key ) {
+            return array(
+                'image' => esc_url_raw( wp_unslash( $payload['spin_wheel_setting_pointer_image'] ?? '' ) ),
+                'size'  => max( 20, intval( wp_unslash( $payload['spin_wheel_setting_pointer_size'] ?? 80 ) ) ),
+            );
+        }
+
+        return array();
+    }
+
+    public function handle_setting_item_form() {
+        if ( empty( $_POST['spin_wheel_setting_item_action'] ) ) {
+            return;
+        }
+
+        if ( empty( $_POST['spin_wheel_setting_item_nonce'] ) || ! wp_verify_nonce( wp_unslash( $_POST['spin_wheel_setting_item_nonce'] ), 'spin_wheel_setting_items' ) ) {
+            return;
+        }
+
+        $action = sanitize_text_field( wp_unslash( $_POST['spin_wheel_setting_item_action'] ) );
+        $group_key = $this->get_group_key_from_type( wp_unslash( $_POST['spin_wheel_setting_item_group'] ?? '' ) );
+
+        if ( ! in_array( $group_key, array( 'backgrounds', 'buttons', 'fonts', 'pointers' ), true ) ) {
+            return;
+        }
+
+        $items = $this->get_setting_items( $group_key );
+        $item_id = sanitize_text_field( wp_unslash( $_POST['spin_wheel_setting_item_id'] ?? '' ) );
+        $item_name = sanitize_text_field( wp_unslash( $_POST['spin_wheel_setting_item_name'] ?? '' ) );
+
+        if ( 'delete' === $action ) {
+            foreach ( $items as $index => $item ) {
+                if ( (string) ( $item['id'] ?? '' ) === $item_id ) {
+                    unset( $items[ $index ] );
+                    break;
+                }
+            }
+
+            $this->save_setting_items( $group_key, array_values( $items ) );
+            wp_safe_redirect( add_query_arg( array( 'page' => 'wp-spin-wheel-settings', 'updated' => '1' ), admin_url( 'admin.php' ) ) );
+            exit;
+        }
+
+        if ( empty( $item_name ) ) {
+            return;
+        }
+
+        if ( empty( $item_id ) ) {
+            $item_id = $group_key . '-' . wp_unique_id();
+        }
+
+        $config = $this->build_item_config( $group_key, $_POST );
+        $item_payload = array(
+            'id'     => $item_id,
+            'name'   => $item_name,
+            'config' => $config,
+        );
+
+        $updated = false;
+        foreach ( $items as $index => $item ) {
+            if ( (string) ( $item['id'] ?? '' ) === $item_id ) {
+                $items[ $index ] = $item_payload;
+                $updated = true;
+                break;
+            }
+        }
+
+        if ( ! $updated ) {
+            $items[] = $item_payload;
+        }
+
+        $this->save_setting_items( $group_key, array_values( $items ) );
+        wp_safe_redirect( add_query_arg( array( 'page' => 'wp-spin-wheel-settings', 'updated' => '1' ), admin_url( 'admin.php' ) ) );
+        exit;
     }
 
     public function add_admin_menu() {
@@ -428,6 +633,169 @@ class WP_Spin_Wheel_Settings {
                 </div>
                 <?php submit_button( __( 'Save Settings', 'wp-spin-wheel' ) ); ?>
             </form>
+
+            <div class="postbox" style="margin-top: 24px;">
+                <h2 class="hndle"><?php esc_html_e( 'Setting items', 'wp-spin-wheel' ); ?></h2>
+                <div class="inside">
+                    <?php
+                    $group_definitions = array(
+                        'backgrounds' => array(
+                            'title' => __( 'Background items', 'wp-spin-wheel' ),
+                            'name'  => __( 'Background', 'wp-spin-wheel' ),
+                        ),
+                        'buttons' => array(
+                            'title' => __( 'Button items', 'wp-spin-wheel' ),
+                            'name'  => __( 'Button', 'wp-spin-wheel' ),
+                        ),
+                        'fonts' => array(
+                            'title' => __( 'Font items', 'wp-spin-wheel' ),
+                            'name'  => __( 'Font', 'wp-spin-wheel' ),
+                        ),
+                        'pointers' => array(
+                            'title' => __( 'Pointer items', 'wp-spin-wheel' ),
+                            'name'  => __( 'Pointer', 'wp-spin-wheel' ),
+                        ),
+                    );
+                    $editing_group = isset( $_GET['edit_setting_group'] ) ? sanitize_key( wp_unslash( $_GET['edit_setting_group'] ) ) : '';
+                    $editing_id = isset( $_GET['edit_setting_item'] ) ? sanitize_text_field( wp_unslash( $_GET['edit_setting_item'] ) ) : '';
+                    $editing_item = array();
+
+                    if ( ! empty( $editing_group ) && ! empty( $editing_id ) ) {
+                        foreach ( $this->get_setting_items( $editing_group ) as $item ) {
+                            if ( (string) ( $item['id'] ?? '' ) === $editing_id ) {
+                                $editing_item = $item;
+                                break;
+                            }
+                        }
+                    }
+                    ?>
+                    <?php foreach ( $group_definitions as $group_key => $group_info ) : ?>
+                        <?php $items = $this->get_setting_items( $group_key ); ?>
+                        <h3><?php echo esc_html( $group_info['title'] ); ?></h3>
+                        <?php if ( empty( $items ) ) : ?>
+                            <p><?php esc_html_e( 'No items yet.', 'wp-spin-wheel' ); ?></p>
+                        <?php else : ?>
+                            <table class="widefat fixed" style="margin-bottom: 12px;">
+                                <thead>
+                                    <tr>
+                                        <th><?php esc_html_e( 'Name', 'wp-spin-wheel' ); ?></th>
+                                        <th><?php esc_html_e( 'Value', 'wp-spin-wheel' ); ?></th>
+                                        <th><?php esc_html_e( 'Action', 'wp-spin-wheel' ); ?></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ( $items as $item ) : ?>
+                                        <tr>
+                                            <td><?php echo esc_html( $item['name'] ?? '' ); ?></td>
+                                            <td>
+                                                <?php
+                                                $config = $item['config'] ?? array();
+                                                if ( 'backgrounds' === $group_key ) {
+                                                    echo esc_html( $config['type'] ?? '' );
+                                                } elseif ( 'buttons' === $group_key ) {
+                                                    echo esc_html( $config['text'] ?? '' );
+                                                } elseif ( 'fonts' === $group_key ) {
+                                                    echo esc_html( $config['family'] ?? '' );
+                                                } else {
+                                                    echo esc_html( $config['image'] ?? '' );
+                                                }
+                                                ?>
+                                            </td>
+                                            <td>
+                                                <a href="<?php echo esc_url( add_query_arg( array( 'page' => 'wp-spin-wheel-settings', 'edit_setting_group' => $group_key, 'edit_setting_item' => $item['id'] ?? '' ) ) ); ?>"><?php esc_html_e( 'Edit', 'wp-spin-wheel' ); ?></a>
+                                                |
+                                                <form method="post" style="display: inline;">
+                                                    <?php wp_nonce_field( 'spin_wheel_setting_items' ); ?>
+                                                    <input type="hidden" name="spin_wheel_setting_item_group" value="<?php echo esc_attr( $group_key ); ?>" />
+                                                    <input type="hidden" name="spin_wheel_setting_item_id" value="<?php echo esc_attr( $item['id'] ?? '' ); ?>" />
+                                                    <input type="hidden" name="spin_wheel_setting_item_action" value="delete" />
+                                                    <button type="submit" class="button-link-delete" style="padding: 0; border: 0; background: none; color: #b32d2e; cursor: pointer;"><?php esc_html_e( 'Delete', 'wp-spin-wheel' ); ?></button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        <?php endif; ?>
+
+                        <form method="post" class="wp-spin-wheel-setting-item-form">
+                            <?php wp_nonce_field( 'spin_wheel_setting_items' ); ?>
+                            <input type="hidden" name="spin_wheel_setting_item_group" value="<?php echo esc_attr( $group_key ); ?>" />
+                            <input type="hidden" name="spin_wheel_setting_item_id" value="<?php echo esc_attr( $editing_item['id'] ?? '' ); ?>" />
+                            <input type="hidden" name="spin_wheel_setting_item_action" value="save" />
+                            <p>
+                                <label><?php esc_html_e( 'Name', 'wp-spin-wheel' ); ?><br />
+                                <input type="text" name="spin_wheel_setting_item_name" value="<?php echo esc_attr( $editing_item['name'] ?? '' ); ?>" class="widefat" /></label>
+                            </p>
+
+                            <?php if ( 'backgrounds' === $group_key ) : ?>
+                                <p>
+                                    <label><?php esc_html_e( 'Type', 'wp-spin-wheel' ); ?><br />
+                                    <select name="spin_wheel_setting_background_type" class="widefat">
+                                        <option value="color" <?php selected( $editing_item['config']['type'] ?? '', 'color' ); ?>><?php esc_html_e( 'Color', 'wp-spin-wheel' ); ?></option>
+                                        <option value="image" <?php selected( $editing_item['config']['type'] ?? '', 'image' ); ?>><?php esc_html_e( 'Image', 'wp-spin-wheel' ); ?></option>
+                                    </select></label>
+                                </p>
+                                <p>
+                                    <label><?php esc_html_e( 'Color', 'wp-spin-wheel' ); ?><br />
+                                    <input type="text" name="spin_wheel_setting_background_color" value="<?php echo esc_attr( $editing_item['config']['value'] ?? '#ffffff' ); ?>" class="widefat wp-spin-wheel-color-field" /></label>
+                                </p>
+                                <p>
+                                    <label><?php esc_html_e( 'Image URL', 'wp-spin-wheel' ); ?><br />
+                                    <input type="text" name="spin_wheel_setting_background_image" value="<?php echo esc_attr( $editing_item['config']['image'] ?? '' ); ?>" class="widefat" /></label>
+                                </p>
+                            <?php elseif ( 'buttons' === $group_key ) : ?>
+                                <p>
+                                    <label><?php esc_html_e( 'Text', 'wp-spin-wheel' ); ?><br />
+                                    <input type="text" name="spin_wheel_setting_button_text" value="<?php echo esc_attr( $editing_item['config']['text'] ?? __( 'QUAY', 'wp-spin-wheel' ) ); ?>" class="widefat" /></label>
+                                </p>
+                                <p>
+                                    <label><?php esc_html_e( 'Color', 'wp-spin-wheel' ); ?><br />
+                                    <input type="text" name="spin_wheel_setting_button_color" value="<?php echo esc_attr( $editing_item['config']['color'] ?? '#2563eb' ); ?>" class="widefat wp-spin-wheel-color-field" /></label>
+                                </p>
+                                <p>
+                                    <label><?php esc_html_e( 'Text color', 'wp-spin-wheel' ); ?><br />
+                                    <input type="text" name="spin_wheel_setting_button_text_color" value="<?php echo esc_attr( $editing_item['config']['text_color'] ?? '#ffffff' ); ?>" class="widefat wp-spin-wheel-color-field" /></label>
+                                </p>
+                                <p>
+                                    <label><?php esc_html_e( 'Radius', 'wp-spin-wheel' ); ?><br />
+                                    <input type="number" name="spin_wheel_setting_button_radius" value="<?php echo esc_attr( $editing_item['config']['radius'] ?? 50 ); ?>" class="small-text" /></label>
+                                </p>
+                                <p>
+                                    <label><?php esc_html_e( 'Background image', 'wp-spin-wheel' ); ?><br />
+                                    <input type="text" name="spin_wheel_setting_button_background_image" value="<?php echo esc_attr( $editing_item['config']['background_image'] ?? '' ); ?>" class="widefat" /></label>
+                                </p>
+                            <?php elseif ( 'fonts' === $group_key ) : ?>
+                                <p>
+                                    <label><?php esc_html_e( 'Font family', 'wp-spin-wheel' ); ?><br />
+                                    <input type="text" name="spin_wheel_setting_font_family" value="<?php echo esc_attr( $editing_item['config']['family'] ?? 'Arial' ); ?>" class="widefat" /></label>
+                                </p>
+                                <p>
+                                    <label><?php esc_html_e( 'Font size', 'wp-spin-wheel' ); ?><br />
+                                    <input type="number" name="spin_wheel_setting_font_size" value="<?php echo esc_attr( $editing_item['config']['size'] ?? 20 ); ?>" class="small-text" /></label>
+                                </p>
+                            <?php elseif ( 'pointers' === $group_key ) : ?>
+                                <p>
+                                    <label><?php esc_html_e( 'Image URL', 'wp-spin-wheel' ); ?><br />
+                                    <input type="text" name="spin_wheel_setting_pointer_image" value="<?php echo esc_attr( $editing_item['config']['image'] ?? '' ); ?>" class="widefat" /></label>
+                                </p>
+                                <p>
+                                    <label><?php esc_html_e( 'Size', 'wp-spin-wheel' ); ?><br />
+                                    <input type="number" name="spin_wheel_setting_pointer_size" value="<?php echo esc_attr( $editing_item['config']['size'] ?? 80 ); ?>" class="small-text" /></label>
+                                </p>
+                            <?php endif; ?>
+
+                            <p>
+                                <button type="submit" class="button button-primary"><?php esc_html_e( 'Save item', 'wp-spin-wheel' ); ?></button>
+                                <?php if ( ! empty( $editing_item ) ) : ?>
+                                    <a href="<?php echo esc_url( add_query_arg( array( 'page' => 'wp-spin-wheel-settings' ) ) ); ?>" class="button"><?php esc_html_e( 'Cancel', 'wp-spin-wheel' ); ?></a>
+                                <?php endif; ?>
+                            </p>
+                        </form>
+                        <hr />
+                    <?php endforeach; ?>
+                </div>
+            </div>
         </div>
         <?php
     }
