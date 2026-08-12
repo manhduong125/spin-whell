@@ -15,7 +15,7 @@ $default_settings = array(
         'shadow'       => true,
     ),
     'button' => array(
-        'text'       => __( 'Quay ngay', 'wp-spin-wheel' ),
+        'text'       => __( 'Quay', 'wp-spin-wheel' ),
         'color'      => '#3b82f6',
         'text_color' => '#ffffff',
         'radius'     => 100,

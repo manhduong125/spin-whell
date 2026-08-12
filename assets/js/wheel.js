@@ -53,7 +53,7 @@ jQuery(document).ready(function($) {
                 shadow: true,
             },
             button: settings.button || {
-                text: 'QUAY NGAY',
+                text: 'QUAY',
                 color: '#ff0000',
                 text_color: '#ffffff',
                 radius: 50,
