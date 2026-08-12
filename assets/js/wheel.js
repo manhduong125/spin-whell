@@ -86,11 +86,11 @@ jQuery(document).ready(function($) {
         $('#editTitle').val(title || 'Vòng quay may mắn');
         $('#editDesc').val(description || 'Nhấn vào nút quay để bắt đầu.');
         $('#edit-mode-txt').text('Đang chỉnh sửa...');
-        $('#myModal').show().attr('aria-hidden', 'false');
+        $('#modal-edit').show().attr('aria-hidden', 'false');
     }
 
     function closeTitleDescriptionEditor() {
-        $('#myModal').hide().attr('aria-hidden', 'true');
+        $('#modal-edit').hide().attr('aria-hidden', 'true');
     }
 
     function saveTitleDesc() {
@@ -506,6 +506,16 @@ jQuery(document).ready(function($) {
         requestAnimationFrame(step);
     }
 
+    function showResultPopup(prize) {
+        $('#modal-result-title').text(prize.title || '');
+        $('#modal-result-desc').text(prize.description || '');
+        $('#modal-result').show().attr('aria-hidden', 'false');
+    }
+
+    function closeResultPopup() {
+        $('#modal-result').hide().attr('aria-hidden', 'true');
+    }
+
     function handleSpinSuccess(prize) {
         var index = getPrizeIndex(prize);
         if ( index === -1 ) {
@@ -518,6 +528,7 @@ jQuery(document).ready(function($) {
             $('#wheel_result').append(resultEntry);
             updateResultCount();
             $('#tab-result').trigger('click');
+            showResultPopup(prize);
         });
     }
 
@@ -610,20 +621,32 @@ jQuery(document).ready(function($) {
         saveTitleDesc();
     });
 
-    $('#modal-close, #myModal .btn-secondary').on('click', function(e) {
+    $('#modal-edit-close, #modal-edit-cancel').on('click', function(e) {
         e.preventDefault();
         closeTitleDescriptionEditor();
     });
 
-    $('#myModal').on('click', function(e) {
-        if ( $(e.target).is('#myModal') ) {
+    $('#modal-edit').on('click', function(e) {
+        if ( $(e.target).is('#modal-edit') ) {
             closeTitleDescriptionEditor();
+        }
+    });
+
+    $('#modal-result-close, #modal-result-close-btn').on('click', function(e) {
+        e.preventDefault();
+        closeResultPopup();
+    });
+
+    $('#modal-result').on('click', function(e) {
+        if ( $(e.target).is('#modal-result') ) {
+            closeResultPopup();
         }
     });
 
     $(document).on('keydown', function(e) {
         if ( e.key === 'Escape' ) {
             closeTitleDescriptionEditor();
+            closeResultPopup();
         }
     });
 

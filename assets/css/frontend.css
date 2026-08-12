@@ -168,32 +168,21 @@
     }
 
     #wheel {
-        height: 500px
+        height: 500px !important;
+        width: 500px !important;
     }
 }
 
 @media screen and (max-width: 576px) {
     #wheel {
-        height: 450px
+        height: 450px !important;
+        width: 450px !important;
     }
-
-    #spin {}
 }
 
 @media screen and (max-width: 480px) {
     #wheel {
-        height: 380px
-    }
-}
-
-@media screen and (max-width: 413px) {
-    #wheel {
-        height: 320px
-    }
-}
-
-@media screen and (max-width: 320px) {
-    #wheel {
-        height: 300px
+        height: 320px !important;
+        width: 320px !important;
     }
 }
