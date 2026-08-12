@@ -9,7 +9,6 @@ jQuery(document).ready(function($) {
     var spinning = false;
     var pendingRequest = false;
     var currentRotation = 0;
-    var pointerImageCache = {};
     var idleAnimationId = null;
     var IDLE_SPEED = 0.001; // radians per frame (~0.17°/frame)
 
@@ -58,10 +57,6 @@ jQuery(document).ready(function($) {
                 text_color: '#ffffff',
                 radius: 50,
                 background_image: '',
-            },
-            pointer: settings.pointer || {
-                image: '',
-                size: 80,
             },
             animation: settings.animation || {
                 duration: 6,
@@ -279,40 +274,6 @@ jQuery(document).ready(function($) {
         });
     }
 
-    function drawPointer(ctx, centerX, centerY, radius) {
-        var pointer = wheelSettings.pointer || {};
-        var size = Math.max(24, parseInt(pointer.size, 10) || 80);
-        var imageUrl = pointer.image || '';
-
-        if ( imageUrl ) {
-            if ( pointerImageCache[ imageUrl ] ) {
-                ctx.save();
-                ctx.translate(centerX, centerY - radius - size / 2 - 8);
-                ctx.drawImage(pointerImageCache[ imageUrl ], -size / 2, -size / 2, size, size);
-                ctx.restore();
-                return;
-            }
-
-            var pointerImage = new Image();
-            pointerImage.onload = function() {
-                pointerImageCache[ imageUrl ] = pointerImage;
-                drawWheelCanvas(currentRotation);
-            };
-            pointerImage.src = imageUrl;
-            return;
-        }
-
-        ctx.save();
-        ctx.fillStyle = '#111';
-        ctx.beginPath();
-        ctx.moveTo(centerX, centerY - radius - 12);
-        ctx.lineTo(centerX - 16, centerY - radius + 18);
-        ctx.lineTo(centerX + 16, centerY - radius + 18);
-        ctx.closePath();
-        ctx.fill();
-        ctx.restore();
-    }
-
     function drawWheelCanvas(rotation) {
         var canvas = document.getElementById('wheel');
         if ( ! canvas || ! wheelPrizes.length ) {
@@ -372,15 +333,15 @@ jQuery(document).ready(function($) {
             var textAngle = startAngle + angleStep / 2;
             var textRadius = radius * 0.65;
             ctx.translate(centerX + Math.cos(textAngle) * textRadius, centerY + Math.sin(textAngle) * textRadius);
-            ctx.rotate(textAngle + Math.PI / 2);
+            ctx.rotate(textAngle);
             ctx.fillStyle = '#ffffff';
-            ctx.font = '16px sans-serif';
+            ctx.font = 'bold 20px sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             var text = prize.title || prize.name || 'Prize';
             var lines = text.split('\n');
             lines.forEach(function(line, lineIndex) {
-                ctx.fillText(line, 0, (lineIndex - (lines.length - 1) / 2) * 18);
+                ctx.fillText(line, 0, (lineIndex - (lines.length - 1) / 2) * 22);
             });
             ctx.restore();
         });

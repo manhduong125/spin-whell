@@ -254,8 +254,6 @@ class WP_Spin_Wheel_Settings {
             'wheel_button_text_color' => array( 'type' => 'color', 'default' => '#ffffff' ),
             'wheel_border_color' => array( 'type' => 'color', 'default' => '#ffffff' ),
             'wheel_background_image' => array( 'type' => 'image', 'default' => '' ),
-            'wheel_pointer_image' => array( 'type' => 'image', 'default' => '' ),
-            'wheel_pointer_size' => array( 'type' => 'text', 'default' => '90' ),
             'wheel_animation_duration' => array( 'type' => 'text', 'default' => '6' ),
             'wheel_confetti' => array( 'type' => 'checkbox', 'default' => 1 ),
             'wheel_segment_colors' => array( 'type' => 'json', 'default' => array() ),
@@ -571,14 +569,6 @@ class WP_Spin_Wheel_Settings {
                                         <div class="col-md-4">
                                             <label class="form-label" for="wheel_background_image"><?php esc_html_e( 'Ảnh nền vòng quay', 'wp-spin-wheel' ); ?></label>
                                             <input type="text" class="form-control" id="wheel_background_image" name="<?php echo esc_attr( self::OPTION_KEY . '[wheel_background_image]' ); ?>" value="<?php echo esc_attr( $options['wheel_background_image'] ); ?>" placeholder="https://example.com/bg.jpg" />
-                                        </div>
-                                        <div class="col-md-4">
-                                            <label class="form-label" for="wheel_pointer_image"><?php esc_html_e( 'Ảnh pointer', 'wp-spin-wheel' ); ?></label>
-                                            <input type="text" class="form-control" id="wheel_pointer_image" name="<?php echo esc_attr( self::OPTION_KEY . '[wheel_pointer_image]' ); ?>" value="<?php echo esc_attr( $options['wheel_pointer_image'] ); ?>" placeholder="https://example.com/pointer.png" />
-                                        </div>
-                                        <div class="col-md-3">
-                                            <label class="form-label" for="wheel_pointer_size"><?php esc_html_e( 'Kích thước pointer', 'wp-spin-wheel' ); ?></label>
-                                            <input type="number" class="form-control" id="wheel_pointer_size" name="<?php echo esc_attr( self::OPTION_KEY . '[wheel_pointer_size]' ); ?>" value="<?php echo esc_attr( $options['wheel_pointer_size'] ); ?>" />
                                         </div>
                                         <div class="col-md-3">
                                             <label class="form-label" for="wheel_animation_duration"><?php esc_html_e( 'Thời gian quay', 'wp-spin-wheel' ); ?></label>

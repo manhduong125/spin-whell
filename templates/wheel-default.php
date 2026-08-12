@@ -20,10 +20,6 @@ $default_settings = array(
         'text_color' => '#ffffff',
         'radius'     => 100,
     ),
-    'pointer' => array(
-        'image' => '',
-        'size'  => 90,
-    ),
     'animation' => array(
         'duration' => 6,
         'confetti' => true,
