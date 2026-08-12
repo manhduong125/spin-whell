@@ -10,6 +10,8 @@ jQuery(document).ready(function($) {
     var pendingRequest = false;
     var currentRotation = 0;
     var pointerImageCache = {};
+    var idleAnimationId = null;
+    var IDLE_SPEED = 0.001; // radians per frame (~0.17°/frame)
 
     function parseJson(value, fallback) {
         if ( ! value ) {
@@ -45,7 +47,7 @@ jQuery(document).ready(function($) {
                 image: backgroundImage,
             },
             wheel: settings.wheel || {
-                size: 500,
+                size: 600,
                 border: 8,
                 border_color: '#ffffff',
                 shadow: true,
@@ -384,7 +386,29 @@ jQuery(document).ready(function($) {
         });
 
         ctx.restore();
-        drawPointer(ctx, centerX, centerY, radius);
+    }
+
+    function startIdleAnimation() {
+        if ( idleAnimationId ) {
+            return;
+        }
+        function idleStep() {
+            if ( spinning ) {
+                idleAnimationId = null;
+                return;
+            }
+            currentRotation = (currentRotation + IDLE_SPEED) % (Math.PI * 2);
+            drawWheelCanvas(currentRotation);
+            idleAnimationId = requestAnimationFrame(idleStep);
+        }
+        idleAnimationId = requestAnimationFrame(idleStep);
+    }
+
+    function stopIdleAnimation() {
+        if ( idleAnimationId ) {
+            cancelAnimationFrame(idleAnimationId);
+            idleAnimationId = null;
+        }
     }
 
     function renderWheel() {
@@ -427,6 +451,7 @@ jQuery(document).ready(function($) {
             return;
         }
 
+        stopIdleAnimation();
         spinning = true;
         var segmentCount = wheelPrizes.length;
         var angleStep = (Math.PI * 2) / segmentCount;
@@ -474,6 +499,8 @@ jQuery(document).ready(function($) {
             if ( typeof callback === 'function' ) {
                 callback();
             }
+
+            startIdleAnimation();
         }
 
         requestAnimationFrame(step);
@@ -498,6 +525,7 @@ jQuery(document).ready(function($) {
     wheelPrizes = loadPrizes();
     renderPrizeList();
     renderWheel();
+    startIdleAnimation();
 
     $('#tab-entries').on('click', function() {
         $('#tab-entries').addClass('active');

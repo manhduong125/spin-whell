@@ -6,10 +6,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 $default_settings = array(
     'background' => array(
         'type'  => 'color',
-        'value' => '#f8fafc',
+        'value' => '',
     ),
     'wheel' => array(
-        'size'         => 520,
+        'size'         => 600,
         'border'       => 12,
         'border_color' => '#ffffff',
         'shadow'       => true,
@@ -18,7 +18,7 @@ $default_settings = array(
         'text'       => __( 'Quay ngay', 'wp-spin-wheel' ),
         'color'      => '#3b82f6',
         'text_color' => '#ffffff',
-        'radius'     => 50,
+        'radius'     => 100,
     ),
     'pointer' => array(
         'image' => '',
@@ -39,6 +39,8 @@ $default_prizes = array(
     array( 'title' => __( 'Kiên', 'wp-spin-wheel' ), 'color' => '#ec4899' ),
     array( 'title' => __( 'Hùng', 'wp-spin-wheel' ), 'color' => '#14b8a6' ),
     array( 'title' => __( 'Nam', 'wp-spin-wheel' ), 'color' => '#f97316' ),
+    array( 'title' => __( 'Hưng', 'wp-spin-wheel' ), 'color' => '#8b5cf6' ),
+    array( 'title' => __( 'Thảo', 'wp-spin-wheel' ), 'color' => '#10b981' ),
 );
 $default_title = __( '', 'wp-spin-wheel' );
 $default_description = __( '', 'wp-spin-wheel' );
@@ -59,7 +61,7 @@ $default_description = __( '', 'wp-spin-wheel' );
                         <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                     </svg></a> <span id="edit-mode-txt"></span>
                 <div id="vqmm-content" class="text-center text-xl-start vqmm-content">
-                    <div class="wp-block-heading has-x-large-font-size toggle-show-hide" id="vqmm-title"><?php echo esc_html( $default_title ); ?></div>
+                    <div class="spin-heading toggle-show-hide" id="vqmm-title"><?php echo esc_html( $default_title ); ?></div>
                     <p class="toggle-show-hide" id="vqmm-desc"><?php echo esc_html( $default_description ); ?></p>
                 </div>
             </div>
