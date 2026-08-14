@@ -754,9 +754,9 @@ jQuery(document).ready(function($) {
             }
 
             // Hiện/ẩn nút "Xóa ô này":
-            // Mặc định luôn hiện, chỉ ẩn khi user tắt option show_remove_button
-            var hideRemove = ( wheelSettings.ui && wheelSettings.ui.show_remove_button === false );
-            $('#btn-remove-result-item').toggle( ! hideRemove );
+            // Mặc định luôn hiện, trừ khi user tắt option show_remove_button
+            var showRemove = ! wheelSettings.ui || wheelSettings.ui.show_remove_button !== false;
+            $('#btn-remove-result-item').toggle( showRemove );
 
             // 4. Hiện popup
             showResultPopup( prize );
@@ -972,9 +972,40 @@ jQuery(document).ready(function($) {
         $('#modal-result-popup-label').text( val );
     });
 
+    // ── Nút "Chủ đề" — mở modalSettings và switch sang tab Giao diện ──
+    $('#btn-open-theme').on('click', function() {
+        // Trigger Bootstrap modal
+        var $modal = $('#modalSettings');
+        $modal.modal ? $modal.modal('show') : $modal.show();
+
+        // Switch sang tab "Giao diện"
+        var $tab = $('#appearance-tab');
+        if ( $tab.length ) {
+            $tab.tab ? $tab.tab('show') : $tab.trigger('click');
+        }
+    });
+
     // ── Lưu settings từ modal ──
     $('#btn_wheel_setting').on('click', function() {
         saveWheelSettings();
+    });
+
+    // ── Nút "Chủ đề" → mở modalSettings và nhảy sang tab Giao diện ──
+    $('#btn-open-theme').on('click', function() {
+        // Kích hoạt tab appearance trước khi modal hiện
+        var $tab = $('#appearance-tab');
+        if ( $tab.length ) {
+            $tab.tab('show');
+        }
+    });
+
+    // Cũng bắt sự kiện khi modal vừa hiện để đảm bảo tab đúng
+    $('#modalSettings').on('show.bs.modal', function(e) {
+        var relatedBtn = e.relatedTarget;
+        if ( relatedBtn && $(relatedBtn).data('tab') ) {
+            var tabId = $(relatedBtn).data('tab');
+            $( '#' + tabId ).tab('show');
+        }
     });
 
     // ── Reset về mặc định ──
@@ -983,6 +1014,61 @@ jQuery(document).ready(function($) {
             resetWheelSettings();
         }
     });
+
+    // ── Hàm fill prizes từ data-content (dùng chung) ──
+    function fillPrizesFromContent( content ) {
+        if ( ! content ) return;
+        var titles = content.split('||').map(function(t) { return $.trim(t); }).filter(function(t) { return t !== ''; });
+        if ( ! titles.length ) return;
+        wheelPrizes = titles.map(function(title, index) {
+            return normalizePrize({ title: title }, index);
+        });
+        savePrizes();
+        renderPrizeList();
+        renderWheel();
+    }
+
+    function fillPrizesFromRange( from, to ) {
+        from = parseInt(from, 10) || 1;
+        to   = parseInt(to, 10)   || 10;
+        if ( from > to ) { var tmp = from; from = to; to = tmp; }
+        var titles = [];
+        for ( var i = from; i <= to; i++ ) titles.push(String(i));
+        wheelPrizes = titles.map(function(title, index) {
+            return normalizePrize({ title: title }, index);
+        });
+        savePrizes();
+        renderPrizeList();
+        renderWheel();
+    }
+
+    // ── Click nút chủ đề text ──
+    $(document).on('click', '.btn-fill', function() {
+        var content = $(this).data('content');
+        if ( ! content ) return;
+        fillPrizesFromContent( content );
+        // Đánh dấu nút đang active
+        $('.btn-fill, .btn-fill-number').removeClass('active');
+        $(this).addClass('active');
+    });
+
+    // ── Click nút chủ đề số ──
+    $(document).on('click', '.btn-fill-number', function() {
+        var from = $(this).data('from');
+        var to   = $(this).data('to');
+        fillPrizesFromRange( from, to );
+        $('.btn-fill, .btn-fill-number').removeClass('active');
+        $(this).addClass('active');
+    });
+
+    // ── Mặc định: nếu wheelPrizes rỗng và không có localStorage → load nút đầu tiên ──
+    if ( ! wheelPrizes.length ) {
+        var $firstBtn = $('.btn-fill').first();
+        if ( $firstBtn.length ) {
+            fillPrizesFromContent( $firstBtn.data('content') );
+            $firstBtn.addClass('active');
+        }
+    }
 
     // ── Toggle hiển thị ô nhập popup label khi bật/tắt show_popup ──
     $('#show_popup').on('change', function() {
