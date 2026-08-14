@@ -68,6 +68,14 @@ class WP_Spin_Wheel_Helper {
             return 'pointers';
         }
 
+        if ( in_array( $type, array( 'audio_start', 'audios_start', 'spin_wheel_audio_start' ), true ) ) {
+            return 'audios_start';
+        }
+
+        if ( in_array( $type, array( 'audio_end', 'audios_end', 'spin_wheel_audio_end' ), true ) ) {
+            return 'audios_end';
+        }
+
         return $type;
     }
 
