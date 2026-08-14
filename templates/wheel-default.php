@@ -2254,13 +2254,176 @@ $default_description = '';
                         </div>
                     </fieldset>
                 </div>
-                <div class="tab-pane py-4 fade" id="media-tab-pane" role="tabpanel"
-                    aria-labelledby="media-tab" tabindex="0">
-                    <div id="uploaded-list" class="mb-3">
-                        <div class="alert alert-warning">Bạn chưa tải lên ảnh nào</div>
-                    </div>
+                <!-- option thay mà -->
+                <div
+   class="tab-pane py-4 fade"
+   id="media-tab-pane"
+   role="tabpanel"
+   aria-labelledby="media-tab"
+   tabindex="0"
+>
+   <div id="uploaded-list" class="mb-3">
+      <div class="form-check form-check-inline">
+         <input
+            class="form-check-input"
+            type="radio"
+            name="filter_media"
+            id="all"
+            value="all"
+            onclick="filter_media('all');"
+            checked=""
+         /><label class="form-check-label" for="all">Tất cả</label>
+      </div>
+      <div class="form-check form-check-inline">
+         <input
+            class="form-check-input"
+            type="radio"
+            name="filter_media"
+            id="media_button"
+            value="btn"
+            onclick="filter_media('btn');"
+         /><label class="form-check-label" for="media_button">Nút quay</label>
+      </div>
+      <div class="form-check form-check-inline">
+         <input
+            class="form-check-input"
+            type="radio"
+            name="filter_media"
+            id="media_background"
+            value="bgr"
+            onclick="filter_media('bgr');"
+         /><label class="form-check-label" for="media_background">Nền</label>
+      </div>
+      <div class="form-check form-check-inline">
+         <input
+            class="form-check-input"
+            type="radio"
+            name="filter_media"
+            id="media_gradient"
+            value="grd"
+            onclick="filter_media('grd');"
+         /><label class="form-check-label" for="media_gradient">Gradient</label>
+      </div>
+      <div class="input-group my-3">
+         <span class="input-group-text"
+            ><svg
+               xmlns="http://www.w3.org/2000/svg"
+               width="24"
+               height="24"
+               viewBox="0 0 24 24"
+               fill="none"
+               stroke="currentColor"
+               stroke-width="2"
+               stroke-linecap="round"
+               stroke-linejoin="round"
+               class="feather feather-search"
+            >
+               <circle cx="11" cy="11" r="8"></circle>
+               <line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg></span
+         ><input
+            type="text"
+            class="form-control"
+            id="media_kw"
+            onkeyup="searhMedia();"
+            placeholder="Từ khoá"
+         />
+      </div>
+      <hr />
+      <div
+         class="mt-3"
+         style="max-height: 350px; overflow-y: auto; overflow-x: hidden"
+      >
+         <table class="table table-striped" id="media">
+            <thead>
+               <tr>
+                  <th>STT</th>
+                  <th>Tên</th>
+                  <th>Link / Preview</th>
+                  <th>Đặt làm</th>
+                  <th>Action</th>
+               </tr>
+            </thead>
+            <tbody id="mediaBody">
+               <tr style="">
+                  <td><span class="badge bg-secondary">1</span></td>
+                  <td class="small">30_04</td>
+                  <td>
+                     <a
+                        href="https://vongquaymayman.co/wp-content/themes/twentytwentythree-child/assets/buttons/30_04.jpg"
+                        target="_blank"
+                        ><img
+                           src="https://vongquaymayman.co/wp-content/themes/twentytwentythree-child/assets/buttons/30_04.jpg"
+                           width="50"
+                           heigh="50"
+                           class="border border-1 rounded-1"
+                     /></a>
+                  </td>
+                  <td data-type="btn">
+                     <button
+                        class="btn btn-sm btn-secondary"
+                        onclick="el('btn-spin-img').value='https://vongquaymayman.co/wp-content/themes/twentytwentythree-child/assets/buttons/30_04.jpg';el('btn-spin-label').value='';el('btn_wheel_setting').click();"
+                     >
+                        Nút Quay
+                     </button>
+                  </td>
+                  <td>∗</td>
+               </tr>
+               <tr style="">
+                  <td><span class="badge bg-secondary">2</span></td>
+                  <td class="small">02_09</td>
+                  <td>
+                     <a
+                        href="https://vongquaymayman.co/wp-content/themes/twentytwentythree-child/assets/buttons/02_09.jpg"
+                        target="_blank"
+                        ><img
+                           src="https://vongquaymayman.co/wp-content/themes/twentytwentythree-child/assets/buttons/02_09.jpg"
+                           width="50"
+                           heigh="50"
+                           class="border border-1 rounded-1"
+                     /></a>
+                  </td>
+                  <td data-type="btn">
+                     <button
+                        class="btn btn-sm btn-secondary"
+                        onclick="el('btn-spin-img').value='https://vongquaymayman.co/wp-content/themes/twentytwentythree-child/assets/buttons/02_09.jpg';el('btn-spin-label').value='';el('btn_wheel_setting').click();"
+                     >
+                        Nút Quay
+                     </button>
+                  </td>
+                  <td>∗</td>
+               </tr>
+
+               <tr style="">
+                  <td><span class="badge bg-secondary">48</span></td>
+                  <td class="small">trickortreat</td>
+                  <td>
+                     <a
+                        href="https://vongquaymayman.co/wp-content/themes/twentytwentythree-child/assets/buttons/trickortreat.png"
+                        target="_blank"
+                        ><img
+                           src="https://vongquaymayman.co/wp-content/themes/twentytwentythree-child/assets/buttons/trickortreat.png"
+                           width="50"
+                           heigh="50"
+                           class="border border-1 rounded-1"
+                     /></a>
+                  </td>
+                  <td data-type="btn">
+                     <button
+                        class="btn btn-sm btn-secondary"
+                        onclick="el('btn-spin-img').value='https://vongquaymayman.co/wp-content/themes/twentytwentythree-child/assets/buttons/trickortreat.png';el('btn-spin-label').value='';el('btn_wheel_setting').click();"
+                     >
+                        Nút Quay
+                     </button>
+                  </td>
+                  <td>∗</td>
+               </tr>
+            </tbody>
+         </table>
+      </div>
+   </div>
+</div>
+
                 </div>
-            </div>
             <div class="mb-3"> <button class="btn btn-primary w-100" id="btn_wheel_setting">Lưu
                     lại</button> </div>
             <p class="text-center"><a href="javascript:void(0);" id="btn-reset-wheel"
