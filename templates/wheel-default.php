@@ -30,7 +30,7 @@ $default_settings = array(
         'radius'     => 100,
     ),
     'animation' => array(
-        'duration' => 6,
+        'duration' => 6,   // giây: 4=nhanh, 6=tiêu chuẩn, 8=chậm, 12=rất chậm
         'confetti' => true,
     ),
     'audio' => array(
@@ -84,6 +84,19 @@ $default_description = __( '', 'wp-spin-wheel' );
                     <canvas id="wheel" width="700" height="700"></canvas>
                     <div id="spin"><?php esc_html_e( 'Quay', 'wp-spin-wheel' ); ?></div>
                 </div>
+            </div>
+            <div class="mt-2">
+                <button type="button" class="btn btn-outline-secondary btn-sm"
+                    data-bs-toggle="modal" data-bs-target="#modalSettings"
+                    aria-label="Cài đặt vòng quay">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round" style="vertical-align:middle;">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                    </svg>
+                    Cài đặt
+                </button>
             </div>
         </div>
 
@@ -257,18 +270,21 @@ $default_description = __( '', 'wp-spin-wheel' );
             <div class="tab-content" id="myTabContent">
                 <div class="tab-pane fade pt-3 show active" id="gen-setting-tab-pane" role="tabpanel"
                     aria-labelledby="gen-setting-tab" tabindex="0">
-                    <div class="group-or"> <span class="or">Hoặc</span>
-                        <div class="input-group mb-2"> <span class="input-group-text">♪ Bắt đầu</span>
+                    <!-- audio player ẩn dùng chung cho preview -->
+                    <audio id="sw-audio-preview" preload="none" style="display:none;"></audio>
+
+                    <!-- ♪ Nhạc bắt đầu -->
+                    <div class="mb-2">
+                        <div class="input-group mb-1">
+                            <span class="input-group-text">♪ Bắt đầu</span>
                             <select class="form-select" id="start_sound">
                                 <!-- dữ liệu nhạc bắt đầu -->
-                                <optgroup label="Hiệu ứng âm thanh">
-                                    <option value="0" <?php selected( $_start_sound, '0' ); selected( $_start_sound, '' ); ?>>Tắt tiếng</option>
-                                    <option value="random" <?php selected( $_start_sound, 'random' ); ?>>Ngẫu nhiên</option>
-                                    <option value="slot_start" <?php selected( $_start_sound, 'slot_start' ); ?>>Slot start</option>
-                                    <option value="conquay" <?php selected( $_start_sound, 'conquay' ); ?>>Con quay</option>
-                                </optgroup>
+                                <option value="0" <?php selected( $_start_sound, '0' ); selected( $_start_sound, '' ); ?>>Tắt tiếng</option>
                                 <?php if ( ! empty( $_audios_start ) ) : ?>
-                                <optgroup label="Thư viện nhạc">
+                                <option value="random" <?php selected( $_start_sound, 'random' ); ?>>Ngẫu nhiên</option>
+                                <?php endif; ?>
+                                <?php if ( ! empty( $_audios_start ) ) : ?>
+                                <optgroup label="── Thư viện nhạc ──">
                                     <?php foreach ( $_audios_start as $_as ) :
                                         $_as_id  = esc_attr( $_as['id'] ?? '' );
                                         $_as_url = esc_attr( $_as['config']['file'] ?? '' );
@@ -278,29 +294,40 @@ $default_description = __( '', 'wp-spin-wheel' );
                                     <?php endforeach; ?>
                                 </optgroup>
                                 <?php endif; ?>
-                            </select> <button class="btn btn-outline-secondary"
-                                id="btn-start-sound-play"><span data-feather="play"></span></button>
+                            </select>
+                            <button type="button" class="btn btn-outline-secondary sw-btn-preview"
+                                data-target="start_sound"
+                                data-audios="<?php echo esc_attr( wp_json_encode( array_values( array_map( function( $a ) { return [ 'id' => $a['id'] ?? '', 'url' => $a['config']['file'] ?? '' ]; }, $_audios_start ) ) ) ); ?>"
+                                title="Nghe thử">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-play"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                            </button>
                         </div>
-                        <div class="input-group mb-3"> <span class="input-group-text"><a
-                                    class="text-decoration-none" target="_blank"
-                                    href="/huong-dan-lay-file_id-tren-nhactik-com/">♪
-                                    nhactik.com</a></span> <input type="text" class="form-control"
-                                id="start_sound_file" placeholder="File ID" value="<?php echo esc_attr( $_start_sound_file ); ?>"> <button
-                                class="btn btn-outline-secondary" id="btn-start-sound-play-file"><span
-                                    data-feather="play"></span></button> </div>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">
+                                <a class="text-decoration-none" target="_blank" href="/huong-dan-lay-file_id-tren-nhactik-com/">♪ nhactik.com</a>
+                            </span>
+                            <input type="text" class="form-control" id="start_sound_file"
+                                placeholder="File ID" value="<?php echo esc_attr( $_start_sound_file ); ?>">
+                            <button type="button" class="btn btn-outline-secondary" id="btn-start-sound-play-file" title="Nghe thử nhactik">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-play"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                            </button>
+                        </div>
                     </div>
-                    <div class="group-or"> <span class="or">Hoặc</span>
-                        <div class="input-group mb-2"> <span class="input-group-text">♪ Kết thúc</span>
+
+                    <!-- ♪ Nhạc kết thúc -->
+                    <div class="mb-2">
+                        <div class="input-group mb-1">
+                            <span class="input-group-text">♪ Kết thúc</span>
                             <select class="form-select" id="end_sound">
                                 <!-- Dữ liệu nhạc kết thúc -->
-                                <optgroup label="Hiệu ứng âm thanh">
-                                    <option value="0" <?php selected( $_end_sound, '0' ); selected( $_end_sound, '' ); ?>>Tắt tiếng</option>
-                                    <option value="random" <?php selected( $_end_sound, 'random' ); ?>>Ngẫu nhiên</option>
-                                    <option value="read" <?php selected( $_end_sound, 'read' ); ?>>Đọc kết quả khi kết thúc</option>
-                                    <option value="slot_end" <?php selected( $_end_sound, 'slot_end' ); ?>>Slot end</option>
-                                </optgroup>
+                                <option value="0" <?php selected( $_end_sound, '0' ); selected( $_end_sound, '' ); ?>>Tắt tiếng</option>
                                 <?php if ( ! empty( $_audios_end ) ) : ?>
-                                <optgroup label="Thư viện nhạc">
+                                <option value="random" <?php selected( $_end_sound, 'random' ); ?>>Ngẫu nhiên</option>
+                                <?php endif; ?>
+                                <option value="read" <?php selected( $_end_sound, 'read' ); ?>>Đọc kết quả</option>
+                                <option value="slot_end" <?php selected( $_end_sound, 'slot_end' ); ?>>Slot end</option>
+                                <?php if ( ! empty( $_audios_end ) ) : ?>
+                                <optgroup label="── Thư viện nhạc ──">
                                     <?php foreach ( $_audios_end as $_ae ) :
                                         $_ae_id  = esc_attr( $_ae['id'] ?? '' );
                                         $_ae_url = esc_attr( $_ae['config']['file'] ?? '' );
@@ -310,23 +337,39 @@ $default_description = __( '', 'wp-spin-wheel' );
                                     <?php endforeach; ?>
                                 </optgroup>
                                 <?php endif; ?>
-                            </select> <button class="btn btn-outline-secondary"
-                                id="btn-end-sound-play"><span data-feather="play"></span></button>
+                            </select>
+                            <button type="button" class="btn btn-outline-secondary sw-btn-preview"
+                                data-target="end_sound"
+                                data-audios="<?php echo esc_attr( wp_json_encode( array_values( array_map( function( $a ) { return [ 'id' => $a['id'] ?? '', 'url' => $a['config']['file'] ?? '' ]; }, $_audios_end ) ) ) ); ?>"
+                                title="Nghe thử">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-play"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                            </button>
                         </div>
-                        <div class="input-group mb-3"> <span class="input-group-text"><a
-                                    class="text-decoration-none" target="_blank"
-                                    href="/huong-dan-lay-file_id-tren-nhactik-com/">♪
-                                    nhactik.com</a></span> <input type="text" class="form-control"
-                                id="end_sound_file" value="<?php echo esc_attr( $_end_sound_file ); ?>" placeholder="File ID"> <button
-                                class="btn btn-outline-secondary" id="btn-end-sound-play-file"><span
-                                    data-feather="play"></span></button> </div>
+                        <div class="input-group mb-3">
+                            <span class="input-group-text">
+                                <a class="text-decoration-none" target="_blank" href="/huong-dan-lay-file_id-tren-nhactik-com/">♪ nhactik.com</a>
+                            </span>
+                            <input type="text" class="form-control" id="end_sound_file"
+                                value="<?php echo esc_attr( $_end_sound_file ); ?>" placeholder="File ID">
+                            <button type="button" class="btn btn-outline-secondary" id="btn-end-sound-play-file" title="Nghe thử nhactik">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-play"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+                            </button>
+                        </div>
                     </div>
-                    <div class="input-group mb-3"> <span class="input-group-text">Thời gian</span>
+                    <div class="input-group mb-3"> <span class="input-group-text">Tốc độ quay</span>
                         <select class="form-select" id="duration">
-                            <option value="0.991" selected>Tiêu chuẩn</option>
-                            <option value="0.98">Ngắn hơn</option>
-                            <option value="0.995">Dài hơn</option>
-                            <option value="0.998">Dài hơn nữa</option>
+                            <?php
+                            $_dur = $default_settings['animation']['duration'];
+                            $duration_options = array(
+                                4  => 'Nhanh',
+                                6  => 'Tiêu chuẩn',
+                                8  => 'Chậm hơn',
+                                12 => 'Chậm hơn nữa',
+                            );
+                            foreach ( $duration_options as $_sec => $_label ) :
+                            ?>
+                            <option value="<?php echo esc_attr( $_sec ); ?>" <?php selected( (int) $_dur, $_sec ); ?>><?php echo esc_html( $_label ); ?></option>
+                            <?php endforeach; ?>
                         </select> </div>
                     <div class="form-check mb-3"> <input class="form-check-input" type="checkbox"
                             id="show_confetti" checked> <label class="form-check-label"
@@ -2228,3 +2271,95 @@ $default_description = __( '', 'wp-spin-wheel' );
         </div>
     </div>
 </div>
+
+<script>
+(function ($) {
+    /* ── Audio preview cho select nhạc bắt đầu / kết thúc ── */
+    var $player    = null;
+    var playingBtn = null;
+
+    function getPlayer() {
+        if (!$player || !$player.length) $player = $('#sw-audio-preview');
+        return $player;
+    }
+
+    // Dừng player và reset icon nút đang phát
+    function stopPreview() {
+        var p = getPlayer();
+        if (p.length) {
+            p[0].pause();
+            p[0].currentTime = 0;
+            p.attr('src', '');
+        }
+        if (playingBtn) {
+            $(playingBtn).find('[data-feather]').attr('data-feather', 'play');
+            if (typeof feather !== 'undefined') feather.replace();
+            playingBtn = null;
+        }
+    }
+
+    // Phát URL — click lần 2 vào cùng nút thì dừng
+    function playUrl(url, btn) {
+        if (!url) return;
+        if (playingBtn === btn) { stopPreview(); return; }
+        stopPreview();
+        var p = getPlayer();
+        p.attr('src', url);
+        p[0].play().catch(function () {});
+        $(btn).find('[data-feather]').attr('data-feather', 'square');
+        if (typeof feather !== 'undefined') feather.replace();
+        playingBtn = btn;
+        p[0].onended = function () {
+            $(btn).find('[data-feather]').attr('data-feather', 'play');
+            if (typeof feather !== 'undefined') feather.replace();
+            playingBtn = null;
+        };
+    }
+
+    // Lấy URL từ option đang chọn trong select
+    function getUrlFromSelect($select, audios) {
+        var val = $select.val();
+        if (!val || val === '0') return null;   // Tắt tiếng → không phát
+
+        if (val === 'random') {
+            // Ngẫu nhiên → pick 1 bài trong thư viện
+            var list = (audios || []).filter(function (a) { return !!a.url; });
+            if (!list.length) return null;
+            return list[Math.floor(Math.random() * list.length)].url;
+        }
+
+        // Option thư viện nhạc có data-url
+        return $select.find('option:selected').data('url') || null;
+    }
+
+    // Nút play của select (class .sw-btn-preview, data-target = id của <select>)
+    $(document).on('click', '.sw-btn-preview', function () {
+        var btn    = this;
+        var audios = $(btn).data('audios') || [];
+        var $sel   = $('#' + $(btn).data('target'));
+        var url    = getUrlFromSelect($sel, audios);
+        if (!url) { stopPreview(); return; }
+        playUrl(url, btn);
+    });
+
+    // Nút play nhactik.com — bắt đầu
+    $(document).on('click', '#btn-start-sound-play-file', function () {
+        var fileId = $.trim($('#start_sound_file').val());
+        if (!fileId) { stopPreview(); return; }
+        playUrl('https://nhactik.com/play/' + fileId + '.mp3', this);
+    });
+
+    // Nút play nhactik.com — kết thúc
+    $(document).on('click', '#btn-end-sound-play-file', function () {
+        var fileId = $.trim($('#end_sound_file').val());
+        if (!fileId) { stopPreview(); return; }
+        playUrl('https://nhactik.com/play/' + fileId + '.mp3', this);
+    });
+
+    // Dừng nhạc khi đóng modal settings
+    $(document).on('hide.bs.modal', '#modalSettings', function () {
+        stopPreview();
+    });
+
+})(jQuery);
+</script>

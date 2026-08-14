@@ -1,3 +1,7 @@
+.button, button, fieldset, input, select, textarea {
+    margin-bottom: 0 !important;
+}
+
 #wheelOfFortune {
     display: block;
     width: -webkit-fit-content;

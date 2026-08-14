@@ -20,7 +20,8 @@ class WP_Spin_Wheel_Settings {
         $changed = false;
 
         foreach ( $this->get_default_item_groups() as $group_key => $defaults ) {
-            if ( empty( $items[ $group_key ] ) || ! is_array( $items[ $group_key ] ) ) {
+            // Chỉ seed default khi key chưa tồn tại trong DB, không ghi đè nếu user đã xóa hết
+            if ( ! array_key_exists( $group_key, $items ) || ! is_array( $items[ $group_key ] ) ) {
                 $items[ $group_key ] = $defaults;
                 $changed = true;
             }
@@ -132,68 +133,100 @@ class WP_Spin_Wheel_Settings {
     }
 
     public function handle_setting_item_form() {
+        // Chỉ xử lý khi có action field của form này
         if ( empty( $_POST['spin_wheel_setting_item_action'] ) ) {
             return;
         }
 
-        if ( empty( $_POST['spin_wheel_setting_item_nonce'] ) || ! wp_verify_nonce( wp_unslash( $_POST['spin_wheel_setting_item_nonce'] ), 'spin_wheel_setting_items' ) ) {
-            return;
+        // Verify nonce
+        if ( empty( $_POST['spin_wheel_setting_item_nonce'] )
+            || ! wp_verify_nonce(
+                wp_unslash( $_POST['spin_wheel_setting_item_nonce'] ),
+                'spin_wheel_setting_items'
+            )
+        ) {
+            wp_die( esc_html__( 'Nonce không hợp lệ.', 'wp-spin-wheel' ) );
         }
 
-        $action = sanitize_text_field( wp_unslash( $_POST['spin_wheel_setting_item_action'] ) );
+        // Chỉ admin mới được thực hiện
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_die( esc_html__( 'Không có quyền.', 'wp-spin-wheel' ) );
+        }
+
+        $action    = sanitize_text_field( wp_unslash( $_POST['spin_wheel_setting_item_action'] ) );
         $group_key = $this->get_group_key_from_type( wp_unslash( $_POST['spin_wheel_setting_item_group'] ?? '' ) );
 
         if ( ! in_array( $group_key, array( 'backgrounds', 'buttons', 'audios_start', 'audios_end' ), true ) ) {
             return;
         }
 
-        $items = $this->get_setting_items( $group_key );
-        $item_id = sanitize_text_field( wp_unslash( $_POST['spin_wheel_setting_item_id'] ?? '' ) );
+        // Luôn load TOÀN BỘ option từ DB để tránh race condition
+        $all_items = $this->get_item_option();
+        // Đảm bảo group key tồn tại và là array
+        if ( ! isset( $all_items[ $group_key ] ) || ! is_array( $all_items[ $group_key ] ) ) {
+            $all_items[ $group_key ] = array();
+        }
+        $items = $all_items[ $group_key ];
+
+        $item_id   = sanitize_text_field( wp_unslash( $_POST['spin_wheel_setting_item_id'] ?? '' ) );
         $item_name = sanitize_text_field( wp_unslash( $_POST['spin_wheel_setting_item_name'] ?? '' ) );
 
+        // --- XÓA ---
         if ( 'delete' === $action ) {
-            foreach ( $items as $index => $item ) {
-                if ( (string) ( $item['id'] ?? '' ) === $item_id ) {
-                    unset( $items[ $index ] );
-                    break;
-                }
-            }
-
-            $this->save_setting_items( $group_key, array_values( $items ) );
-            wp_safe_redirect( add_query_arg( array( 'page' => 'wp-spin-wheel-settings', 'updated' => '1' ), admin_url( 'admin.php' ) ) );
+            $items = array_values( array_filter( $items, function( $item ) use ( $item_id ) {
+                return (string) ( $item['id'] ?? '' ) !== $item_id;
+            } ) );
+            $all_items[ $group_key ] = $items;
+            update_option( self::ITEM_OPTION_KEY, $all_items );
+            wp_safe_redirect( add_query_arg(
+                array( 'page' => 'wp-spin-wheel-settings', 'updated' => '1' ),
+                admin_url( 'admin.php' )
+            ) );
             exit;
         }
 
+        // --- THÊM / SỬA ---
         if ( empty( $item_name ) ) {
-            return;
+            wp_safe_redirect( add_query_arg(
+                array( 'page' => 'wp-spin-wheel-settings', 'error' => 'empty_name' ),
+                admin_url( 'admin.php' )
+            ) );
+            exit;
         }
 
+        // Tạo ID mới nếu thêm mới (item_id rỗng)
         if ( empty( $item_id ) ) {
-            $item_id = $group_key . '-' . wp_unique_id();
+            $item_id = $group_key . '-' . uniqid( '', true );
         }
 
-        $config = $this->build_item_config( $group_key, $_POST );
+        $config       = $this->build_item_config( $group_key, $_POST );
         $item_payload = array(
             'id'     => $item_id,
             'name'   => $item_name,
             'config' => $config,
         );
 
-        $updated = false;
+        // Tìm và update nếu ID đã tồn tại, ngược lại append
+        $found = false;
         foreach ( $items as $index => $item ) {
             if ( (string) ( $item['id'] ?? '' ) === $item_id ) {
                 $items[ $index ] = $item_payload;
-                $updated = true;
+                $found = true;
                 break;
             }
         }
-
-        if ( ! $updated ) {
+        if ( ! $found ) {
             $items[] = $item_payload;
         }
 
-        $this->save_setting_items( $group_key, array_values( $items ) );
-        wp_safe_redirect( add_query_arg( array( 'page' => 'wp-spin-wheel-settings', 'updated' => '1' ), admin_url( 'admin.php' ) ) );
+        // Ghi đúng group và save toàn bộ
+        $all_items[ $group_key ] = array_values( $items );
+        update_option( self::ITEM_OPTION_KEY, $all_items );
+
+        wp_safe_redirect( add_query_arg(
+            array( 'page' => 'wp-spin-wheel-settings', 'updated' => '1' ),
+            admin_url( 'admin.php' )
+        ) );
         exit;
     }
 
@@ -414,203 +447,19 @@ class WP_Spin_Wheel_Settings {
         }
 
         $options = $this->get_option();
+        $form_action = esc_url( admin_url( 'admin.php?page=wp-spin-wheel-settings' ) );
         ?>
         <div class="wrap wp-spin-wheel-settings-page">
             <h1><?php esc_html_e( 'Spin Wheel Settings', 'wp-spin-wheel' ); ?></h1>
-            <form id="spin-wheel-settings-form" method="post" action="options.php">
-                <?php settings_fields( 'wp_spin_wheel' ); ?>
-                <div class="card">
-                    <div class="card-body">
-                        <ul class="nav nav-tabs" id="spinWheelSettingsTabs" role="tablist">
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link active" id="gen-setting-tab" data-bs-toggle="tab" data-bs-target="#gen-setting-tab-pane" type="button" role="tab" aria-controls="gen-setting-tab-pane" aria-selected="true"><?php esc_html_e( 'Chung', 'wp-spin-wheel' ); ?></button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="appearance-tab" data-bs-toggle="tab" data-bs-target="#appearance-tab-pane" type="button" role="tab" aria-controls="appearance-tab-pane" aria-selected="false"><?php esc_html_e( 'Giao diện', 'wp-spin-wheel' ); ?></button>
-                            </li>
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link" id="media-tab" data-bs-toggle="tab" data-bs-target="#media-tab-pane" type="button" role="tab" aria-controls="media-tab-pane" aria-selected="false"><?php esc_html_e( 'Thư viện', 'wp-spin-wheel' ); ?></button>
-                            </li>
-                        </ul>
-                        <div class="tab-content pt-4" id="spinWheelSettingsContent">
-                            <div class="tab-pane fade show active" id="gen-setting-tab-pane" role="tabpanel" aria-labelledby="gen-setting-tab">
-                                <div class="group-or mb-4">
-                                    <div class="input-group mb-3">
-                                        <span class="input-group-text"><?php esc_html_e( '♪ Bắt đầu', 'wp-spin-wheel' ); ?></span>
-                                        <select class="form-select" name="<?php echo esc_attr( self::OPTION_KEY . '[start_sound]' ); ?>" id="start_sound">
-                                            <option value="" <?php selected( $options['start_sound'], '' ); ?>><?php esc_html_e( 'Tắt tiếng', 'wp-spin-wheel' ); ?></option>
-                                            <option value="random" <?php selected( $options['start_sound'], 'random' ); ?>><?php esc_html_e( 'Ngẫu nhiên', 'wp-spin-wheel' ); ?></option>
-                                            <option value="slot_start" <?php selected( $options['start_sound'], 'slot_start' ); ?>><?php esc_html_e( 'Slot start', 'wp-spin-wheel' ); ?></option>
-                                            <option value="conquay" <?php selected( $options['start_sound'], 'conquay' ); ?>><?php esc_html_e( 'Con quay', 'wp-spin-wheel' ); ?></option>
-                                        </select>
-                                        <button type="button" class="btn btn-outline-secondary" id="btn-start-sound-play"><span data-feather="play"></span></button>
-                                    </div>
-                                    <div class="input-group mb-3">
-                                        <span class="input-group-text"><a class="text-decoration-none" target="_blank" href="/huong-dan-lay-file_id-tren-nhactik-com/">♪ nhactik.com</a></span>
-                                        <input type="text" class="form-control" id="start_sound_file" name="<?php echo esc_attr( self::OPTION_KEY . '[start_sound_file]' ); ?>" value="<?php echo esc_attr( $options['start_sound_file'] ); ?>" placeholder="File ID" />
-                                        <button type="button" class="btn btn-outline-secondary" id="btn-start-sound-play-file"><span data-feather="play"></span></button>
-                                    </div>
-                                </div>
-                                <div class="group-or mb-4">
-                                    <div class="input-group mb-3">
-                                        <span class="input-group-text"><?php esc_html_e( '♪ Kết thúc', 'wp-spin-wheel' ); ?></span>
-                                        <select class="form-select" name="<?php echo esc_attr( self::OPTION_KEY . '[end_sound]' ); ?>" id="end_sound">
-                                            <option value="" <?php selected( $options['end_sound'], '' ); ?>><?php esc_html_e( 'Tắt tiếng', 'wp-spin-wheel' ); ?></option>
-                                            <option value="random" <?php selected( $options['end_sound'], 'random' ); ?>><?php esc_html_e( 'Ngẫu nhiên', 'wp-spin-wheel' ); ?></option>
-                                            <option value="read" <?php selected( $options['end_sound'], 'read' ); ?>><?php esc_html_e( 'Đọc kết quả', 'wp-spin-wheel' ); ?></option>
-                                            <option value="slot_end" <?php selected( $options['end_sound'], 'slot_end' ); ?>><?php esc_html_e( 'Slot end', 'wp-spin-wheel' ); ?></option>
-                                        </select>
-                                        <button type="button" class="btn btn-outline-secondary" id="btn-end-sound-play"><span data-feather="play"></span></button>
-                                    </div>
-                                    <div class="input-group mb-3">
-                                        <span class="input-group-text"><a class="text-decoration-none" target="_blank" href="/huong-dan-lay-file_id-tren-nhactik-com/">♪ nhactik.com</a></span>
-                                        <input type="text" class="form-control" id="end_sound_file" name="<?php echo esc_attr( self::OPTION_KEY . '[end_sound_file]' ); ?>" value="<?php echo esc_attr( $options['end_sound_file'] ); ?>" placeholder="File ID" />
-                                        <button type="button" class="btn btn-outline-secondary" id="btn-end-sound-play-file"><span data-feather="play"></span></button>
-                                    </div>
-                                </div>
-                                <div class="input-group mb-3">
-                                    <span class="input-group-text"><?php esc_html_e( 'Thời gian', 'wp-spin-wheel' ); ?></span>
-                                    <select class="form-select" id="duration" name="<?php echo esc_attr( self::OPTION_KEY . '[duration]' ); ?>">
-                                        <option value="0.98" <?php selected( $options['duration'], '0.98' ); ?>><?php esc_html_e( 'Ngắn hơn', 'wp-spin-wheel' ); ?></option>
-                                        <option value="0.991" <?php selected( $options['duration'], '0.991' ); ?>><?php esc_html_e( 'Tiêu chuẩn', 'wp-spin-wheel' ); ?></option>
-                                        <option value="0.995" <?php selected( $options['duration'], '0.995' ); ?>><?php esc_html_e( 'Dài hơn', 'wp-spin-wheel' ); ?></option>
-                                        <option value="0.998" <?php selected( $options['duration'], '0.998' ); ?>><?php esc_html_e( 'Dài hơn nữa', 'wp-spin-wheel' ); ?></option>
-                                    </select>
-                                </div>
-                                <div class="form-check mb-3">
-                                    <input class="form-check-input" type="checkbox" id="show_confetti" name="<?php echo esc_attr( self::OPTION_KEY . '[show_confetti]' ); ?>" value="1" <?php checked( $options['show_confetti'], 1 ); ?> />
-                                    <label class="form-check-label" for="show_confetti"><?php esc_html_e( 'Bắn hoa giấy khi kết thúc', 'wp-spin-wheel' ); ?></label>
-                                </div>
-                                <div class="form-check mb-3">
-                                    <input class="form-check-input" type="checkbox" id="auto_remove" name="<?php echo esc_attr( self::OPTION_KEY . '[auto_remove]' ); ?>" value="1" <?php checked( $options['auto_remove'], 1 ); ?> />
-                                    <label class="form-check-label" for="auto_remove"><?php esc_html_e( 'Tự động xóa kết quả sau 5 giây', 'wp-spin-wheel' ); ?></label>
-                                </div>
-                                <div class="form-check mb-3">
-                                    <input class="form-check-input" type="checkbox" id="show_popup" name="<?php echo esc_attr( self::OPTION_KEY . '[show_popup]' ); ?>" value="1" <?php checked( $options['show_popup'], 1 ); ?> />
-                                    <label class="form-check-label" for="show_popup"><?php esc_html_e( 'Popup kết quả với tiêu đề', 'wp-spin-wheel' ); ?></label>
-                                </div>
-                                <div class="mb-3">
-                                    <input type="text" class="form-control" id="popup_label" name="<?php echo esc_attr( self::OPTION_KEY . '[popup_label]' ); ?>" value="<?php echo esc_attr( $options['popup_label'] ); ?>" placeholder="<?php esc_attr_e( 'Bạn đã quay vào ô', 'wp-spin-wheel' ); ?>" />
-                                </div>
-                                <div class="form-check ms-3 mb-3">
-                                    <input class="form-check-input" type="checkbox" id="show_remove_button" name="<?php echo esc_attr( self::OPTION_KEY . '[show_remove_button]' ); ?>" value="1" <?php checked( $options['show_remove_button'], 1 ); ?> />
-                                    <label class="form-check-label" for="show_remove_button"><?php esc_html_e( 'Hiển thị nút "Xóa ô này"', 'wp-spin-wheel' ); ?></label>
-                                </div>
-                                <div class="form-check ms-3 mb-3">
-                                    <input class="form-check-input" type="checkbox" id="show_hide_button" name="<?php echo esc_attr( self::OPTION_KEY . '[show_hide_button]' ); ?>" value="1" <?php checked( $options['show_hide_button'], 1 ); ?> />
-                                    <label class="form-check-label" for="show_hide_button"><?php esc_html_e( 'Hiển thị nút "Ẩn"', 'wp-spin-wheel' ); ?></label>
-                                </div>
-                            </div>
-                            <div class="tab-pane fade" id="appearance-tab-pane" role="tabpanel" aria-labelledby="appearance-tab">
-                                <fieldset class="border border-2 px-2 py-3">
-                                    <legend class="float-none w-auto p-2 fs-6 fw-bold"><?php esc_html_e( 'Vòng quay', 'wp-spin-wheel' ); ?></legend>
-                                    <div class="row justify-content-center align-items-center mb-3">
-                                        <div class="col-5 text-end">
-                                            <button type="button" class="btn mb-1" id="btn_color_wheel">
-                                                <img decoding="async" src="https://vongquaymayman.co/wp-content/themes/twentytwentythree-child/assets/images/color-wheel.png" width="36" alt="Color wheel">
-                                            </button>
-                                            <label for="btn_color_wheel"><?php esc_html_e( 'Màu cho mỗi phần', 'wp-spin-wheel' ); ?></label>
-                                        </div>
-                                        <div class="col-2 text-center">
-                                            <div class="form-check form-switch p-0 d-inline-block mx-auto">
-                                                <input class="form-check-input ms-0" style="background-color: #0d6efd; border-color: #0d6efd;" type="checkbox" role="switch" id="switch_cover_img" name="<?php echo esc_attr( self::OPTION_KEY . '[switch_cover_img]' ); ?>" value="1" <?php checked( $options['switch_cover_img'], 1 ); ?>>
-                                            </div>
-                                        </div>
-                                        <div class="col-5 text-start">
-                                            <button type="button" class="btn mb-1" id="btn_cover_wheel">
-                                                <img decoding="async" src="https://vongquaymayman.co/wp-content/themes/twentytwentythree-child/assets/images/cover-wheel.jpg" width="36" class="rounded-pill" alt="Cover wheel">
-                                            </button>
-                                            <label for="btn_cover_wheel"><?php esc_html_e( 'Ảnh nền vòng quay', 'wp-spin-wheel' ); ?></label>
-                                        </div>
-                                    </div>
-                                    <div class="mb-3<?php echo empty( $options['switch_cover_img'] ) ? ' d-none' : ''; ?>" id="form_cover_img">
-                                        <div class="input-group justify-content-center mb-3">
-                                            <input type="text" class="form-control" id="cover_img" name="<?php echo esc_attr( self::OPTION_KEY . '[cover_img]' ); ?>" value="<?php echo esc_attr( $options['cover_img'] ); ?>" placeholder="https://example.com/cover800.jpg" />
-                                            <span class="input-group-text">
-                                                <img decoding="async" src="<?php echo esc_url( $options['cover_img'] ?: 'https://vongquaymayman.co/wp-content/themes/twentytwentythree-child/assets/images/cover-wheel.jpg' ); ?>" width="36" height="36" id="cover_img_display" class="rounded-pill" alt="default cover image">
-                                            </span>
-                                            <button type="button" class="btn btn-secondary" id="btn-select-cover-img"><?php esc_html_e( 'Chọn', 'wp-spin-wheel' ); ?></button>
-                                            <span class="input-group-text">
-                                                <label for="upload_cover_img" id="btn_upload_cover_img" data-bs-toggle="tooltip" title="<?php esc_attr_e( 'Kích thước khuyên dùng: 800 x 800 (px)', 'wp-spin-wheel' ); ?>"><span data-feather="image"></span></label>
-                                            </span>
-                                            <input type="file" id="upload_cover_img" data-maxsize="2" class="d-none" accept="image/*" />
-                                        </div>
-                                    </div>
 
-                                    <div class="row g-3 mt-2">
-                                        <div class="col-md-6">
-                                            <label class="form-label" for="wheel_title"><?php esc_html_e( 'Tiêu đề vòng quay', 'wp-spin-wheel' ); ?></label>
-                                            <input type="text" class="form-control" id="wheel_title" name="<?php echo esc_attr( self::OPTION_KEY . '[wheel_title]' ); ?>" value="<?php echo esc_attr( $options['wheel_title'] ); ?>" />
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label class="form-label" for="wheel_button_text"><?php esc_html_e( 'Chữ nút quay', 'wp-spin-wheel' ); ?></label>
-                                            <input type="text" class="form-control" id="wheel_button_text" name="<?php echo esc_attr( self::OPTION_KEY . '[wheel_button_text]' ); ?>" value="<?php echo esc_attr( $options['wheel_button_text'] ); ?>" />
-                                        </div>
-                                        <div class="col-12">
-                                            <label class="form-label" for="wheel_description"><?php esc_html_e( 'Mô tả vòng quay', 'wp-spin-wheel' ); ?></label>
-                                            <textarea class="form-control" id="wheel_description" name="<?php echo esc_attr( self::OPTION_KEY . '[wheel_description]' ); ?>" rows="3"><?php echo esc_textarea( $options['wheel_description'] ); ?></textarea>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <label class="form-label" for="wheel_background_color"><?php esc_html_e( 'Màu nền', 'wp-spin-wheel' ); ?></label>
-                                            <input type="color" class="form-control form-control-color" id="wheel_background_color" name="<?php echo esc_attr( self::OPTION_KEY . '[wheel_background_color]' ); ?>" value="<?php echo esc_attr( $options['wheel_background_color'] ); ?>" />
-                                        </div>
-                                        <div class="col-md-4">
-                                            <label class="form-label" for="wheel_button_color"><?php esc_html_e( 'Màu nút', 'wp-spin-wheel' ); ?></label>
-                                            <input type="color" class="form-control form-control-color" id="wheel_button_color" name="<?php echo esc_attr( self::OPTION_KEY . '[wheel_button_color]' ); ?>" value="<?php echo esc_attr( $options['wheel_button_color'] ); ?>" />
-                                        </div>
-                                        <div class="col-md-4">
-                                            <label class="form-label" for="wheel_button_text_color"><?php esc_html_e( 'Màu chữ nút', 'wp-spin-wheel' ); ?></label>
-                                            <input type="color" class="form-control form-control-color" id="wheel_button_text_color" name="<?php echo esc_attr( self::OPTION_KEY . '[wheel_button_text_color]' ); ?>" value="<?php echo esc_attr( $options['wheel_button_text_color'] ); ?>" />
-                                        </div>
-                                        <div class="col-md-4">
-                                            <label class="form-label" for="wheel_border_color"><?php esc_html_e( 'Màu viền', 'wp-spin-wheel' ); ?></label>
-                                            <input type="color" class="form-control form-control-color" id="wheel_border_color" name="<?php echo esc_attr( self::OPTION_KEY . '[wheel_border_color]' ); ?>" value="<?php echo esc_attr( $options['wheel_border_color'] ); ?>" />
-                                        </div>
-                                        <div class="col-md-4">
-                                            <label class="form-label" for="wheel_background_image"><?php esc_html_e( 'Ảnh nền vòng quay', 'wp-spin-wheel' ); ?></label>
-                                            <input type="text" class="form-control" id="wheel_background_image" name="<?php echo esc_attr( self::OPTION_KEY . '[wheel_background_image]' ); ?>" value="<?php echo esc_attr( $options['wheel_background_image'] ); ?>" placeholder="https://example.com/bg.jpg" />
-                                        </div>
-                                        <div class="col-md-3">
-                                            <label class="form-label" for="wheel_animation_duration"><?php esc_html_e( 'Thời gian quay', 'wp-spin-wheel' ); ?></label>
-                                            <input type="number" step="0.1" class="form-control" id="wheel_animation_duration" name="<?php echo esc_attr( self::OPTION_KEY . '[wheel_animation_duration]' ); ?>" value="<?php echo esc_attr( $options['wheel_animation_duration'] ); ?>" />
-                                        </div>
-                                        <div class="col-12">
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" id="wheel_confetti" name="<?php echo esc_attr( self::OPTION_KEY . '[wheel_confetti]' ); ?>" value="1" <?php checked( $options['wheel_confetti'], 1 ); ?> />
-                                                <label class="form-check-label" for="wheel_confetti"><?php esc_html_e( 'Bật hiệu ứng confetti', 'wp-spin-wheel' ); ?></label>
-                                            </div>
-                                        </div>
-                                        <div class="col-12">
-                                            <label class="form-label" for="wheel_segment_colors"><?php esc_html_e( 'Màu các phần (JSON)', 'wp-spin-wheel' ); ?></label>
-                                            <textarea class="form-control" id="wheel_segment_colors" name="<?php echo esc_attr( self::OPTION_KEY . '[wheel_segment_colors]' ); ?>" rows="3"><?php echo esc_textarea( is_array( $options['wheel_segment_colors'] ) ? wp_json_encode( $options['wheel_segment_colors'] ) : (string) $options['wheel_segment_colors'] ); ?></textarea>
-                                        </div>
-                                        <div class="col-12">
-                                            <label class="form-label" for="wheel_extra_config"><?php esc_html_e( 'Cấu hình mở rộng (JSON)', 'wp-spin-wheel' ); ?></label>
-                                            <textarea class="form-control" id="wheel_extra_config" name="<?php echo esc_attr( self::OPTION_KEY . '[wheel_extra_config]' ); ?>" rows="3"><?php echo esc_textarea( is_array( $options['wheel_extra_config'] ) ? wp_json_encode( $options['wheel_extra_config'] ) : (string) $options['wheel_extra_config'] ); ?></textarea>
-                                        </div>
-                                    </div>
-                                </fieldset>
-                            </div>
-                            <div class="tab-pane fade" id="media-tab-pane" role="tabpanel" aria-labelledby="media-tab">
-                                <div class="mb-3">
-                                    <p><?php esc_html_e( 'Quản lý thư viện và các tệp âm thanh tại đây.', 'wp-spin-wheel' ); ?></p>
-                                    <div class="input-group mb-3">
-                                        <span class="input-group-text"><?php esc_html_e( 'Start audio file', 'wp-spin-wheel' ); ?></span>
-                                        <input type="text" class="form-control" value="<?php echo esc_attr( $options['start_sound_file'] ); ?>" disabled />
-                                    </div>
-                                    <div class="input-group mb-3">
-                                        <span class="input-group-text"><?php esc_html_e( 'End audio file', 'wp-spin-wheel' ); ?></span>
-                                        <input type="text" class="form-control" value="<?php echo esc_attr( $options['end_sound_file'] ); ?>" disabled />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <?php submit_button( __( 'Save Settings', 'wp-spin-wheel' ) ); ?>
-            </form>
+            <?php if ( ! empty( $_GET['updated'] ) ) : ?>
+            <div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Đã lưu thành công.', 'wp-spin-wheel' ); ?></p></div>
+            <?php endif; ?>
+            <?php if ( ! empty( $_GET['error'] ) && $_GET['error'] === 'empty_name' ) : ?>
+            <div class="notice notice-error is-dismissible"><p><?php esc_html_e( 'Vui lòng nhập tên.', 'wp-spin-wheel' ); ?></p></div>
+            <?php endif; ?>
 
-            <div class="postbox" style="margin-top: 24px;">
+            <div class="post-box" style="margin-top: 24px;">
                 <h2 class="hndle"><?php esc_html_e( 'Setting items', 'wp-spin-wheel' ); ?></h2>
                 <div class="inside">
                     <?php
@@ -633,7 +482,6 @@ class WP_Spin_Wheel_Settings {
                         ),
                     );
 
-                    // Lấy group và item đang được edit (chỉ áp dụng cho đúng group đó)
                     $editing_group = isset( $_GET['edit_setting_group'] ) ? sanitize_key( wp_unslash( $_GET['edit_setting_group'] ) ) : '';
                     $editing_id    = isset( $_GET['edit_setting_item'] ) ? sanitize_text_field( wp_unslash( $_GET['edit_setting_item'] ) ) : '';
                     $cancel_url    = esc_url( add_query_arg( array( 'page' => 'wp-spin-wheel-settings' ), admin_url( 'admin.php' ) ) );
@@ -641,7 +489,6 @@ class WP_Spin_Wheel_Settings {
                     <?php foreach ( $group_definitions as $group_key => $group_info ) :
                         $items = $this->get_setting_items( $group_key );
 
-                        // Item đang edit — chỉ tìm nếu đúng group
                         $editing_item = array();
                         if ( $editing_group === $group_key && ! empty( $editing_id ) ) {
                             foreach ( $items as $item ) {
@@ -653,15 +500,15 @@ class WP_Spin_Wheel_Settings {
                         }
                         $is_editing = ! empty( $editing_item );
                     ?>
-                        <h3><?php echo esc_html( $group_info['title'] ); ?></h3>
+                        <h3 style="border-bottom:1px solid #ddd;padding-bottom:6px;"><?php echo esc_html( $group_info['title'] ); ?></h3>
 
                         <?php if ( ! empty( $items ) ) : ?>
-                            <table class="widefat fixed" style="margin-bottom: 16px;">
+                            <table class="widefat fixed striped" style="margin-bottom: 16px;">
                                 <thead>
                                     <tr>
                                         <th style="width:35%"><?php esc_html_e( 'Tên', 'wp-spin-wheel' ); ?></th>
                                         <th><?php esc_html_e( 'Giá trị', 'wp-spin-wheel' ); ?></th>
-                                        <th style="width:120px"><?php esc_html_e( 'Thao tác', 'wp-spin-wheel' ); ?></th>
+                                        <th style="width:140px"><?php esc_html_e( 'Thao tác', 'wp-spin-wheel' ); ?></th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -670,11 +517,10 @@ class WP_Spin_Wheel_Settings {
                                         $is_this_row_editing = $is_editing && ( (string) ( $item['id'] ?? '' ) === $editing_id );
                                     ?>
                                         <?php if ( $is_this_row_editing ) : ?>
-                                            <!-- Hàng edit inline -->
                                             <tr style="background:#fff8e1;">
-                                                <td colspan="3">
+                                                <td colspan="3" style="padding:12px;">
                                                     <strong><?php esc_html_e( 'Đang sửa:', 'wp-spin-wheel' ); ?> <?php echo esc_html( $item['name'] ?? '' ); ?></strong>
-                                                    <form method="post" style="margin-top:8px;">
+                                                    <form method="post" action="<?php echo $form_action; ?>" style="margin-top:8px;">
                                                         <?php wp_nonce_field( 'spin_wheel_setting_items', 'spin_wheel_setting_item_nonce' ); ?>
                                                         <input type="hidden" name="spin_wheel_setting_item_group" value="<?php echo esc_attr( $group_key ); ?>" />
                                                         <input type="hidden" name="spin_wheel_setting_item_id" value="<?php echo esc_attr( $item['id'] ?? '' ); ?>" />
@@ -684,7 +530,7 @@ class WP_Spin_Wheel_Settings {
                                                                 <th style="padding:4px 8px;width:150px"><?php esc_html_e( 'Tên', 'wp-spin-wheel' ); ?></th>
                                                                 <td style="padding:4px 8px"><input type="text" name="spin_wheel_setting_item_name" value="<?php echo esc_attr( $item['name'] ?? '' ); ?>" class="widefat" required /></td>
                                                             </tr>
-                                                            <?php echo $this->render_item_fields( $group_key, $cfg ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+                                                            <?php echo $this->render_item_fields( $group_key, $cfg ); // phpcs:ignore ?>
                                                         </table>
                                                         <p style="margin-top:8px;">
                                                             <button type="submit" class="button button-primary"><?php esc_html_e( 'Lưu', 'wp-spin-wheel' ); ?></button>
@@ -708,18 +554,24 @@ class WP_Spin_Wheel_Settings {
                                                         }
                                                     } elseif ( 'audios_start' === $group_key || 'audios_end' === $group_key ) {
                                                         $file = $cfg['file'] ?? '';
-                                                        echo $file ? '<a href="' . esc_url( $file ) . '" target="_blank">' . esc_html( basename( $file ) ) . '</a>' : esc_html__( '(chưa có file)', 'wp-spin-wheel' );
+                                                        if ( $file ) {
+                                                            echo '<a href="' . esc_url( $file ) . '" target="_blank">' . esc_html( basename( $file ) ) . '</a>';
+                                                        } else {
+                                                            echo '<em style="color:#999;">' . esc_html__( 'Chưa có file', 'wp-spin-wheel' ) . '</em>';
+                                                        }
                                                     }
                                                     ?>
                                                 </td>
                                                 <td>
-                                                    <a href="<?php echo esc_url( add_query_arg( array( 'page' => 'wp-spin-wheel-settings', 'edit_setting_group' => $group_key, 'edit_setting_item' => $item['id'] ?? '' ), admin_url( 'admin.php' ) ) ); ?>" class="button button-small"><?php esc_html_e( 'Sửa', 'wp-spin-wheel' ); ?></a>
-                                                    <form method="post" style="display:inline;margin-left:4px;">
+                                                    <a href="<?php echo esc_url( add_query_arg( array( 'page' => 'wp-spin-wheel-settings', 'edit_setting_group' => $group_key, 'edit_setting_item' => $item['id'] ?? '' ), admin_url( 'admin.php' ) ) ); ?>"
+                                                        class="button button-small"><?php esc_html_e( 'Sửa', 'wp-spin-wheel' ); ?></a>
+                                                    <form method="post" action="<?php echo $form_action; ?>" style="display:inline;margin-left:4px;"
+                                                        onsubmit="return confirm('<?php esc_attr_e( 'Xác nhận xóa?', 'wp-spin-wheel' ); ?>')">
                                                         <?php wp_nonce_field( 'spin_wheel_setting_items', 'spin_wheel_setting_item_nonce' ); ?>
                                                         <input type="hidden" name="spin_wheel_setting_item_group" value="<?php echo esc_attr( $group_key ); ?>" />
                                                         <input type="hidden" name="spin_wheel_setting_item_id" value="<?php echo esc_attr( $item['id'] ?? '' ); ?>" />
                                                         <input type="hidden" name="spin_wheel_setting_item_action" value="delete" />
-                                                        <button type="submit" class="button button-small" style="color:#b32d2e;" onclick="return confirm('<?php esc_attr_e( 'Xác nhận xóa?', 'wp-spin-wheel' ); ?>')"><?php esc_html_e( 'Xóa', 'wp-spin-wheel' ); ?></button>
+                                                        <button type="submit" class="button button-small" style="color:#b32d2e;"><?php esc_html_e( 'Xóa', 'wp-spin-wheel' ); ?></button>
                                                     </form>
                                                 </td>
                                             </tr>
@@ -728,15 +580,16 @@ class WP_Spin_Wheel_Settings {
                                 </tbody>
                             </table>
                         <?php else : ?>
-                            <p style="color:#666;"><?php esc_html_e( 'Chưa có mục nào.', 'wp-spin-wheel' ); ?></p>
+                            <p style="color:#999;font-style:italic;"><?php esc_html_e( 'Chưa có mục nào.', 'wp-spin-wheel' ); ?></p>
                         <?php endif; ?>
 
                         <?php if ( ! $is_editing ) : ?>
-                        <!-- Form thêm mới — chỉ hiện khi không đang edit group này -->
-                        <details style="margin-bottom:16px;">
-                            <summary style="cursor:pointer;font-weight:600;padding:6px 0;">&#43; <?php printf( esc_html__( 'Thêm %s mới', 'wp-spin-wheel' ), esc_html( strtolower( $group_info['name'] ) ) ); ?></summary>
-                            <div style="background:#f9f9f9;border:1px solid #ddd;padding:16px;margin-top:8px;">
-                                <form method="post">
+                        <details style="margin-bottom:20px;">
+                            <summary style="cursor:pointer;font-weight:600;padding:6px 0;color:#2271b1;">
+                                &#43; <?php printf( esc_html__( 'Thêm %s mới', 'wp-spin-wheel' ), esc_html( strtolower( $group_info['name'] ) ) ); ?>
+                            </summary>
+                            <div style="background:#f9f9f9;border:1px solid #ddd;padding:16px;margin-top:8px;border-radius:4px;">
+                                <form method="post" action="<?php echo $form_action; ?>">
                                     <?php wp_nonce_field( 'spin_wheel_setting_items', 'spin_wheel_setting_item_nonce' ); ?>
                                     <input type="hidden" name="spin_wheel_setting_item_group" value="<?php echo esc_attr( $group_key ); ?>" />
                                     <input type="hidden" name="spin_wheel_setting_item_id" value="" />
@@ -744,9 +597,12 @@ class WP_Spin_Wheel_Settings {
                                     <table class="form-table" style="margin:0;">
                                         <tr>
                                             <th style="padding:4px 8px;width:150px"><?php esc_html_e( 'Tên', 'wp-spin-wheel' ); ?></th>
-                                            <td style="padding:4px 8px"><input type="text" name="spin_wheel_setting_item_name" value="" class="widefat" required placeholder="<?php esc_attr_e( 'Nhập tên...', 'wp-spin-wheel' ); ?>" /></td>
+                                            <td style="padding:4px 8px">
+                                                <input type="text" name="spin_wheel_setting_item_name" value="" class="widefat" required
+                                                    placeholder="<?php esc_attr_e( 'Nhập tên...', 'wp-spin-wheel' ); ?>" />
+                                            </td>
                                         </tr>
-                                        <?php echo $this->render_item_fields( $group_key, array() ); // phpcs:ignore WordPress.Security.EscapeOutput ?>
+                                        <?php echo $this->render_item_fields( $group_key, array() ); // phpcs:ignore ?>
                                     </table>
                                     <p style="margin-top:8px;">
                                         <button type="submit" class="button button-primary"><?php esc_html_e( 'Thêm mới', 'wp-spin-wheel' ); ?></button>
@@ -756,7 +612,7 @@ class WP_Spin_Wheel_Settings {
                         </details>
                         <?php endif; ?>
 
-                        <hr />
+                        <hr style="margin:16px 0;" />
                     <?php endforeach; ?>
                 </div>
             </div>

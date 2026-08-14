@@ -467,13 +467,32 @@ jQuery(document).ready(function($) {
         requestAnimationFrame(step);
     }
 
+    var autoRemoveTimer = null;
+
     function showResultPopup(prize) {
         $('#modal-result-title').text(prize.title || '');
         $('#modal-result-desc').text(prize.description || '');
         $('#modal-result').show().attr('aria-hidden', 'false');
+
+        // Auto-close sau 5 giây nếu checkbox auto_remove được bật
+        if ( autoRemoveTimer ) {
+            clearTimeout( autoRemoveTimer );
+            autoRemoveTimer = null;
+        }
+        if ( $('#auto_remove').is(':checked') ) {
+            autoRemoveTimer = setTimeout( function() {
+                closeResultPopup();
+                autoRemoveTimer = null;
+            }, 5000 );
+        }
     }
 
     function closeResultPopup() {
+        // Hủy timer nếu user đóng thủ công trước khi hết 5s
+        if ( autoRemoveTimer ) {
+            clearTimeout( autoRemoveTimer );
+            autoRemoveTimer = null;
+        }
         $('#modal-result').hide().attr('aria-hidden', 'true');
     }
 
