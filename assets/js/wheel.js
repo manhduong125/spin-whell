@@ -12,6 +12,130 @@ jQuery(document).ready(function($) {
     var idleAnimationId = null;
     var IDLE_SPEED = 0.001; // radians per frame (~0.17°/frame)
 
+    // Key lưu settings vào localStorage
+    function getSettingsStorageKey() {
+        return 'wp_spin_wheel_ui_settings_' + (wheelId || '0');
+    }
+
+    // Đọc tất cả option từ modal settings thành object
+    function collectSettings() {
+        return {
+            animation: {
+                duration: parseFloat( $('#duration').val() ) || 6,
+                confetti:  $('#show_confetti').is(':checked'),
+            },
+            audio: {
+                start_sound:      $('#start_sound').val() || '0',
+                start_sound_file: $.trim( $('#start_sound_file').val() ),
+                end_sound:        $('#end_sound').val() || '0',
+                end_sound_file:   $.trim( $('#end_sound_file').val() ),
+            },
+            ui: {
+                auto_remove:        $('#auto_remove').is(':checked'),
+                show_popup:         $('#show_popup').is(':checked'),
+                popup_label:        $.trim( $('#popup_label').val() ),
+                show_remove_button: $('#show_remove_button').is(':checked'),
+            },
+        };
+    }
+
+    // Áp settings đã lưu vào các control trong modal
+    function applySettingsToUI( s ) {
+        if ( ! s ) return;
+
+        if ( s.animation ) {
+            if ( s.animation.duration !== undefined ) {
+                $('#duration').val( s.animation.duration );
+            }
+            if ( s.animation.confetti !== undefined ) {
+                $('#show_confetti').prop('checked', !! s.animation.confetti );
+            }
+        }
+
+        if ( s.audio ) {
+            if ( s.audio.start_sound !== undefined ) {
+                $('#start_sound').val( s.audio.start_sound );
+            }
+            if ( s.audio.start_sound_file !== undefined ) {
+                $('#start_sound_file').val( s.audio.start_sound_file );
+            }
+            if ( s.audio.end_sound !== undefined ) {
+                $('#end_sound').val( s.audio.end_sound );
+            }
+            if ( s.audio.end_sound_file !== undefined ) {
+                $('#end_sound_file').val( s.audio.end_sound_file );
+            }
+        }
+
+        if ( s.ui ) {
+            if ( s.ui.auto_remove !== undefined ) {
+                $('#auto_remove').prop('checked', !! s.ui.auto_remove );
+            }
+            if ( s.ui.show_popup !== undefined ) {
+                $('#show_popup').prop('checked', !! s.ui.show_popup );
+            }
+            if ( s.ui.popup_label !== undefined ) {
+                $('#popup_label').val( s.ui.popup_label );
+                $('#modal-result-popup-label').text( s.ui.popup_label || 'Bạn đã quay vào ô' );
+            }
+            if ( s.ui.show_remove_button !== undefined ) {
+                $('#show_remove_button').prop('checked', !! s.ui.show_remove_button );
+            }
+        }
+    }
+
+    // Merge saved settings vào wheelSettings
+    function mergeUserSettings( saved ) {
+        if ( ! saved ) return;
+        if ( saved.animation ) {
+            wheelSettings.animation = $.extend( {}, wheelSettings.animation, saved.animation );
+        }
+        if ( saved.audio ) {
+            wheelSettings.audio = $.extend( {}, wheelSettings.audio, saved.audio );
+        }
+        if ( saved.ui ) {
+            wheelSettings.ui = $.extend( {}, wheelSettings.ui, saved.ui );
+        }
+    }
+
+    // Lưu settings + apply vào wheelSettings + re-render
+    function saveWheelSettings() {
+        var s = collectSettings();
+
+        // Lưu localStorage
+        localStorage.setItem( getSettingsStorageKey(), JSON.stringify(s) );
+
+        // Merge vào wheelSettings đang dùng
+        mergeUserSettings( s );
+
+        // Re-render vòng quay để áp dụng thay đổi giao diện
+        renderWheel();
+
+        // Feedback trên nút
+        var $btn = $('#btn_wheel_setting');
+        $btn.text('Đã lưu ✓').addClass('btn-success').removeClass('btn-primary');
+        setTimeout( function() {
+            $btn.text('Lưu lại').removeClass('btn-success').addClass('btn-primary');
+        }, 1500 );
+    }
+
+    // Reset về default
+    function resetWheelSettings() {
+        localStorage.removeItem( getSettingsStorageKey() );
+
+        // Reset wheelSettings về default từ data attribute
+        wheelSettings = normalizeSettings( parseJson(rawSettings) );
+
+        // Reset UI controls về giá trị mặc định
+        applySettingsToUI({
+            animation: { duration: 6, confetti: false },
+            audio:     { start_sound: '0', start_sound_file: '', end_sound: '0', end_sound_file: '' },
+            ui:        { auto_remove: false, show_popup: false, popup_label: '', show_remove_button: false },
+        });
+
+        renderWheel();
+    }
+
     function parseJson(value, fallback) {
         if ( ! value ) {
             return fallback;
@@ -414,6 +538,9 @@ jQuery(document).ready(function($) {
 
         stopIdleAnimation();
         spinning = true;
+
+        // Phát nhạc bắt đầu
+        playSpinAudio();
         var segmentCount = wheelPrizes.length;
         var angleStep = (Math.PI * 2) / segmentCount;
         var normalizedRotation = currentRotation % (Math.PI * 2);
@@ -453,6 +580,10 @@ jQuery(document).ready(function($) {
             currentRotation = (startRotation + totalRotation) % (Math.PI * 2);
             drawWheelCanvas(currentRotation);
 
+            // Dừng nhạc quay, phát nhạc kết thúc
+            stopSpinAudio();
+            playEndAudio();
+
             if ( wheelSettings.animation.confetti && typeof window.confetti === 'function' ) {
                 window.confetti();
             }
@@ -469,7 +600,110 @@ jQuery(document).ready(function($) {
 
     var autoRemoveTimer = null;
 
+    // ── Audio engine cho vòng quay ──
+    var spinAudioEl  = null;  // nhạc đang chạy khi quay
+    var endAudioEl   = null;  // nhạc kết thúc
+
+    function createAudio() {
+        var el = document.createElement('audio');
+        el.preload = 'auto';
+        return el;
+    }
+
+    // Lấy URL file nhạc từ value của select
+    // value có thể là: '0' (tắt) | 'random' | 'slot_start' | 'conquay' | ... | ID thư viện
+    function resolveAudioUrl( soundVal, soundFileVal, selectId ) {
+        if ( ! soundVal || soundVal === '0' ) return null;
+
+        // Nhactik file ID ưu tiên nếu có
+        if ( soundFileVal ) {
+            return 'https://nhactik.com/play/' + soundFileVal + '.mp3';
+        }
+
+        if ( soundVal === 'random' ) {
+            // Lấy toàn bộ option có data-url trong select tương ứng
+            var urls = [];
+            $( '#' + selectId + ' option[data-url]' ).each(function() {
+                var u = $(this).data('url');
+                if ( u ) urls.push( u );
+            });
+            if ( ! urls.length ) return null;
+            return urls[ Math.floor( Math.random() * urls.length ) ];
+        }
+
+        // Các âm thanh built-in — trỏ vào thư mục assets/sound/
+        var pluginUrl = ( wp_spin_wheel_params && wp_spin_wheel_params.plugin_url )
+            ? wp_spin_wheel_params.plugin_url.replace(/\/$/, '')
+            : '';
+        var builtIn = {
+            slot_start: pluginUrl ? pluginUrl + '/assets/sound/slot_start.mp3' : null,
+            conquay:    pluginUrl ? pluginUrl + '/assets/sound/conquay.mp3'    : null,
+            slot_end:   pluginUrl ? pluginUrl + '/assets/sound/slot_end.mp3'   : null,
+            read:       null,
+        };
+        if ( builtIn[ soundVal ] !== undefined ) {
+            return builtIn[ soundVal ] || null;
+        }
+
+        // Là ID item trong thư viện — lấy data-url từ option
+        var $opt = $( '#' + selectId + ' option[value="' + soundVal + '"]' );
+        return $opt.data('url') || null;
+    }
+
+    function playSpinAudio() {
+        var audio = wheelSettings.audio || {};
+        var url = resolveAudioUrl(
+            audio.start_sound      || $('#start_sound').val(),
+            audio.start_sound_file || $('#start_sound_file').val(),
+            'start_sound'
+        );
+        if ( ! url ) return;
+
+        if ( spinAudioEl ) { spinAudioEl.pause(); }
+        spinAudioEl = createAudio();
+        spinAudioEl.src = url;
+        spinAudioEl.loop = true;   // nhạc bắt đầu lặp lại trong khi quay
+        spinAudioEl.volume = 0.8;
+        spinAudioEl.play().catch(function(){});
+    }
+
+    function stopSpinAudio() {
+        if ( spinAudioEl ) {
+            spinAudioEl.pause();
+            spinAudioEl.currentTime = 0;
+            spinAudioEl = null;
+        }
+    }
+
+    function playEndAudio() {
+        var audio = wheelSettings.audio || {};
+        var url = resolveAudioUrl(
+            audio.end_sound      || $('#end_sound').val(),
+            audio.end_sound_file || $('#end_sound_file').val(),
+            'end_sound'
+        );
+        if ( ! url ) return;
+
+        if ( endAudioEl ) { endAudioEl.pause(); }
+        endAudioEl = createAudio();
+        endAudioEl.src = url;
+        endAudioEl.loop = false;
+        endAudioEl.volume = 0.9;
+        endAudioEl.play().catch(function(){});
+    }
+
     function showResultPopup(prize) {
+        // Nếu show_popup bị tắt thì không hiện popup
+        if ( wheelSettings.ui && wheelSettings.ui.show_popup === false ) {
+            return;
+        }
+
+        // Cập nhật tiêu đề popup theo settings
+        var label = ( wheelSettings.ui && wheelSettings.ui.popup_label )
+            ? wheelSettings.ui.popup_label
+            : 'Bạn đã quay vào ô';
+        $('#modal-result-popup-label').text( label );
+
         $('#modal-result-title').text(prize.title || '');
         $('#modal-result-desc').text(prize.description || '');
         $('#modal-result').show().attr('aria-hidden', 'false');
@@ -481,14 +715,14 @@ jQuery(document).ready(function($) {
         }
         if ( $('#auto_remove').is(':checked') ) {
             autoRemoveTimer = setTimeout( function() {
-                closeResultPopup();
+                closeResultPopup();   // auto-close → giữ kết quả, đóng popup
                 autoRemoveTimer = null;
             }, 5000 );
         }
     }
 
+    // Đóng popup — luôn GIỮ kết quả (đã append rồi)
     function closeResultPopup() {
-        // Hủy timer nếu user đóng thủ công trước khi hết 5s
         if ( autoRemoveTimer ) {
             clearTimeout( autoRemoveTimer );
             autoRemoveTimer = null;
@@ -496,23 +730,48 @@ jQuery(document).ready(function($) {
         $('#modal-result').hide().attr('aria-hidden', 'true');
     }
 
+    // Biến lưu jQuery element entry vừa append, để nút "Xóa ô này" dùng
+    var lastResultEntry = null;
+
     function handleSpinSuccess(prize) {
         var index = getPrizeIndex(prize);
         if ( index === -1 ) {
             index = 0;
         }
         animateSpin(index, function() {
-            var title = prize.title || '';
-            var description = prize.description || '';
-            var resultEntry = '<div class="wheel-result-item"><strong>' + title + '</strong><div>' + description + '</div></div>';
-            $('#wheel_result').append(resultEntry);
+            // 1. Append kết quả vào bảng ngay
+            var $entry = $('<div/>', { 'class': 'wheel-result-item' })
+                .append( $('<strong/>').text( prize.title || '' ) )
+                .append( $('<div/>').text( prize.description || '' ) );
+            $('#wheel_result').append( $entry );
+            lastResultEntry = $entry;
             updateResultCount();
             $('#tab-result').trigger('click');
-            showResultPopup(prize);
+
+            // 2. Nếu show_popup tắt → không hiện popup, dừng tại đây
+            if ( wheelSettings.ui && wheelSettings.ui.show_popup === false ) {
+                return;
+            }
+
+            // Hiện/ẩn nút "Xóa ô này":
+            // Mặc định luôn hiện, chỉ ẩn khi user tắt option show_remove_button
+            var hideRemove = ( wheelSettings.ui && wheelSettings.ui.show_remove_button === false );
+            $('#btn-remove-result-item').toggle( ! hideRemove );
+
+            // 4. Hiện popup
+            showResultPopup( prize );
         });
     }
 
     wheelSettings = normalizeSettings(parseJson(rawSettings));
+
+    // Load settings đã lưu từ localStorage và merge vào wheelSettings + áp lên UI
+    var savedSettings = parseJson( localStorage.getItem( getSettingsStorageKey() ), null );
+    if ( savedSettings ) {
+        mergeUserSettings( savedSettings );
+        applySettingsToUI( savedSettings );
+    }
+
     wheelPrizes = loadPrizes();
     renderPrizeList();
     renderWheel();
@@ -612,15 +871,27 @@ jQuery(document).ready(function($) {
         }
     });
 
+    // "Đóng lại" hoặc nút X → giữ kết quả, đóng popup
     $('#modal-result-close, #modal-result-close-btn').on('click', function(e) {
         e.preventDefault();
         closeResultPopup();
     });
 
+    // Click backdrop → đóng, giữ kết quả
     $('#modal-result').on('click', function(e) {
         if ( $(e.target).is('#modal-result') ) {
             closeResultPopup();
         }
+    });
+
+    // "Xóa ô này" → xóa entry vừa append, đóng popup
+    $(document).on('click', '#btn-remove-result-item', function() {
+        if ( lastResultEntry ) {
+            lastResultEntry.remove();
+            lastResultEntry = null;
+            updateResultCount();
+        }
+        closeResultPopup();
     });
 
     $(document).on('keydown', function(e) {
@@ -692,4 +963,42 @@ jQuery(document).ready(function($) {
             renderWheel();
         }
     });
+
+    // ── popup_label: cập nhật span tiêu đề real-time khi user gõ ──
+    $('#popup_label').on('input', function() {
+        var val = $.trim( $(this).val() ) || 'Bạn đã quay vào ô';
+        if ( ! wheelSettings.ui ) wheelSettings.ui = {};
+        wheelSettings.ui.popup_label = val;
+        $('#modal-result-popup-label').text( val );
+    });
+
+    // ── Lưu settings từ modal ──
+    $('#btn_wheel_setting').on('click', function() {
+        saveWheelSettings();
+    });
+
+    // ── Reset về mặc định ──
+    $('#btn-reset-wheel').on('click', function() {
+        if ( confirm('Reset tất cả cài đặt về mặc định?') ) {
+            resetWheelSettings();
+        }
+    });
+
+    // ── Toggle hiển thị ô nhập popup label khi bật/tắt show_popup ──
+    $('#show_popup').on('change', function() {
+        var $extra = $('#show_popup').closest('.form-check').next('.mb-3');
+        $extra.toggle( $(this).is(':checked') );
+    }).trigger('change');
+
+    // ── show_remove_button: ẩn/hiện nút "Xóa ô này" trong popup kết quả ──
+    // Nếu popup đang mở mà user thay đổi checkbox → cập nhật ngay.
+    $('#show_remove_button').on('change', function() {
+        if ( $('#modal-result').is(':visible') ) {
+            $('#btn-remove-result-item').toggle( $(this).is(':checked') );
+        }
+        // Lưu vào wheelSettings ngay để lần quay tiếp áp dụng đúng
+        if ( ! wheelSettings.ui ) wheelSettings.ui = {};
+        wheelSettings.ui.show_remove_button = $(this).is(':checked');
+    });
+
 });

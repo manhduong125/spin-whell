@@ -20,6 +20,7 @@ class WP_Spin_Wheel_Frontend {
             'nonce'      => wp_create_nonce( 'wp_rest' ),
             'text_win'   => __( 'Bạn đã trúng', 'wp-spin-wheel' ),
             'text_error' => __( 'Đã có lỗi xảy ra.', 'wp-spin-wheel' ),
+            'plugin_url' => WP_SPIN_WHEEL_URL,
         ) );
     }
 }

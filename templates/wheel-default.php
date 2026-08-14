@@ -24,14 +24,14 @@ $default_settings = array(
         'shadow'       => true,
     ),
     'button' => array(
-        'text'       => __( 'Quay', 'wp-spin-wheel' ),
-        'color'      => '#3b82f6',
-        'text_color' => '#ffffff',
+        'text'       => 'Quay',
+        'color'      => '#000',
+        'text_color' => '',
         'radius'     => 100,
     ),
     'animation' => array(
-        'duration' => 6,   // giây: 4=nhanh, 6=tiêu chuẩn, 8=chậm, 12=rất chậm
-        'confetti' => true,
+        'duration' => 6,
+        'confetti' => false,
     ),
     'audio' => array(
         'start_sound'      => $_start_sound,
@@ -41,20 +41,9 @@ $default_settings = array(
     ),
 );
 
-$default_prizes = array(
-    array( 'title' => __( 'Tuấn', 'wp-spin-wheel' ), 'color' => '#ef4444' ),
-    array( 'title' => __( 'Linh', 'wp-spin-wheel' ), 'color' => '#f59e0b' ),
-    array( 'title' => __( 'Trang', 'wp-spin-wheel' ), 'color' => '#10b981' ),
-    array( 'title' => __( 'Nga', 'wp-spin-wheel' ), 'color' => '#3b82f6' ),
-    array( 'title' => __( 'Thiện', 'wp-spin-wheel' ), 'color' => '#8b5cf6' ),
-    array( 'title' => __( 'Kiên', 'wp-spin-wheel' ), 'color' => '#ec4899' ),
-    array( 'title' => __( 'Hùng', 'wp-spin-wheel' ), 'color' => '#14b8a6' ),
-    array( 'title' => __( 'Nam', 'wp-spin-wheel' ), 'color' => '#f97316' ),
-    array( 'title' => __( 'Hưng', 'wp-spin-wheel' ), 'color' => '#8b5cf6' ),
-    array( 'title' => __( 'Thảo', 'wp-spin-wheel' ), 'color' => '#10b981' ),
-);
-$default_title = __( '', 'wp-spin-wheel' );
-$default_description = __( '', 'wp-spin-wheel' );
+$default_prizes = array();
+$default_title = '';
+$default_description = '';
 ?>
 <div class="container-fluid noads wp-spin-wheel-wrapper" id="wheel-wrapper" data-wheel-id="0"
     data-wheel-settings="<?php echo esc_attr( wp_json_encode( $default_settings ) ); ?>"
@@ -222,7 +211,7 @@ $default_description = __( '', 'wp-spin-wheel' );
                             <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
                             <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
                         </svg>
-                        <?php esc_html_e( 'Bạn đã quay vào ô', 'wp-spin-wheel' ); ?>
+                        <span id="modal-result-popup-label"><?php esc_html_e( 'Bạn đã quay vào ô', 'wp-spin-wheel' ); ?></span>
                     </span>
                 </h5>
                 <button type="button" class="btn-close" id="modal-result-close" aria-label="Close"></button>
@@ -237,8 +226,23 @@ $default_description = __( '', 'wp-spin-wheel' );
                 <div class="fs-1 fw-bold" id="modal-result-title" style="color:#4f9a29;word-break:break-word;"></div>
                 <div class="mt-2 text-muted" id="modal-result-desc"></div>
             </div>
-            <div class="modal-footer justify-content-center">
-                <button type="button" class="btn btn-secondary" id="modal-result-close-btn"><?php esc_html_e( 'Đóng lại', 'wp-spin-wheel' ); ?></button>
+            <div class="modal-footer justify-content-center gap-2">
+                <button type="button" class="btn btn-secondary" id="modal-result-close-btn">
+                    <?php esc_html_e( 'Đóng lại', 'wp-spin-wheel' ); ?>
+                </button>
+                <button type="button" class="btn btn-outline-danger" id="btn-remove-result-item">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round"
+                        style="vertical-align:middle;margin-right:3px;">
+                        <polyline points="3 6 5 6 21 6"></polyline>
+                        <path d="M19 6l-1 14H6L5 6"></path>
+                        <path d="M10 11v6"></path>
+                        <path d="M14 11v6"></path>
+                        <path d="M9 6V4h6v2"></path>
+                    </svg>
+                    <?php esc_html_e( 'Xóa ô này', 'wp-spin-wheel' ); ?>
+                </button>
             </div>
         </div>
     </div>
@@ -383,14 +387,7 @@ $default_description = __( '', 'wp-spin-wheel' );
                     <div class="mb-3"> <input type="text" class="form-control ms-3"
                             style="width: calc(100% - 1rem);" id="popup_label" value="Bạn đã quay vào ô"
                             placeholder="Bạn đã quay vào ô"> </div>
-                    <div class="form-check ms-3 mb-3"> <input class="form-check-input" type="checkbox"
-                            id="show_remove_button" checked> <label class="form-check-label"
-                            for="show_remove_button"> Hiển thị nút &#8220;Xóa ô này&#8221; </label>
-                    </div>
-                    <div class="form-check ms-3 mb-3 d-none" id="show_hide_button_div"> <input
-                            class="form-check-input" type="checkbox" id="show_hide_button"> <label
-                            class="form-check-label" for="show_hide_button"> Hiển thị nút
-                            &#8220;Ẩn&#8221; </label> </div>
+                            <div class="form-check ms-3 mb-3"> <input class="form-check-input" type="checkbox" id="show_remove_button" checked=""> <label class="form-check-label" for="show_remove_button"> Hiển thị nút “Xóa ô này” </label> </div>
                 </div>
                 <div class="tab-pane fade pt-1" id="appearance-tab-pane" role="tabpanel"
                     aria-labelledby="appearance-tab" tabindex="0">

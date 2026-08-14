@@ -34,20 +34,9 @@ class WP_Spin_Wheel_Settings {
 
     private function get_default_item_groups() {
         return array(
-            'backgrounds' => array(
-                array(
-                    'id'     => 'background-default',
-                    'name'   => __( 'Default Background', 'wp-spin-wheel' ),
-                    'config' => array( 'type' => 'color', 'value' => '#f8fafc', 'image' => '' ),
-                ),
-            ),
-            'buttons' => array(
-                array(
-                    'id'     => 'button-default',
-                    'name'   => __( 'Primary Button', 'wp-spin-wheel' ),
-                    'config' => array( 'text' => __( 'QUAY', 'wp-spin-wheel' ), 'color' => '#2563eb', 'text_color' => '#ffffff', 'radius' => 50, 'background_image' => '' ),
-                ),
-            ),
+            'bg_gradients' => array(),
+            'bg_images'    => array(),
+            'buttons'      => array(),
             'audios_start' => array(),
             'audios_end'   => array(),
         );
@@ -56,8 +45,17 @@ class WP_Spin_Wheel_Settings {
     private function get_group_key_from_type( $type ) {
         $type = is_string( $type ) ? sanitize_key( $type ) : '';
 
+        if ( in_array( $type, array( 'bg_gradient', 'bg_gradients' ), true ) ) {
+            return 'bg_gradients';
+        }
+
+        if ( in_array( $type, array( 'bg_image', 'bg_images' ), true ) ) {
+            return 'bg_images';
+        }
+
+        // Backward compat: 'backgrounds' cũ map về bg_images
         if ( in_array( $type, array( 'background', 'backgrounds', 'spin_wheel_background' ), true ) ) {
-            return 'backgrounds';
+            return 'bg_images';
         }
 
         if ( in_array( $type, array( 'button', 'buttons', 'spin_wheel_button' ), true ) ) {
@@ -105,20 +103,21 @@ class WP_Spin_Wheel_Settings {
     private function build_item_config( $group_key, $payload ) {
         $payload = is_array( $payload ) ? $payload : array();
 
-        if ( 'backgrounds' === $group_key ) {
+        if ( 'bg_gradients' === $group_key ) {
             return array(
-                'type'  => sanitize_text_field( wp_unslash( $payload['spin_wheel_setting_background_type'] ?? 'color' ) ),
-                'value' => sanitize_text_field( wp_unslash( $payload['spin_wheel_setting_background_color'] ?? '#ffffff' ) ),
-                'image' => esc_url_raw( wp_unslash( $payload['spin_wheel_setting_background_image'] ?? '' ) ),
+                'gradient' => sanitize_text_field( wp_unslash( $payload['spin_wheel_setting_bg_gradient'] ?? '' ) ),
+            );
+        }
+
+        if ( 'bg_images' === $group_key ) {
+            return array(
+                'image' => esc_url_raw( wp_unslash( $payload['spin_wheel_setting_bg_image'] ?? '' ) ),
             );
         }
 
         if ( 'buttons' === $group_key ) {
             return array(
-                'text'             => sanitize_text_field( wp_unslash( $payload['spin_wheel_setting_button_text'] ?? __( 'QUAY', 'wp-spin-wheel' ) ) ),
-                'color'            => sanitize_text_field( wp_unslash( $payload['spin_wheel_setting_button_color'] ?? '#2563eb' ) ),
-                'text_color'       => sanitize_text_field( wp_unslash( $payload['spin_wheel_setting_button_text_color'] ?? '#ffffff' ) ),
-                'radius'           => max( 0, intval( wp_unslash( $payload['spin_wheel_setting_button_radius'] ?? 50 ) ) ),
+                'color'            => sanitize_hex_color( wp_unslash( $payload['spin_wheel_setting_button_color'] ?? '#2563eb' ) ) ?: '#2563eb',
                 'background_image' => esc_url_raw( wp_unslash( $payload['spin_wheel_setting_button_background_image'] ?? '' ) ),
             );
         }
@@ -156,7 +155,7 @@ class WP_Spin_Wheel_Settings {
         $action    = sanitize_text_field( wp_unslash( $_POST['spin_wheel_setting_item_action'] ) );
         $group_key = $this->get_group_key_from_type( wp_unslash( $_POST['spin_wheel_setting_item_group'] ?? '' ) );
 
-        if ( ! in_array( $group_key, array( 'backgrounds', 'buttons', 'audios_start', 'audios_end' ), true ) ) {
+        if ( ! in_array( $group_key, array( 'bg_gradients', 'bg_images', 'buttons', 'audios_start', 'audios_end' ), true ) ) {
             return;
         }
 
@@ -266,31 +265,31 @@ class WP_Spin_Wheel_Settings {
 
     public function get_setting_schema() {
         return array(
-            'start_sound' => array( 'type' => 'select', 'default' => '' ),
-            'start_sound_file' => array( 'type' => 'text', 'default' => '' ),
-            'end_sound' => array( 'type' => 'select', 'default' => '' ),
-            'end_sound_file' => array( 'type' => 'text', 'default' => '' ),
-            'duration' => array( 'type' => 'text', 'default' => '0.991' ),
-            'show_confetti' => array( 'type' => 'checkbox', 'default' => 1 ),
-            'auto_remove' => array( 'type' => 'checkbox', 'default' => 0 ),
-            'show_popup' => array( 'type' => 'checkbox', 'default' => 1 ),
-            'popup_label' => array( 'type' => 'text', 'default' => 'Bạn đã quay vào ô' ),
-            'show_remove_button' => array( 'type' => 'checkbox', 'default' => 0 ),
-            'show_hide_button' => array( 'type' => 'checkbox', 'default' => 0 ),
-            'switch_cover_img' => array( 'type' => 'checkbox', 'default' => 0 ),
-            'cover_img' => array( 'type' => 'image', 'default' => '' ),
-            'wheel_title' => array( 'type' => 'text', 'default' => 'Vòng quay may mắn' ),
-            'wheel_description' => array( 'type' => 'textarea', 'default' => 'Nhấn vào nút quay để bắt đầu.' ),
-            'wheel_background_color' => array( 'type' => 'color', 'default' => '#f8fafc' ),
-            'wheel_button_text' => array( 'type' => 'text', 'default' => 'Quay ngay' ),
-            'wheel_button_color' => array( 'type' => 'color', 'default' => '#3b82f6' ),
-            'wheel_button_text_color' => array( 'type' => 'color', 'default' => '#ffffff' ),
-            'wheel_border_color' => array( 'type' => 'color', 'default' => '#ffffff' ),
-            'wheel_background_image' => array( 'type' => 'image', 'default' => '' ),
-            'wheel_animation_duration' => array( 'type' => 'text', 'default' => '6' ),
-            'wheel_confetti' => array( 'type' => 'checkbox', 'default' => 1 ),
-            'wheel_segment_colors' => array( 'type' => 'json', 'default' => array() ),
-            'wheel_extra_config' => array( 'type' => 'json', 'default' => array() ),
+            'start_sound'             => array( 'type' => 'select',   'default' => '' ),
+            'start_sound_file'        => array( 'type' => 'text',     'default' => '' ),
+            'end_sound'               => array( 'type' => 'select',   'default' => '' ),
+            'end_sound_file'          => array( 'type' => 'text',     'default' => '' ),
+            'duration'                => array( 'type' => 'text',     'default' => '6' ),
+            'show_confetti'           => array( 'type' => 'checkbox', 'default' => 0 ),
+            'auto_remove'             => array( 'type' => 'checkbox', 'default' => 0 ),
+            'show_popup'              => array( 'type' => 'checkbox', 'default' => 0 ),
+            'popup_label'             => array( 'type' => 'text',     'default' => '' ),
+            'show_remove_button'      => array( 'type' => 'checkbox', 'default' => 0 ),
+            'show_hide_button'        => array( 'type' => 'checkbox', 'default' => 0 ),
+            'switch_cover_img'        => array( 'type' => 'checkbox', 'default' => 0 ),
+            'cover_img'               => array( 'type' => 'image',    'default' => '' ),
+            'wheel_title'             => array( 'type' => 'text',     'default' => '' ),
+            'wheel_description'       => array( 'type' => 'textarea', 'default' => '' ),
+            'wheel_background_color'  => array( 'type' => 'color',    'default' => '' ),
+            'wheel_button_text'       => array( 'type' => 'text',     'default' => '' ),
+            'wheel_button_color'      => array( 'type' => 'color',    'default' => '' ),
+            'wheel_button_text_color' => array( 'type' => 'color',    'default' => '' ),
+            'wheel_border_color'      => array( 'type' => 'color',    'default' => '' ),
+            'wheel_background_image'  => array( 'type' => 'image',    'default' => '' ),
+            'wheel_animation_duration'=> array( 'type' => 'text',     'default' => '6' ),
+            'wheel_confetti'          => array( 'type' => 'checkbox', 'default' => 0 ),
+            'wheel_segment_colors'    => array( 'type' => 'json',     'default' => array() ),
+            'wheel_extra_config'      => array( 'type' => 'json',     'default' => array() ),
         );
     }
 
@@ -388,51 +387,43 @@ class WP_Spin_Wheel_Settings {
         $cfg = is_array( $cfg ) ? $cfg : array();
         $out = '';
 
-        if ( 'backgrounds' === $group_key ) {
-            $type  = $cfg['type'] ?? 'color';
-            $value = $cfg['value'] ?? '#ffffff';
+        if ( 'bg_gradients' === $group_key ) {
+            $gradient = $cfg['gradient'] ?? '';
+            $out .= '<tr><th style="padding:4px 8px;width:160px">' . esc_html__( 'CSS Gradient', 'wp-spin-wheel' ) . '</th><td style="padding:4px 8px">';
+            $out .= '<input type="text" name="spin_wheel_setting_bg_gradient" value="' . esc_attr( $gradient ) . '" class="widefat" placeholder="linear-gradient(135deg, #f06, #4a90e2)" />';
+            $out .= '<small style="display:block;margin-top:4px;color:#666;">' . esc_html__( 'Ví dụ: linear-gradient(135deg, #f06, #4a90e2)', 'wp-spin-wheel' ) . '</small>';
+            if ( $gradient ) {
+                $out .= '<div style="margin-top:6px;width:100%;height:32px;border-radius:4px;background:' . esc_attr( $gradient ) . ';border:1px solid #ddd;"></div>';
+            }
+            $out .= '</td></tr>';
+        }
+
+        if ( 'bg_images' === $group_key ) {
             $image = $cfg['image'] ?? '';
-
-            $out .= '<tr><th style="padding:4px 8px;width:150px">' . esc_html__( 'Loại', 'wp-spin-wheel' ) . '</th><td style="padding:4px 8px">';
-            $out .= '<select name="spin_wheel_setting_background_type" class="widefat">';
-            $out .= '<option value="color"' . selected( $type, 'color', false ) . '>' . esc_html__( 'Màu', 'wp-spin-wheel' ) . '</option>';
-            $out .= '<option value="image"' . selected( $type, 'image', false ) . '>' . esc_html__( 'Hình ảnh', 'wp-spin-wheel' ) . '</option>';
-            $out .= '</select></td></tr>';
-
-            $out .= '<tr><th style="padding:4px 8px">' . esc_html__( 'Màu', 'wp-spin-wheel' ) . '</th><td style="padding:4px 8px">';
-            $out .= '<input type="color" name="spin_wheel_setting_background_color" value="' . esc_attr( $value ) . '" style="width:60px;height:36px;" /></td></tr>';
-
-            $out .= '<tr><th style="padding:4px 8px">' . esc_html__( 'URL hình ảnh', 'wp-spin-wheel' ) . '</th><td style="padding:4px 8px">';
-            $out .= '<input type="text" name="spin_wheel_setting_background_image" value="' . esc_attr( $image ) . '" class="widefat" placeholder="https://example.com/bg.jpg" /></td></tr>';
+            $out .= '<tr><th style="padding:4px 8px;width:160px">' . esc_html__( 'URL hình ảnh', 'wp-spin-wheel' ) . '</th><td style="padding:4px 8px">';
+            $out .= '<input type="text" name="spin_wheel_setting_bg_image" value="' . esc_attr( $image ) . '" class="widefat" placeholder="https://example.com/bg.jpg" />';
+            if ( $image ) {
+                $out .= '<div style="margin-top:6px;"><img src="' . esc_url( $image ) . '" style="max-height:60px;border-radius:4px;border:1px solid #ddd;" /></div>';
+            }
+            $out .= '</td></tr>';
         }
 
         if ( 'buttons' === $group_key ) {
-            $text  = $cfg['text'] ?? __( 'QUAY', 'wp-spin-wheel' );
-            $color = $cfg['color'] ?? '#2563eb';
-            $tcolor = $cfg['text_color'] ?? '#ffffff';
-            $radius = $cfg['radius'] ?? 50;
-            $bg_img = $cfg['background_image'] ?? '';
+            $color   = $cfg['color'] ?? '#2563eb';
+            $bg_img  = $cfg['background_image'] ?? '';
 
-            $out .= '<tr><th style="padding:4px 8px;width:150px">' . esc_html__( 'Chữ nút', 'wp-spin-wheel' ) . '</th><td style="padding:4px 8px">';
-            $out .= '<input type="text" name="spin_wheel_setting_button_text" value="' . esc_attr( $text ) . '" class="widefat" /></td></tr>';
-
-            $out .= '<tr><th style="padding:4px 8px">' . esc_html__( 'Màu nền nút', 'wp-spin-wheel' ) . '</th><td style="padding:4px 8px">';
+            $out .= '<tr><th style="padding:4px 8px;width:160px">' . esc_html__( 'Màu nền nút', 'wp-spin-wheel' ) . '</th><td style="padding:4px 8px">';
             $out .= '<input type="color" name="spin_wheel_setting_button_color" value="' . esc_attr( $color ) . '" style="width:60px;height:36px;" /></td></tr>';
 
-            $out .= '<tr><th style="padding:4px 8px">' . esc_html__( 'Màu chữ', 'wp-spin-wheel' ) . '</th><td style="padding:4px 8px">';
-            $out .= '<input type="color" name="spin_wheel_setting_button_text_color" value="' . esc_attr( $tcolor ) . '" style="width:60px;height:36px;" /></td></tr>';
-
-            $out .= '<tr><th style="padding:4px 8px">' . esc_html__( 'Bo góc (px)', 'wp-spin-wheel' ) . '</th><td style="padding:4px 8px">';
-            $out .= '<input type="number" name="spin_wheel_setting_button_radius" value="' . esc_attr( $radius ) . '" class="small-text" min="0" max="100" /></td></tr>';
-
             $out .= '<tr><th style="padding:4px 8px">' . esc_html__( 'Ảnh nền nút (URL)', 'wp-spin-wheel' ) . '</th><td style="padding:4px 8px">';
-            $out .= '<input type="text" name="spin_wheel_setting_button_background_image" value="' . esc_attr( $bg_img ) . '" class="widefat" placeholder="https://example.com/btn.png" /></td></tr>';
+            $out .= '<input type="text" name="spin_wheel_setting_button_background_image" value="' . esc_attr( $bg_img ) . '" class="widefat" placeholder="https://example.com/btn.png" />';
+            $out .= '<small style="display:block;margin-top:4px;color:#666;">' . esc_html__( 'Nếu có ảnh nền sẽ ưu tiên hiển thị hơn màu.', 'wp-spin-wheel' ) . '</small>';
+            $out .= '</td></tr>';
         }
 
         if ( 'audios_start' === $group_key || 'audios_end' === $group_key ) {
             $file = $cfg['file'] ?? '';
-
-            $out .= '<tr><th style="padding:4px 8px;width:150px">' . esc_html__( 'File nhạc (URL)', 'wp-spin-wheel' ) . '</th><td style="padding:4px 8px">';
+            $out .= '<tr><th style="padding:4px 8px;width:160px">' . esc_html__( 'File nhạc (URL)', 'wp-spin-wheel' ) . '</th><td style="padding:4px 8px">';
             $out .= '<input type="text" name="spin_wheel_setting_audio_file" value="' . esc_attr( $file ) . '" class="widefat" placeholder="https://example.com/music.mp3" />';
             $out .= '<small style="display:block;margin-top:4px;color:#666;">' . esc_html__( 'Hỗ trợ: .mp3, .ogg, .wav', 'wp-spin-wheel' ) . '</small>';
             $out .= '</td></tr>';
@@ -464,12 +455,16 @@ class WP_Spin_Wheel_Settings {
                 <div class="inside">
                     <?php
                     $group_definitions = array(
-                        'backgrounds' => array(
-                            'title' => __( 'Background items', 'wp-spin-wheel' ),
-                            'name'  => __( 'Background', 'wp-spin-wheel' ),
+                        'bg_gradients' => array(
+                            'title' => __( 'Background Gradient', 'wp-spin-wheel' ),
+                            'name'  => __( 'Gradient', 'wp-spin-wheel' ),
+                        ),
+                        'bg_images' => array(
+                            'title' => __( 'Background Image', 'wp-spin-wheel' ),
+                            'name'  => __( 'Image', 'wp-spin-wheel' ),
                         ),
                         'buttons' => array(
-                            'title' => __( 'Button items', 'wp-spin-wheel' ),
+                            'title' => __( 'Button', 'wp-spin-wheel' ),
                             'name'  => __( 'Button', 'wp-spin-wheel' ),
                         ),
                         'audios_start' => array(
@@ -544,13 +539,28 @@ class WP_Spin_Wheel_Settings {
                                                 <td><?php echo esc_html( $item['name'] ?? '' ); ?></td>
                                                 <td>
                                                     <?php
-                                                    if ( 'backgrounds' === $group_key ) {
-                                                        $label = ( 'color' === ( $cfg['type'] ?? '' ) ) ? $cfg['value'] ?? '' : $cfg['image'] ?? '';
-                                                        echo esc_html( ( $cfg['type'] ?? '' ) . ': ' . $label );
+                                                    if ( 'bg_gradients' === $group_key ) {
+                                                        $gradient = $cfg['gradient'] ?? '';
+                                                        if ( $gradient ) {
+                                                            echo '<span style="display:inline-block;width:80px;height:18px;border-radius:3px;background:' . esc_attr( $gradient ) . ';border:1px solid #ccc;vertical-align:middle;"></span> ';
+                                                            echo '<small>' . esc_html( mb_strimwidth( $gradient, 0, 40, '…' ) ) . '</small>';
+                                                        } else {
+                                                            echo '<em style="color:#999;">' . esc_html__( 'Chưa có gradient', 'wp-spin-wheel' ) . '</em>';
+                                                        }
+                                                    } elseif ( 'bg_images' === $group_key ) {
+                                                        $image = $cfg['image'] ?? '';
+                                                        if ( $image ) {
+                                                            echo '<img src="' . esc_url( $image ) . '" style="max-height:32px;border-radius:3px;border:1px solid #ccc;vertical-align:middle;" /> ';
+                                                            echo '<small>' . esc_html( basename( $image ) ) . '</small>';
+                                                        } else {
+                                                            echo '<em style="color:#999;">' . esc_html__( 'Chưa có ảnh', 'wp-spin-wheel' ) . '</em>';
+                                                        }
                                                     } elseif ( 'buttons' === $group_key ) {
-                                                        echo esc_html( $cfg['text'] ?? '' );
-                                                        if ( ! empty( $cfg['color'] ) ) {
-                                                            echo ' <span style="display:inline-block;width:14px;height:14px;background:' . esc_attr( $cfg['color'] ) . ';border:1px solid #ccc;vertical-align:middle;border-radius:2px;"></span>';
+                                                        if ( ! empty( $cfg['background_image'] ) ) {
+                                                            echo '<img src="' . esc_url( $cfg['background_image'] ) . '" style="max-height:28px;border-radius:3px;border:1px solid #ccc;vertical-align:middle;" />';
+                                                        } elseif ( ! empty( $cfg['color'] ) ) {
+                                                            echo '<span style="display:inline-block;width:28px;height:18px;background:' . esc_attr( $cfg['color'] ) . ';border:1px solid #ccc;vertical-align:middle;border-radius:2px;"></span> ';
+                                                            echo '<small>' . esc_html( $cfg['color'] ) . '</small>';
                                                         }
                                                     } elseif ( 'audios_start' === $group_key || 'audios_end' === $group_key ) {
                                                         $file = $cfg['file'] ?? '';
