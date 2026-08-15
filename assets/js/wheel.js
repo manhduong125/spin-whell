@@ -19,6 +19,7 @@ jQuery(document).ready(function($) {
 
     // Đọc tất cả option từ modal settings thành object
     function collectSettings() {
+        var spinBgIsImage = $('#switch_spin_bg_type').is(':checked');
         return {
             animation: {
                 duration: parseFloat( $('#duration').val() ) || 6,
@@ -36,6 +37,15 @@ jQuery(document).ready(function($) {
                 popup_label:        $.trim( $('#popup_label').val() ),
                 show_remove_button: $('#show_remove_button').is(':checked'),
             },
+            button: {
+                text:             $.trim( $('#btn-spin-label').val() ),
+                bg_type:          spinBgIsImage ? 'image' : 'color',
+                color:            spinBgIsImage ? '' : ( $('#btn-spin-color').val() || '#ff0000' ),
+                text_color:       spinBgIsImage ? '' : ( $('#btn-spin-text-color').val() || '#ffffff' ),
+                background_image: spinBgIsImage ? $.trim( $('#btn-spin-img').val() ) : '',
+            },
+            // background: đọc từ wheelSettings (được cập nhật trực tiếp bởi sw-media-apply)
+            background: $.extend( {}, wheelSettings.background || {} ),
         };
     }
 
@@ -82,6 +92,32 @@ jQuery(document).ready(function($) {
                 $('#show_remove_button').prop('checked', !! s.ui.show_remove_button );
             }
         }
+
+        if ( s.button ) {
+            var b = s.button;
+            if ( b.text !== undefined ) {
+                $('#btn-spin-label').val( b.text );
+            }
+            var isImage = b.bg_type === 'image' || ( ! b.bg_type && !! b.background_image );
+            $('#switch_spin_bg_type').prop('checked', isImage);
+            if ( isImage ) {
+                $('#form_spin_bg_color').addClass('d-none');
+                $('#form_spin_bg_image').removeClass('d-none');
+                if ( b.background_image !== undefined ) {
+                    $('#btn-spin-img').val( b.background_image );
+                    updateSpinImgPreview( b.background_image );
+                }
+            } else {
+                $('#form_spin_bg_image').addClass('d-none');
+                $('#form_spin_bg_color').removeClass('d-none');
+                if ( b.color ) {
+                    $('#btn-spin-color').val( b.color );
+                }
+                if ( b.text_color ) {
+                    $('#btn-spin-text-color').val( b.text_color );
+                }
+            }
+        }
     }
 
     // Merge saved settings vào wheelSettings
@@ -95,6 +131,12 @@ jQuery(document).ready(function($) {
         }
         if ( saved.ui ) {
             wheelSettings.ui = $.extend( {}, wheelSettings.ui, saved.ui );
+        }
+        if ( saved.button ) {
+            wheelSettings.button = $.extend( {}, wheelSettings.button, saved.button );
+        }
+        if ( saved.background ) {
+            wheelSettings.background = $.extend( {}, wheelSettings.background, saved.background );
         }
     }
 
@@ -131,9 +173,23 @@ jQuery(document).ready(function($) {
             animation: { duration: 6, confetti: false },
             audio:     { start_sound: '0', start_sound_file: '', end_sound: '0', end_sound_file: '' },
             ui:        { auto_remove: false, show_popup: false, popup_label: '', show_remove_button: false },
+            button:    { text: 'Quay', bg_type: 'color', color: '#ff0000', text_color: '#ffffff', background_image: '' },
         });
 
         renderWheel();
+    }
+
+    // Cập nhật preview ảnh nút quay
+    function updateSpinImgPreview( url ) {
+        var $wrap = $('#spin_img_preview_wrap');
+        var $img  = $('#spin_img_preview');
+        if ( url ) {
+            $img.attr('src', url);
+            $wrap.show();
+        } else {
+            $wrap.hide();
+            $img.attr('src', '');
+        }
     }
 
     function parseJson(value, fallback) {
@@ -165,9 +221,10 @@ jQuery(document).ready(function($) {
 
         return {
             background: {
-                type: backgroundType,
-                color: backgroundColor,
-                image: backgroundImage,
+                type:     backgroundType,
+                color:    backgroundColor,
+                image:    backgroundImage,
+                gradient: background.gradient || '',
             },
             wheel: settings.wheel || {
                 size: 600,
@@ -498,20 +555,44 @@ jQuery(document).ready(function($) {
 
     function renderWheel() {
         var wrapper = $('#wheel-wrapper');
-        wrapper.css({
-            backgroundColor: wheelSettings.background.color,
-            backgroundImage: wheelSettings.background.image ? 'url(' + wheelSettings.background.image + ')' : 'none',
-            backgroundSize: wheelSettings.background.image ? 'cover' : 'auto',
-            backgroundRepeat: wheelSettings.background.image ? 'no-repeat' : 'repeat',
-            backgroundPosition: wheelSettings.background.image ? 'center center' : 'center',
-        });
+        var bg      = wheelSettings.background || {};
 
-        $('#spin').text(wheelSettings.button.text || 'QUAY NGAY');
+        if ( bg.gradient ) {
+            // Gradient: gán vào backgroundImage (gradient là image function trong CSS)
+            wrapper.css({
+                backgroundColor:    'transparent',
+                backgroundImage:    bg.gradient,
+                backgroundSize:     'cover',
+                backgroundRepeat:   'no-repeat',
+                backgroundPosition: 'center center',
+            });
+        } else if ( bg.image ) {
+            // Ảnh URL
+            wrapper.css({
+                backgroundColor: bg.color || '',
+                backgroundImage: 'url(' + bg.image + ')',
+                backgroundSize:     'cover',
+                backgroundRepeat:   'no-repeat',
+                backgroundPosition: 'center center',
+            });
+        } else {
+            // Màu nền thuần
+            wrapper.css({
+                backgroundColor: bg.color || '',
+                backgroundImage: 'none',
+                backgroundSize:     'auto',
+                backgroundRepeat:   'repeat',
+                backgroundPosition: 'center',
+            });
+        }
+
+        var btnText = wheelSettings.button.text !== undefined ? wheelSettings.button.text : 'QUAY NGAY';
+        $('#spin').text(btnText);
         $('#spin').css({
-            backgroundColor: wheelSettings.button.background_image ? 'transparent' : wheelSettings.button.color,
+            backgroundColor: wheelSettings.button.background_image ? 'transparent' : ( wheelSettings.button.color || '#ff0000' ),
             backgroundImage: wheelSettings.button.background_image ? 'url(' + wheelSettings.button.background_image + ')' : 'none',
-            color: wheelSettings.button.text_color,
-            borderRadius: wheelSettings.button.radius + 'px',
+            color: wheelSettings.button.background_image ? 'transparent' : ( wheelSettings.button.text_color || '#ffffff' ),
+            borderRadius: (wheelSettings.button.radius || 50) + 'px',
             backgroundSize: wheelSettings.button.background_image ? 'cover' : '',
             backgroundRepeat: wheelSettings.button.background_image ? 'no-repeat' : '',
             backgroundPosition: wheelSettings.button.background_image ? 'center center' : '',
@@ -987,6 +1068,11 @@ jQuery(document).ready(function($) {
 
     // ── Lưu settings từ modal ──
     $('#btn_wheel_setting').on('click', function() {
+        // Nếu btn-spin-img có giá trị nhưng switch chưa bật → tự chuyển sang image mode
+        var imgVal = $.trim( $('#btn-spin-img').val() );
+        if ( imgVal && ! $('#switch_spin_bg_type').is(':checked') ) {
+            $('#switch_spin_bg_type').prop('checked', true).trigger('change');
+        }
         saveWheelSettings();
     });
 
@@ -1085,6 +1171,90 @@ jQuery(document).ready(function($) {
         // Lưu vào wheelSettings ngay để lần quay tiếp áp dụng đúng
         if ( ! wheelSettings.ui ) wheelSettings.ui = {};
         wheelSettings.ui.show_remove_button = $(this).is(':checked');
+    });
+
+    // ── Thư viện media: event delegation cho nút .sw-media-apply ──
+    // data-type="btn"  → đặt làm ảnh nút quay
+    // data-type="bgr"  → đặt làm ảnh nền #wheel-wrapper
+    // data-type="grd"  → đặt làm gradient nền #wheel-wrapper (đọc từ .sw-gradient-preview cùng hàng)
+    $(document).on('click', '.sw-media-apply', function() {
+        var type = $(this).data('type');
+        var url  = $(this).data('url') || '';
+
+        if ( type === 'btn' ) {
+            // --- Nút quay: ảnh nền ---
+            if ( ! wheelSettings.button ) wheelSettings.button = {};
+            wheelSettings.button.background_image = url;
+            wheelSettings.button.text             = '';      // ẩn text khi dùng ảnh
+            wheelSettings.button.color            = '';
+            wheelSettings.button.text_color       = 'transparent';
+
+            // Đồng bộ UI trong modal: switch sang chế độ ảnh
+            $('#btn-spin-img').val( url );
+            $('#btn-spin-label').val( '' );
+            updateSpinImgPreview( url );
+            $('#switch_spin_bg_type').prop('checked', true);
+            $('#form_spin_bg_color').addClass('d-none');
+            $('#form_spin_bg_image').removeClass('d-none');
+
+        } else if ( type === 'bgr' ) {
+            // --- Nền: ảnh URL ---
+            if ( ! wheelSettings.background ) wheelSettings.background = {};
+            wheelSettings.background.image    = url;
+            wheelSettings.background.gradient = '';   // xóa gradient nếu có
+            wheelSettings.background.color    = '';
+
+            // Đồng bộ UI trong modal
+            $('#custom-bg-img').val( url );
+            if ( $('#bg-gradient').length ) $('#bg-gradient').val('');
+
+        } else if ( type === 'grd' ) {
+            // --- Nền: gradient — đọc từ data-gradient attribute trên .sw-gradient-preview cùng hàng ---
+            var gradientValue = $(this).closest('tr').find('.sw-gradient-preview').data('gradient') || '';
+            if ( ! gradientValue ) return;
+
+            if ( ! wheelSettings.background ) wheelSettings.background = {};
+            wheelSettings.background.gradient = gradientValue;
+            wheelSettings.background.image    = '';   // xóa ảnh URL nếu có
+
+            // Đồng bộ UI trong modal
+            $('#custom-bg-img').val('');
+            if ( $('#bg-gradient').length ) $('#bg-gradient').val( gradientValue );
+        }
+
+        // Lưu vào localStorage và re-render ngay, không cần bấm "Lưu lại"
+        localStorage.setItem( getSettingsStorageKey(), JSON.stringify( collectSettings() ) );
+        renderWheel();
+
+        // Feedback: đổi nút thành "✓" rồi trả về
+        var $btn = $(this);
+        var origText = $btn.text();
+        $btn.text('✓').addClass('btn-success').removeClass('btn-secondary');
+        setTimeout(function() {
+            $btn.text(origText).removeClass('btn-success').addClass('btn-secondary');
+        }, 1200);
+    });
+
+    // ── Switch nút quay: toggle giữa bg color và bg image ──
+    $('#switch_spin_bg_type').on('change', function() {
+        var isImage = $(this).is(':checked');
+        if ( isImage ) {
+            $('#form_spin_bg_color').addClass('d-none');
+            $('#form_spin_bg_image').removeClass('d-none');
+        } else {
+            $('#form_spin_bg_image').addClass('d-none');
+            $('#form_spin_bg_color').removeClass('d-none');
+        }
+    });
+
+    // ── Preview ảnh khi user nhập URL vào btn-spin-img ──
+    $('#btn-spin-img').on('input change', function() {
+        var url = $.trim( $(this).val() );
+        // Nếu có URL ảnh → tự động switch sang chế độ ảnh
+        if ( url && ! $('#switch_spin_bg_type').is(':checked') ) {
+            $('#switch_spin_bg_type').prop('checked', true).trigger('change');
+        }
+        updateSpinImgPreview( url );
     });
 
 });
