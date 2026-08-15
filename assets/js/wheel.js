@@ -20,6 +20,8 @@ jQuery(document).ready(function($) {
     // Đọc tất cả option từ modal settings thành object
     function collectSettings() {
         var spinBgIsImage = $('#switch_spin_bg_type').is(':checked');
+        // background_image có thể là URL hoặc dataURL từ upload — luôn lấy từ wheelSettings
+        var currentBgImage = ( wheelSettings.button && wheelSettings.button.background_image ) || '';
         return {
             animation: {
                 duration: parseFloat( $('#duration').val() ) || 6,
@@ -39,10 +41,10 @@ jQuery(document).ready(function($) {
             },
             button: {
                 text:             $.trim( $('#btn-spin-label').val() ),
-                bg_type:          spinBgIsImage ? 'image' : 'color',
-                color:            spinBgIsImage ? '' : ( $('#btn-spin-color').val() || '#ff0000' ),
-                text_color:       spinBgIsImage ? '' : ( $('#btn-spin-text-color').val() || '#ffffff' ),
-                background_image: spinBgIsImage ? $.trim( $('#btn-spin-img').val() ) : '',
+                bg_type:          currentBgImage ? 'image' : 'color',
+                color:            currentBgImage ? '' : ( $('#btn-spin-color').val() || '#ff0000' ),
+                text_color:       currentBgImage ? '' : ( $('#btn-spin-text-color').val() || '#ffffff' ),
+                background_image: currentBgImage,
             },
             // background: đọc từ wheelSettings (được cập nhật trực tiếp bởi sw-media-apply)
             background: $.extend( {}, wheelSettings.background || {} ),
@@ -155,7 +157,7 @@ jQuery(document).ready(function($) {
 
         // Feedback trên nút
         var $btn = $('#btn_wheel_setting');
-        $btn.text('Đã lưu ✓').addClass('btn-success').removeClass('btn-primary');
+        $btn.text('Đã lưu \u2713').addClass('btn-success').removeClass('btn-primary');
         setTimeout( function() {
             $btn.text('Lưu lại').removeClass('btn-success').addClass('btn-primary');
         }, 1500 );
@@ -181,8 +183,8 @@ jQuery(document).ready(function($) {
 
     // Cập nhật preview ảnh nút quay
     function updateSpinImgPreview( url ) {
-        var $wrap = $('#spin_img_preview_wrap');
-        var $img  = $('#spin_img_preview');
+        var $wrap = $('#spin-img-preview-wrap');
+        var $img  = $('#spin-img-preview');
         if ( url ) {
             $img.attr('src', url);
             $wrap.show();
@@ -1068,11 +1070,6 @@ jQuery(document).ready(function($) {
 
     // ── Lưu settings từ modal ──
     $('#btn_wheel_setting').on('click', function() {
-        // Nếu btn-spin-img có giá trị nhưng switch chưa bật → tự chuyển sang image mode
-        var imgVal = $.trim( $('#btn-spin-img').val() );
-        if ( imgVal && ! $('#switch_spin_bg_type').is(':checked') ) {
-            $('#switch_spin_bg_type').prop('checked', true).trigger('change');
-        }
         saveWheelSettings();
     });
 
@@ -1182,20 +1179,9 @@ jQuery(document).ready(function($) {
         var url  = $(this).data('url') || '';
 
         if ( type === 'btn' ) {
-            // --- Nút quay: ảnh nền ---
-            if ( ! wheelSettings.button ) wheelSettings.button = {};
-            wheelSettings.button.background_image = url;
-            wheelSettings.button.text             = '';      // ẩn text khi dùng ảnh
-            wheelSettings.button.color            = '';
-            wheelSettings.button.text_color       = 'transparent';
-
-            // Đồng bộ UI trong modal: switch sang chế độ ảnh
-            $('#btn-spin-img').val( url );
-            $('#btn-spin-label').val( '' );
-            updateSpinImgPreview( url );
-            $('#switch_spin_bg_type').prop('checked', true);
-            $('#form_spin_bg_color').addClass('d-none');
-            $('#form_spin_bg_image').removeClass('d-none');
+            // --- Nút quay: ảnh từ thư viện → dùng chung applySpinImage() ---
+            $('#btn-spin-img').val( url );   // đồng bộ URL field
+            applySpinImage( url );
 
         } else if ( type === 'bgr' ) {
             // --- Nền: ảnh URL ---
@@ -1226,14 +1212,117 @@ jQuery(document).ready(function($) {
         localStorage.setItem( getSettingsStorageKey(), JSON.stringify( collectSettings() ) );
         renderWheel();
 
-        // Feedback: đổi nút thành "✓" rồi trả về
+        // Feedback: đổi nút thành "\u2713" rồi trả về
         var $btn = $(this);
         var origText = $btn.text();
-        $btn.text('✓').addClass('btn-success').removeClass('btn-secondary');
+        $btn.text('\u2713').addClass('btn-success').removeClass('btn-secondary');
         setTimeout(function() {
             $btn.text(origText).removeClass('btn-success').addClass('btn-secondary');
         }, 1200);
     });
+
+    // ── Body: Áp dụng màu nền + màu chữ ──
+    $('#btn-apply-body-color').on('click', function() {
+        var bg    = $('#custom-bg-color').val() || '#ffffff';
+        var color = $('#custom-color').val()    || '#000000';
+        if ( ! wheelSettings.background ) wheelSettings.background = {};
+        wheelSettings.background.color    = bg;
+        wheelSettings.background.image    = '';
+        wheelSettings.background.gradient = '';
+        $('#wheel-wrapper').css({ color: color });
+        renderWheel();
+        localStorage.setItem( getSettingsStorageKey(), JSON.stringify( collectSettings() ) );
+        feedbackBtn( $(this), 'Đã áp dụng \u2713' );
+    });
+
+    // ── Body: Upload ảnh nền ──
+    $('#upload_bgr').on('change', function() {
+        var file = this.files && this.files[0];
+        if ( ! file ) return;
+        var maxMB = parseFloat( $(this).data('maxsize') ) || 5;
+        if ( file.size > maxMB * 1024 * 1024 ) {
+            $('#bgr-upload-info').text('Quá ' + maxMB + 'MB!').addClass('text-danger');
+            return;
+        }
+        $('#bgr-upload-info').text('Đang xử lý...').removeClass('text-danger');
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            applyBodyImage( e.target.result, 'Ảnh từ máy của bạn' );
+            $('#bgr-upload-info').text( file.name );
+            document.getElementById('upload_bgr').value = '';
+        };
+        reader.readAsDataURL( file );
+    });
+
+    // ── Body: Áp dụng URL ảnh nền ──
+    $('#btn-apply-body-img').on('click', function() {
+        var url = $.trim( $('#custom-bg-img').val() );
+        if ( ! url ) return;
+        applyBodyImage( url, url.replace(/^https?:\/\/[^/]+/, '').substring(0, 40) + '...' );
+    });
+
+    // ── Body: Xoá ảnh nền ──
+    $('#btn-clear-body-img').on('click', function() {
+        $('#custom-bg-img').val('');
+        applyBodyImage('', '');
+        $('#bgr-upload-info').text('JPG/PNG/WebP ≤ 5MB').removeClass('text-danger');
+    });
+
+    // Helper: apply ảnh vào background #wheel-wrapper
+    function applyBodyImage( src, label ) {
+        if ( ! wheelSettings.background ) wheelSettings.background = {};
+        wheelSettings.background.image    = src;
+        wheelSettings.background.gradient = '';
+        wheelSettings.background.color    = '';
+        if ( src ) {
+            $('#bgr-preview').attr('src', src);
+            $('#bgr-preview-wrap').show();
+        } else {
+            $('#bgr-preview-wrap').hide();
+            $('#bgr-preview').attr('src', '');
+        }
+        renderWheel();
+        localStorage.setItem( getSettingsStorageKey(), JSON.stringify( collectSettings() ) );
+    }
+
+    // ── Body: Swatches gradient nhanh ──
+    $(document).on('click', '.sw-gradient-swatch', function() {
+        var gradient = $(this).data('gradient') || '';
+        if ( ! gradient ) return;
+        $('#bg-gradient').val( gradient );
+        $('#gradient-preview-box').css('background', gradient);
+        // Đánh dấu swatch đang chọn
+        $('.sw-gradient-swatch').css('outline', '');
+        $(this).css('outline', '2px solid #0d6efd');
+    });
+
+    // ── Body: Preview live khi gõ gradient textarea ──
+    $('#bg-gradient').on('input', function() {
+        var val = $.trim( $(this).val() );
+        if ( val ) $('#gradient-preview-box').css('background', val);
+    });
+
+    // ── Body: Áp dụng gradient ──
+    $('#btn-apply-body-gradient').on('click', function() {
+        var gradient = $.trim( $('#bg-gradient').val() );
+        if ( ! gradient ) return;
+        if ( ! wheelSettings.background ) wheelSettings.background = {};
+        wheelSettings.background.gradient = gradient;
+        wheelSettings.background.image    = '';
+        wheelSettings.background.color    = '';
+        renderWheel();
+        localStorage.setItem( getSettingsStorageKey(), JSON.stringify( collectSettings() ) );
+        feedbackBtn( $(this), 'Đã áp dụng \u2713' );
+    });
+
+    // Utility: feedback ngắn trên button
+    function feedbackBtn( $btn, msg ) {
+        var orig = $btn.text();
+        $btn.text( msg ).addClass('btn-success').removeClass('btn-primary btn-outline-secondary');
+        setTimeout(function(){
+            $btn.text( orig ).removeClass('btn-success').addClass('btn-primary');
+        }, 1400);
+    }
 
     // ── Switch nút quay: toggle giữa bg color và bg image ──
     $('#switch_spin_bg_type').on('change', function() {
@@ -1247,14 +1336,97 @@ jQuery(document).ready(function($) {
         }
     });
 
-    // ── Preview ảnh khi user nhập URL vào btn-spin-img ──
-    $('#btn-spin-img').on('input change', function() {
+    // ── Preview ảnh khi user nhập URL — chỉ khi user thực sự gõ, không trigger từ JS ──
+    $('#btn-spin-img').on('input', function() {
         var url = $.trim( $(this).val() );
-        // Nếu có URL ảnh → tự động switch sang chế độ ảnh
-        if ( url && ! $('#switch_spin_bg_type').is(':checked') ) {
-            $('#switch_spin_bg_type').prop('checked', true).trigger('change');
-        }
         updateSpinImgPreview( url );
     });
+
+    // ── Nút "Áp dụng text" nút quay ──
+    $('#btn-apply-spin-label').on('click', function() {
+        var text = $.trim( $('#btn-spin-label').val() );
+        if ( ! wheelSettings.button ) wheelSettings.button = {};
+        wheelSettings.button.text = text;
+        renderWheel();
+        localStorage.setItem( getSettingsStorageKey(), JSON.stringify( collectSettings() ) );
+        var $b = $(this);
+        $b.text('\u2713').addClass('btn-success').removeClass('btn-outline-secondary');
+        setTimeout(function(){ $b.text('Áp dụng').removeClass('btn-success').addClass('btn-outline-secondary'); }, 1200);
+    });
+
+    // Enter trong input text cũng apply
+    $('#btn-spin-label').on('keydown', function(e) {
+        if ( e.key === 'Enter' ) { e.preventDefault(); $('#btn-apply-spin-label').trigger('click'); }
+    });
+
+    // ── Nút "Áp dụng" URL ảnh nút quay ──
+    $('#btn-apply-spin-img').on('click', function() {
+        var url = $.trim( $('#btn-spin-img').val() );
+        applySpinImage( url );
+    });
+
+    // ── Upload ảnh nút quay từ máy ──
+    $('#upload_spin_bg').on('change', function() {
+        var file = this.files && this.files[0];
+        if ( ! file ) return;
+
+        var maxMB = parseFloat( $(this).data('maxsize') ) || 2;
+        if ( file.size > maxMB * 1024 * 1024 ) {
+            $('#spin-upload-info').text('Ảnh quá lớn! Tối đa ' + maxMB + 'MB').addClass('text-danger');
+            return;
+        }
+        $('#spin-upload-info').text('Đang xử lý...').removeClass('text-danger');
+
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            var dataUrl = e.target.result;
+            $('#spin-upload-info').text( file.name );
+            $('#btn-spin-img').val('');   // clear URL field vì đang dùng upload
+            applySpinImage( dataUrl );
+            // reset input SAU khi đọc xong để không cancel FileReader
+            document.getElementById('upload_spin_bg').value = '';
+        };
+        reader.onerror = function() {
+            $('#spin-upload-info').text('Lỗi đọc file!').addClass('text-danger');
+        };
+        reader.readAsDataURL( file );
+    });
+
+    // ── Xoá ảnh nút quay ──
+    $('#btn-clear-spin-img').on('click', function() {
+        $('#btn-spin-img').val('');
+        applySpinImage('');
+        $('#spin-upload-info').text('JPG/PNG/WebP, tối đa 2MB').removeClass('text-danger');
+    });
+
+    // Helper trung tâm: apply ảnh vào nút quay từ mọi nguồn (upload/URL/thư viện)
+    function applySpinImage( src ) {
+        if ( ! wheelSettings.button ) wheelSettings.button = {};
+        wheelSettings.button.background_image = src;
+
+        if ( src ) {
+            // Có ảnh: ẩn text
+            wheelSettings.button.text       = '';
+            wheelSettings.button.text_color = 'transparent';
+            // Hiện preview
+            $('#spin-img-preview').attr('src', src);
+            $('#spin-img-preview-wrap').show();
+            // Label: upload = data: prefix, thư viện/URL = domain
+            if ( src.indexOf('data:') === 0 ) {
+                $('#spin-img-preview-label').text('Ảnh từ máy của bạn');
+            } else {
+                $('#spin-img-preview-label').text( src.replace(/^https?:\/\/[^/]+/, '').substring(0, 40) + '...' );
+            }
+        } else {
+            // Xoá ảnh: trả text về
+            wheelSettings.button.text       = $.trim( $('#btn-spin-label').val() ) || 'Quay';
+            wheelSettings.button.text_color = '#ffffff';
+            $('#spin-img-preview-wrap').hide();
+            $('#spin-img-preview').attr('src', '');
+        }
+
+        renderWheel();
+        localStorage.setItem( getSettingsStorageKey(), JSON.stringify( collectSettings() ) );
+    }
 
 });

@@ -556,11 +556,16 @@ $default_description = '';
                                 id="show_remove_button" checked=""> <label class="form-check-label"
                                 for="show_remove_button"> Hiển thị nút “Xóa ô này” </label> </div>
                     </div>
+
                     <div class="tab-pane fade pt-1" id="appearance-tab-pane" role="tabpanel"
                         aria-labelledby="appearance-tab" tabindex="0">
                         <fieldset class="border border-2 px-2">
-                            <legend class="float-none w-auto p-2 fs-6 fw-bold">Vòng quay <span
-                                    data-feather="chevron-down"></span></legend>
+                            <legend class="float-none w-auto p-2 fs-6 fw-bold">Vòng quay <svg
+                                    xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="feather feather-chevron-down">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg></legend>
                             <div class="mb-3" id="custom-basic-style"> <input type="hidden" id="type" value="color">
                                 <div class="row justify-content-center align-items-center mb-3">
                                     <div class="col-5 text-end"> <button class="btn mb-1" id="btn_color_wheel"><img
@@ -569,18 +574,16 @@ $default_description = '';
                                                 width="36" alt="Color wheel"></button> <label for="btn_color_wheel">Màu
                                             cho mỗi phần</label> </div>
                                     <div class="col-2 text-center">
-                                        <div class="form-check form-switch p-0 d-inline-block mx-auto">
-                                            <input class="form-check-input ms-0"
+                                        <div class="form-check form-switch p-0 d-inline-block mx-auto"> <input
+                                                class="form-check-input ms-0"
                                                 style="background-color: #0d6efd;border-color: #0d6efd;background-image: url('data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'-4 -4 8 8\'%3e%3ccircle r=\'3\' fill=\'%23fff\'/%3e%3c/svg%3e');"
-                                                type="checkbox" role="switch" id="switch_cover_img">
-                                        </div>
+                                                type="checkbox" role="switch" id="switch_cover_img"> </div>
                                     </div>
                                     <div class="col-5 text-start"> <button class="btn mb-1" id="btn_cover_wheel"><img
                                                 decoding="async"
                                                 src="https://vongquaymayman.co/wp-content/themes/twentytwentythree-child/assets/images/cover-wheel.jpg"
-                                                width="36" class="rounded-pill" alt="Cover wheel"></button>
-                                        <label for="btn_cover_wheel">Ảnh nền vòng quay</label>
-                                    </div>
+                                                width="36" class="rounded-pill" alt="Cover wheel"></button> <label
+                                            for="btn_cover_wheel">Ảnh nền vòng quay</label> </div>
                                 </div>
                                 <div class="mb-3 d-none" id="form_cover_img">
                                     <div class="input-group justify-content-center mb-3"> <input type="text"
@@ -590,15 +593,26 @@ $default_description = '';
                                             class="input-group-text"> <img decoding="async"
                                                 src="https://vongquaymayman.co/wp-content/themes/twentytwentythree-child/assets/images/cover-wheel.jpg"
                                                 width="36" height="36" id="cover_img_display" class="rounded-pill"
-                                                alt="default cover image"> </span>
-                                        <button class="btn btn-secondary" id="btn-select-cover-img">Chọn
-                                            <span data-feather="chevron-down"></span></button> <span
-                                            class="input-group-text"> <label for="upload_cover_img"
-                                                id="btn_upload_cover_img" data-bs-toggle="tooltip"
-                                                title="Kích thước khuyên dùng: 800 x 800 (px)"><span
-                                                    data-feather="image"></span></label> </span> <input type="file"
-                                            id="upload_cover_img" data-maxsize="2" class="d-none" accept="image/*">
-                                    </div>
+                                                alt="default cover image"> </span> <button class="btn btn-secondary"
+                                            id="btn-select-cover-img">Chọn <svg xmlns="http://www.w3.org/2000/svg"
+                                                width="24" height="24" viewBox="0 0 24 24" fill="none"
+                                                stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                                stroke-linejoin="round" class="feather feather-chevron-down">
+                                                <polyline points="6 9 12 15 18 9"></polyline>
+                                            </svg></button> <span class="input-group-text"> <label
+                                                for="upload_cover_img" id="btn_upload_cover_img"
+                                                data-bs-toggle="tooltip"
+                                                aria-label="Kích thước khuyên dùng: 800 x 800 (px)"
+                                                data-bs-original-title="Kích thước khuyên dùng: 800 x 800 (px)"><svg
+                                                    xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                                    viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                                                    class="feather feather-image">
+                                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                                                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                                                    <polyline points="21 15 16 10 5 21"></polyline>
+                                                </svg></label> </span> <input type="file" id="upload_cover_img"
+                                            data-maxsize="2" class="d-none" accept="image/*"> </div>
                                 </div>
                                 <div id="form_theme_color">
                                     <div class="dropdown mb-3" id="myDropdown"> <button type="button"
@@ -606,8 +620,8 @@ $default_description = '';
                                             data-bs-toggle="dropdown" aria-expanded="false"
                                             data-bs-auto-close="outside"> Áp dụng một chủ đề </button>
                                         <div class="dropdown-menu">
-                                            <div class="item-header border-top border-bottom pt-3 pb-2 m-2">
-                                                Mặc định</div>
+                                            <div class="item-header border-top border-bottom pt-3 pb-2 m-2">Mặc định
+                                            </div>
                                             <div class="dropdown-item ms-1"
                                                 data-content="#D6392E,#3369E8,#4F9A29,#EEB331"
                                                 data-border="#FF4D00,#F6FA00" data-spin_label="Quay" data-spin_img=""
@@ -636,8 +650,8 @@ $default_description = '';
                                                         </svg> </div>
                                                 </div>
                                             </div>
-                                            <div class="item-header border-top border-bottom pt-3 pb-2 m-2">
-                                                Mạng xã hội</div>
+                                            <div class="item-header border-top border-bottom pt-3 pb-2 m-2">Mạng xã hội
+                                            </div>
                                             <div class="dropdown-item ms-1"
                                                 data-content="#002296,#82008F,#C0007A,#EA0C5F,#FF5341,#FF8820"
                                                 data-border="#1419AD,#FFFFFF" data-spin_label=""
@@ -830,8 +844,8 @@ $default_description = '';
                                                         </svg> </div>
                                                 </div>
                                             </div>
-                                            <div class="item-header border-top border-bottom pt-3 pb-2 m-2">
-                                                Học sinh</div>
+                                            <div class="item-header border-top border-bottom pt-3 pb-2 m-2">Học sinh
+                                            </div>
                                             <div class="dropdown-item ms-1" data-content="#FFFFFF,#A9D9E2,#FDB1D4"
                                                 data-border="#A9D9E2,#FFFFFF" data-spin_label="Quay" data-spin_img=""
                                                 data-is_stroke="no" data-bg_img="" data-bg_gradient=""
@@ -1062,8 +1076,7 @@ $default_description = '';
                                                         </svg> </div>
                                                 </div>
                                             </div>
-                                            <div class="item-header border-top border-bottom pt-3 pb-2 m-2">
-                                                Phụ nữ</div>
+                                            <div class="item-header border-top border-bottom pt-3 pb-2 m-2">Phụ nữ</div>
                                             <div class="dropdown-item ms-1"
                                                 data-content="#F31559,#FF52A2,#FFB07F,#FFECAF"
                                                 data-border="#F31559,#FFFFFF" data-spin_label="Quay" data-spin_img=""
@@ -1265,8 +1278,7 @@ $default_description = '';
                                                         </svg> </div>
                                                 </div>
                                             </div>
-                                            <div class="item-header border-top border-bottom pt-3 pb-2 m-2">
-                                                Chủ đề</div>
+                                            <div class="item-header border-top border-bottom pt-3 pb-2 m-2">Chủ đề</div>
                                             <div class="dropdown-item ms-1"
                                                 data-content="#3E1C34,#602748,#B04622,#F7921D"
                                                 data-border="#3E1C34,#FFFFFF" data-spin_label=""
@@ -1604,8 +1616,8 @@ $default_description = '';
                                                         </svg> </div>
                                                 </div>
                                             </div>
-                                            <div class="item-header border-top border-bottom pt-3 pb-2 m-2">
-                                                Theo mùa</div>
+                                            <div class="item-header border-top border-bottom pt-3 pb-2 m-2">Theo mùa
+                                            </div>
                                             <div class="dropdown-item ms-1"
                                                 data-content="#FFC5C5,#FFEBD8,#C7DCA7,#89B9AD"
                                                 data-border="#C7DCA7,#FFFFFF" data-spin_label="Quay" data-spin_img=""
@@ -1780,8 +1792,7 @@ $default_description = '';
                                                         </svg> </div>
                                                 </div>
                                             </div>
-                                            <div class="item-header border-top border-bottom pt-3 pb-2 m-2">
-                                                Màu cờ</div>
+                                            <div class="item-header border-top border-bottom pt-3 pb-2 m-2">Màu cờ</div>
                                             <div class="dropdown-item ms-1" data-content="#DD241F,#FBF500"
                                                 data-border="#dd241f,#f6fa00" data-spin_label=""
                                                 data-spin_img="https://vongquaymayman.co/wp-content/themes/twentytwentythree-child/assets/buttons/vnflag.jpg"
@@ -2040,48 +2051,48 @@ $default_description = '';
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="d-flex justify-content-between mb-3"><span>Tùy chỉnh màu
-                                            sắc</span> <a class="text-primary text-decoration-none" target="_blank"
-                                            href="https://vongquaymayman.co/meo-chon-mau-sac-dep/">Mẹo chọn
-                                            màu đẹp°</a></div>
+                                    <div class="d-flex justify-content-between mb-3"><span>Tùy chỉnh màu sắc</span> <a
+                                            class="text-primary text-decoration-none" target="_blank"
+                                            href="https://vongquaymayman.co/meo-chon-mau-sac-dep/">Mẹo chọn màu đẹp°</a>
+                                    </div>
                                     <div class="row g-1 g-lg-1 mb-3">
-                                        <div class="col col-lg-2">
+                                        <div class="col-2 col-lg-2">
                                             <div class="d-flex">
                                                 <div class="form-check"> <input class="form-check-input" type="checkbox"
-                                                        value="1" name="chkcolor" id="chkcolor-1" checked> </div> <input
-                                                    type="color"
+                                                        value="1" name="chkcolor" id="chkcolor-1" checked=""> </div>
+                                                <input type="color"
                                                     class="form-control form-control-sm form-control-color m-0 p-0 border-0"
                                                     value="#D6392E" id="color-1">
                                             </div>
                                         </div>
-                                        <div class="col col-lg-2">
+                                        <div class="col-2 col-lg-2">
                                             <div class="d-flex">
                                                 <div class="form-check"> <input class="form-check-input" type="checkbox"
-                                                        value="2" name="chkcolor" id="chkcolor-2" checked> </div> <input
-                                                    type="color"
+                                                        value="2" name="chkcolor" id="chkcolor-2" checked=""> </div>
+                                                <input type="color"
                                                     class="form-control form-control-sm form-control-color m-0 p-0 border-0"
                                                     value="#3369E8" id="color-2">
                                             </div>
                                         </div>
-                                        <div class="col col-lg-2">
+                                        <div class="col-2 col-lg-2">
                                             <div class="d-flex">
                                                 <div class="form-check"> <input class="form-check-input" type="checkbox"
-                                                        value="3" name="chkcolor" id="chkcolor-3" checked> </div> <input
-                                                    type="color"
+                                                        value="3" name="chkcolor" id="chkcolor-3" checked=""> </div>
+                                                <input type="color"
                                                     class="form-control form-control-sm form-control-color m-0 p-0 border-0"
                                                     value="#4F9A29" id="color-3">
                                             </div>
                                         </div>
-                                        <div class="col col-lg-2">
+                                        <div class="col-2 col-lg-2">
                                             <div class="d-flex">
                                                 <div class="form-check"> <input class="form-check-input" type="checkbox"
-                                                        value="4" name="chkcolor" id="chkcolor-4" checked> </div> <input
-                                                    type="color"
+                                                        value="4" name="chkcolor" id="chkcolor-4" checked=""> </div>
+                                                <input type="color"
                                                     class="form-control form-control-sm form-control-color m-0 p-0 border-0"
                                                     value="#EEB331" id="color-4">
                                             </div>
                                         </div>
-                                        <div class="col col-lg-2">
+                                        <div class="col-2 col-lg-2">
                                             <div class="d-flex">
                                                 <div class="form-check"> <input class="form-check-input" type="checkbox"
                                                         value="5" name="chkcolor" id="chkcolor-5"> </div> <input
@@ -2090,7 +2101,7 @@ $default_description = '';
                                                     value="#ADB2B0" id="color-5">
                                             </div>
                                         </div>
-                                        <div class="col col-lg-2">
+                                        <div class="col-2 col-lg-2">
                                             <div class="d-flex">
                                                 <div class="form-check"> <input class="form-check-input" type="checkbox"
                                                         value="6" name="chkcolor" id="chkcolor-6"> </div> <input
@@ -2101,199 +2112,181 @@ $default_description = '';
                                         </div>
                                     </div>
                                 </div>
-                                <div class="d-flex mb-3"> <span class="me-2">Màu chữ khi sector
-                                        trắng:</span> <input type="color"
+                                <div class="d-flex mb-3"> <span class="me-2">Màu chữ khi sector trắng:</span> <input
+                                        type="color"
                                         class="form-control form-control-sm form-control-color m-0 p-0 border-0"
-                                        value="#000000" id="tcsw" placeholder="Text color sector white">
-                                </div>
+                                        value="#000000" id="tcsw" placeholder="Text color sector white"> </div>
                             </div>
                             <hr>
+                            
                             <div class="form-check mb-3"> <input class="form-check-input" type="checkbox"
-                                    id="is_stroke"> <label class="form-check-label" for="is_stroke"> Bo viền
-                                    từng ô </label> </div>
-                            <div class="form-check mb-3"> <input class="form-check-input" type="checkbox"
-                                    id="show_border" checked> <label class="form-check-label" for="show_border"> Viền
+                                    id="show_border" checked=""> <label class="form-check-label" for="show_border"> Viền
                                     kim cương </label> </div>
                             <div class="row " id="custom_border_color">
                                 <div class="col-6">
-                                    <div class="input-group mb-3"> <span class="input-group-text">Màu
-                                            viền</span> <input type="color" class="form-control form-control-color"
-                                            id="border_color" value="#FF4D00"> </div>
+                                    <div class="input-group mb-3"> <span class="input-group-text">Màu viền</span> <input
+                                            type="color" class="form-control form-control-color" id="border_color"
+                                            value="#FF4D00"> </div>
                                 </div>
                                 <div class="col-6">
-                                    <div class="input-group mb-3"> <span class="input-group-text">Màu kim
-                                            cương</span> <input type="color" class="form-control form-control-color"
-                                            id="diamond_color" value="#F6FA00"> </div>
+                                    <div class="input-group mb-3"> <span class="input-group-text">Màu kim cương</span>
+                                        <input type="color" class="form-control form-control-color" id="diamond_color"
+                                            value="#F6FA00"> </div>
                                 </div>
                             </div>
                         </fieldset>
+                        <!-- text nút quay và ảnh nút quay -->
                         <fieldset class="border border-2 px-2">
-                            <legend class="float-none w-auto p-2 fs-6 fw-bold">Nút quay <span
-                                    data-feather="chevron-down"></span></legend>
+                            <legend class="float-none w-auto p-2 fs-6 fw-bold">Nút quay <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-down"><polyline points="6 9 12 15 18 9"></polyline></svg></legend>
+
+                            <!-- Text nút quay -->
                             <div class="input-group mb-3">
-                                <span class="input-group-text">Văn bản</span>
+                                <span class="input-group-text">Text</span>
                                 <input type="text" class="form-control" id="btn-spin-label" placeholder="Quay" value="Quay">
+                                <button class="btn btn-outline-secondary" id="btn-apply-spin-label" type="button">Áp dụng</button>
                             </div>
-                            <!-- Switch chọn kiểu nền nút quay -->
-                            <div class="row justify-content-center align-items-center mb-2">
-                                <div class="col-5 text-end">
-                                    <label class="form-label mb-0 fw-semibold" for="btn-spin-bg-type-color">
-                                        <span class="badge bg-secondary me-1" style="font-size:.75em;">A</span>Màu nền
-                                    </label>
-                                </div>
-                                <div class="col-2 text-center">
-                                    <div class="form-check form-switch p-0 d-inline-block mx-auto">
-                                        <input class="form-check-input ms-0"
-                                            style="background-color:#0d6efd;border-color:#0d6efd;background-image:url('data:image/svg+xml,%3csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'-4 -4 8 8\'%3e%3ccircle r=\'3\' fill=\'%23fff\'/%3e%3c/svg%3e');"
-                                            type="checkbox" role="switch" id="switch_spin_bg_type">
+
+                            <!-- Ảnh nút quay: 2 tab tách biệt -->
+                            <label class="form-label small text-muted mb-1">Ảnh nút quay</label>
+                            <ul class="nav nav-tabs nav-sm mb-2" id="spinImgTabs">
+                                <li class="nav-item">
+                                    <button class="nav-link active py-1 px-2 small" data-bs-toggle="tab"
+                                        data-bs-target="#spin-tab-upload" type="button">
+                                        ↑ Upload
+                                    </button>
+                                </li>
+                                <li class="nav-item">
+                                    <button class="nav-link py-1 px-2 small" data-bs-toggle="tab"
+                                        data-bs-target="#spin-tab-url" type="button">
+                                        🔗 URL
+                                    </button>
+                                </li>
+                            </ul>
+                            <div class="tab-content">
+                                <!-- Tab 1: Upload từ máy -->
+                                <div class="tab-pane fade show active" id="spin-tab-upload">
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        <label for="upload_spin_bg"
+                                            class="btn btn-outline-primary btn-sm mb-0">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:3px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                                            Chọn ảnh từ máy
+                                        </label>
+                                        <input type="file" id="upload_spin_bg" data-maxsize="2" class="d-none" accept="image/*">
+                                        <span class="small text-muted" id="spin-upload-info">JPG/PNG/WebP ≤ 2MB</span>
                                     </div>
                                 </div>
-                                <div class="col-5 text-start">
-                                    <label class="form-label mb-0 fw-semibold" for="btn-spin-bg-type-image">
-                                        <span class="badge bg-secondary me-1" style="font-size:.75em;">&#128247;</span>Ảnh nền
-                                    </label>
+                                <!-- Tab 2: URL -->
+                                <div class="tab-pane fade" id="spin-tab-url">
+                                    <div class="input-group mb-2">
+                                        <input type="url" class="form-control form-control-sm" id="btn-spin-img"
+                                            value="" placeholder="https://example.com/nut.jpg">
+                                        <button class="btn btn-outline-secondary btn-sm" id="btn-apply-spin-img" type="button">Áp dụng</button>
+                                    </div>
                                 </div>
                             </div>
-                            <!-- Dạng 1: Màu nền -->
-                            <div id="form_spin_bg_color">
-                                <div class="input-group mb-3">
-                                    <span class="input-group-text">Màu nền</span>
-                                    <input type="color" class="form-control form-control-color" id="btn-spin-color" value="#ff0000">
-                                    <span class="input-group-text">Màu chữ</span>
-                                    <input type="color" class="form-control form-control-color" id="btn-spin-text-color" value="#ffffff">
-                                </div>
-                            </div>
-                            <!-- Dạng 2: Ảnh nền -->
-                            <div id="form_spin_bg_image" class="d-none">
-                                <div class="input-group mb-3">
-                                    <span class="input-group-text">Ảnh</span>
-                                    <input type="url" class="form-control" id="btn-spin-img" value=""
-                                        placeholder="https://example.com/nut.jpg">
-                                    <button class="btn btn-secondary" id="btn-select-spin-img">Chọn
-                                        <span data-feather="chevron-down"></span>
+
+                            <!-- Preview chung (hiện khi có ảnh từ bất kỳ nguồn nào) -->
+                            <div id="spin-img-preview-wrap" style="display:none;" class="mb-1 d-flex align-items-center gap-3">
+                                <img id="spin-img-preview" src="https://placehold.co/100x100" alt="preview"
+                                    width="72" height="72"
+                                    class="rounded-circle border border-2 shadow-sm"
+                                    style="object-fit:cover;flex-shrink:0;">
+                                <div>
+                                    <div class="small text-muted mb-1" id="spin-img-preview-label">Đang dùng ảnh này</div>
+                                    <button class="btn btn-outline-danger btn-sm py-0 px-2" id="btn-clear-spin-img" type="button">
+                                        ✕ Xoá ảnh
                                     </button>
-                                    <span class="input-group-text">
-                                        <label for="upload_spin_bg" id="btn_upload_spin_bg"
-                                            data-bs-toggle="tooltip" title="Kích thước khuyên dùng: 250 x 250 (px)">
-                                            <span data-feather="image"></span>
-                                        </label>
-                                    </span>
-                                    <input type="file" id="upload_spin_bg" data-maxsize="5" class="d-none" accept="image/*">
-                                </div>
-                                <!-- Preview ảnh nút quay -->
-                                <div class="mb-3 text-center" id="spin_img_preview_wrap" style="display:none;">
-                                    <img id="spin_img_preview" src="" alt="preview" width="80" height="80"
-                                        class="rounded-circle border border-2" style="object-fit:cover;">
                                 </div>
                             </div>
                         </fieldset>
                         <fieldset class="border border-2 px-2 mb-3">
-                            <legend class="float-none w-auto p-2 fs-6 fw-bold">Body <span
-                                    data-feather="chevron-down"></span></legend>
-                            <div class="row mb-3">
-                                <div class="col">
-                                    <div class="input-group"> <span class="input-group-text">Màu nền</span>
-                                        <input type="color" class="form-control form-control-color" id="custom-bg-color"
-                                            value="#ffffff">
+                            <legend class="float-none w-auto p-2 fs-6 fw-bold">Body (nền trang) <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-down"><polyline points="6 9 12 15 18 9"></polyline></svg></legend>
+
+                            <!-- Màu nền + màu chữ -->
+                            <div class="row g-2 mb-2">
+                                <div class="col-6">
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text">Màu nền</span>
+                                        <input type="color" class="form-control form-control-color" id="custom-bg-color" value="#ffffff">
                                     </div>
                                 </div>
-                                <div class="col">
-                                    <div class="input-group"> <span class="input-group-text">Màu chữ</span>
-                                        <input type="color" class="form-control form-control-color" id="custom-color"
-                                            value="#000000">
-                                    </div>
-                                </div>
-                            </div>
-                            <ul class="nav nav-tabs" id="deviceTab" role="tablist">
-                                <li class="nav-item" role="presentation"> <button class="nav-link active"
-                                        id="desktop-tab" data-bs-toggle="tab" data-bs-target="#desktop-tab-pane"
-                                        type="button" role="tab" aria-controls="desktop-tab-pane"
-                                        aria-selected="true"><span class="btn-desktop">Desktop</span></button> </li>
-                                <li class="nav-item" role="presentation"> <button class="nav-link" id="tablet-tab"
-                                        data-bs-toggle="tab" data-bs-target="#tablet-tab-pane" type="button" role="tab"
-                                        aria-controls="tablet-tab-pane" aria-selected="false"><span
-                                            class="btn-tablet">Tablet</span></button> </li>
-                                <li class="nav-item" role="presentation"> <button class="nav-link" id="mobile-tab"
-                                        data-bs-toggle="tab" data-bs-target="#mobile-tab-pane" type="button" role="tab"
-                                        aria-controls="mobile-tab-pane" aria-selected="false"><span
-                                            class="btn-mobile">Mobile</span></button> </li>
-                            </ul>
-                            <div class="tab-content pt-1" id="deviceTabContent">
-                                <div class="tab-pane fade show active" id="desktop-tab-pane" role="tabpanel"
-                                    aria-labelledby="desktop-tab" tabindex="0">
-                                    <div class="input-group mb-3"> <span class="input-group-text">Nền</span>
-                                        <input type="text" class="form-control" id="custom-bg-img"
-                                            placeholder="https://example.com/bg.jpg" value=""> <button
-                                            class="btn btn-secondary" id="btn-select-bg">Chọn<span
-                                                data-feather="chevron-down"></span></button> <span
-                                            class="input-group-text"> <label for="upload_bgr" id="btn_upload_bgr"
-                                                data-bs-toggle="tooltip"
-                                                title="Kích thước (16:9): 1920 x 1080 (px)"><span
-                                                    data-feather="image"></span></label> </span> <input type="file"
-                                            id="upload_bgr" data-maxsize="5" class="d-none" accept="image/*">
-                                    </div>
-                                </div>
-                                <div class="tab-pane fade" id="tablet-tab-pane" role="tabpanel"
-                                    aria-labelledby="tablet-tab" tabindex="0">
-                                    <div class="input-group mb-3"> <span class="input-group-text">Nền</span>
-                                        <input type="text" class="form-control" id="custom-bg-img-tablet"
-                                            placeholder="https://example.com/bg-tablet.jpg"> <button
-                                            class="btn btn-secondary" id="btn-select-bg-tablet">Chọn<span
-                                                data-feather="chevron-down"></span></button> <span
-                                            class="input-group-text"> <label for="upload_bgr_tablet"
-                                                id="btn_upload_bgr_tablet" data-bs-toggle="tooltip"
-                                                title="Kích thước (4:3): 1536 x 2048 (px)"><span
-                                                    data-feather="image"></span></label> </span> <input type="file"
-                                            id="upload_bgr_tablet" data-maxsize="5" class="d-none" accept="image/*">
-                                    </div>
-                                </div>
-                                <div class="tab-pane fade" id="mobile-tab-pane" role="tabpanel"
-                                    aria-labelledby="mobile-tab" tabindex="0">
-                                    <div class="input-group mb-3"> <span class="input-group-text">Nền</span>
-                                        <input type="text" class="form-control" id="custom-bg-img-mobile"
-                                            placeholder="https://example.com/bg-mobile.jpg"> <button
-                                            class="btn btn-secondary" id="btn-select-bg-mobile">Chọn<span
-                                                data-feather="chevron-down"></span></button> <span
-                                            class="input-group-text"> <label for="upload_bgr_mobile"
-                                                id="btn_upload_bgr_mobile" data-bs-toggle="tooltip"
-                                                title="Kích thước (9:16): 1080 x 1920 (px)"><span
-                                                    data-feather="image"></span></label> </span> <input type="file"
-                                            id="upload_bgr_mobile" data-maxsize="5" class="d-none" accept="image/*">
+                                <div class="col-6">
+                                    <div class="input-group input-group-sm">
+                                        <span class="input-group-text">Màu chữ</span>
+                                        <input type="color" class="form-control form-control-color" id="custom-color" value="#000000">
                                     </div>
                                 </div>
                             </div>
-                            <div class="mb-3"> <label for="bg-gradient" class="form-label"> <span class="dropdown mt-3">
-                                        <button class="btn btn-secondary btn-sm dropdown-toggle"
-                                            id="btnDropdownGradient" type="button" data-bs-toggle="dropdown"
-                                            aria-expanded="false"> Chọn nền Gradient </button> &#8211; <span
-                                            class="text-success"><strong>Đẹp, nhẹ</strong> mà ko cần
-                                            ảnh</span>
-                                        <ul id="gradientList" class="dropdown-menu"
-                                            style="max-height:300px; overflow:auto;"> </ul>
-                                    </span> </label>
-                                <div class="d-flex">
-                                    <div id="previewBox"
-                                        style="width:150px; height:150px; border:2px solid #ccc; border-radius: 6px; margin-right: 5px; transition: all 0.2s;">
-                                    </div> <textarea class="form-control" id="bg-gradient" rows="2"
-                                        placeholder="Nhập CSS gradient (vd: conic-gradient(...))">conic-gradient(from 90deg, rgb(223, 48, 0) 0deg, rgb(223, 48, 0) 27.692deg, rgb(254, 96, 0) 27.692deg, rgb(254, 96, 0) 55.385deg, rgb(255, 145, 37) 55.385deg, rgb(255, 145, 37) 83.077deg, rgb(251, 187, 95) 83.077deg, rgb(251, 187, 95) 110.769deg, rgb(218, 217, 154) 110.769deg, rgb(218, 217, 154) 138.462deg, rgb(169, 230, 202) 138.462deg, rgb(169, 230, 202) 166.154deg, rgb(114, 224, 232) 166.154deg, rgb(114, 224, 232) 193.846deg, rgb(62, 201, 236) 193.846deg, rgb(62, 201, 236) 221.538deg, rgb(20, 163, 214) 221.538deg, rgb(20, 163, 214) 249.231deg, rgb(0, 116, 171) 249.231deg, rgb(0, 116, 171) 276.923deg, rgb(0, 67, 115) 276.923deg, rgb(0, 67, 115) 304.615deg, rgb(18, 22, 55) 304.615deg, rgb(18, 22, 55) 332.308deg, rgb(58, 0, 5) 332.308deg, rgb(58, 0, 5) 360deg)</textarea>
-                                </div>
-                                <div class="small text-secondary mt-2">➥ Gradient sẽ thay thế nền màu và ảnh
-                                    đã thiết lập ở trên</div>
+                            <button class="btn btn-outline-primary btn-sm w-100 mb-3" id="btn-apply-body-color">Áp dụng màu</button>
+
+                            <hr class="my-2">
+
+                            <!-- Ảnh nền: upload hoặc URL -->
+                            <div class="mb-1 small fw-semibold text-muted">Ảnh nền</div>
+                            <div class="d-flex align-items-center gap-2 mb-2">
+                                <label for="upload_bgr" class="btn btn-outline-secondary btn-sm mb-0">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:3px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                                    Upload ảnh
+                                </label>
+                                <input type="file" id="upload_bgr" data-maxsize="5" class="d-none" accept="image/*">
+                                <span class="small text-muted" id="bgr-upload-info">JPG/PNG/WebP &le; 5MB</span>
                             </div>
-                            <div class="form-check mb-2"> <input class="form-check-input" type="checkbox" checked
-                                    id="show_particle"> <label class="form-check-label" for="show_particle"> Hiệu ứng
-                                    đẹp <sup class="text-danger">Mới</sup>
-                                </label> </div> <select class="form-select mb-2" id="particle_type"
-                                aria-label="Kiểu hiệu hứng">
-                                <option value="default">Mặc định</option>
-                                <option value="snow">Tuyết rơi</option>
-                                <option value="bubble">Bong bóng</option>
-                                <option value="heart">Trái tim</option>
+                            <div class="input-group input-group-sm mb-2">
+                                <span class="input-group-text">URL</span>
+                                <input type="url" class="form-control" id="custom-bg-img" placeholder="https://example.com/bg.jpg" value="">
+                                <button class="btn btn-outline-secondary" id="btn-apply-body-img" type="button">Áp dụng</button>
+                            </div>
+                            <div id="bgr-preview-wrap" style="display:none;" class="mb-2 d-flex align-items-center gap-2">
+                                <img id="bgr-preview" src="" alt="" width="60" height="40"
+                                    style="object-fit:cover;border-radius:4px;border:1px solid #ccc;flex-shrink:0;">
+                                <button class="btn btn-outline-danger btn-sm py-0 px-2" id="btn-clear-body-img" type="button">x Xoa</button>
+                            </div>
+
+                            <hr class="my-2">
+
+                            <!-- Gradient -->
+                            <div class="mb-1 small fw-semibold text-muted">Gradient</div>
+                            <div class="d-flex flex-wrap gap-1 mb-2" id="gradient-swatches">
+                                <div class="sw-gradient-swatch" title="Cam do" data-gradient="conic-gradient(from 135deg, rgb(255, 255, 196) 0deg, rgb(255, 255, 196) 27.692deg, rgb(255, 237, 165) 55.385deg, rgb(255, 205, 149) 83.077deg, rgb(255, 170, 133) 110.769deg, rgb(255, 134, 116) 138.462deg, rgb(255, 97, 100) 166.154deg, rgb(245, 61, 85) 193.846deg, rgb(233, 28, 69) 221.538deg, rgb(220, 0, 55) 249.231deg, rgb(206, 0, 42) 276.923deg, rgb(192, 0, 29) 304.615deg, rgb(176, 0, 18) 332.308deg, rgb(176, 0, 18) 360deg)" style="width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid #dee2e6;background:conic-gradient(from 135deg,#ffffc4,#ff6164,#b00012);"></div>
+                                <div class="sw-gradient-swatch" title="Xanh bien" data-gradient="conic-gradient(from 90deg, rgb(164, 116, 81) 0deg, rgb(139, 160, 147) 83.077deg, rgb(88, 152, 160) 138.462deg, rgb(32, 116, 141) 193.846deg, rgb(0, 65, 97) 249.231deg, rgb(0, 18, 45) 304.615deg, rgb(0, 1, 22) 360deg)" style="width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid #dee2e6;background:conic-gradient(from 90deg,#a47451,#395ba0,#000116);"></div>
+                                <div class="sw-gradient-swatch" title="Tim" data-gradient="linear-gradient(135deg,#667eea 0%,#764ba2 100%)" style="width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid #dee2e6;background:linear-gradient(135deg,#667eea,#764ba2);"></div>
+                                <div class="sw-gradient-swatch" title="Hong tim" data-gradient="linear-gradient(135deg,#f093fb 0%,#f5576c 100%)" style="width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid #dee2e6;background:linear-gradient(135deg,#f093fb,#f5576c);"></div>
+                                <div class="sw-gradient-swatch" title="Xanh nuoc" data-gradient="linear-gradient(135deg,#4facfe 0%,#00f2fe 100%)" style="width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid #dee2e6;background:linear-gradient(135deg,#4facfe,#00f2fe);"></div>
+                                <div class="sw-gradient-swatch" title="Xanh la" data-gradient="linear-gradient(135deg,#43e97b 0%,#38f9d7 100%)" style="width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid #dee2e6;background:linear-gradient(135deg,#43e97b,#38f9d7);"></div>
+                                <div class="sw-gradient-swatch" title="Hong vang" data-gradient="linear-gradient(135deg,#fa709a 0%,#fee140 100%)" style="width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid #dee2e6;background:linear-gradient(135deg,#fa709a,#fee140);"></div>
+                                <div class="sw-gradient-swatch" title="Cau vong" data-gradient="radial-gradient(circle at 30% 30%,#ff6b6b,#feca57,#48dbfb,#ff9ff3)" style="width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid #dee2e6;background:radial-gradient(circle at 30% 30%,#ff6b6b,#feca57,#48dbfb,#ff9ff3);"></div>
+                            </div>
+                            <div class="d-flex gap-2 align-items-start mb-2">
+                                <div id="gradient-preview-box" style="width:44px;height:44px;border-radius:6px;border:1px solid #ccc;flex-shrink:0;transition:.2s;background:conic-gradient(from 90deg,#df3000,#feb81a,#df3000);"></div>
+                                <textarea class="form-control form-control-sm" id="bg-gradient" rows="2"
+                                    placeholder="Nhap CSS gradient (vd: conic-gradient(...))">conic-gradient(from 90deg,#df3000 0deg,#feb81a 180deg,#df3000 360deg)</textarea>
+                            </div>
+                            <button class="btn btn-outline-primary btn-sm w-100 mb-3" id="btn-apply-body-gradient">Ap dung gradient</button>
+
+                            <hr class="my-2">
+
+                            <!-- Hieu ung -->
+                            <div class="form-check mb-1">
+                                <input class="form-check-input" type="checkbox" checked id="show_particle">
+                                <label class="form-check-label" for="show_particle">Bat hieu ung <sup class="text-danger">Moi</sup></label>
+                            </div>
+                            <select class="form-select form-select-sm mb-1" id="particle_type">
+                                <option value="default">Mac dinh</option>
+                                <option value="snow">Tuyet roi</option>
+                                <option value="bubble">Bong bong</option>
+                                <option value="heart">Trai tim</option>
                             </select>
-                            <div class="small text-secondary mb-3">➥ Nền phải khác màu trắng mới nhìn thấy
-                            </div>
+                            <div class="small text-muted mb-2">Nen phai khac mau trang moi thay hieu ung</div>
                         </fieldset>
                     </div>
+
+
+
+                    <!-- option thay màu, bg -->
+                    </div>
+
+
+
                     <!-- option thay màu, bg -->
                     <div class="tab-pane py-4 fade" id="media-tab-pane" role="tabpanel" aria-labelledby="media-tab"
                         tabindex="0">
@@ -2346,7 +2339,8 @@ $default_description = '';
                                                                 class="border border-1 rounded-1"></a></td>
                                                     <td><button class="btn btn-sm btn-secondary sw-media-apply"
                                                             data-type="btn"
-                                                            data-url="https://vongquaymayman.co/wp-content/themes/twentytwentythree-child/assets/buttons/30_04.jpg">Nút Quay</button></td>
+                                                            data-url="https://vongquaymayman.co/wp-content/themes/twentytwentythree-child/assets/buttons/30_04.jpg">Nút
+                                                            Quay</button></td>
                                                     <td>∗</td>
                                                 </tr>
                                             </tbody>
