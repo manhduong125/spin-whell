@@ -137,9 +137,19 @@
     justify-content: center;
 }
 
+.wp-spin-wheel-wrapper .prize-title , .wheel-result-item {
+    font-size: 16px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+}
+
 .wp-spin-wheel-wrapper .badge {
     height: auto;
+    font-size: 12px;
 }
+
 
 .wheel-prize-item {
     display: flex;
