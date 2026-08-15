@@ -45,6 +45,7 @@ $default_prizes = array();
 $default_title = '';
 $default_description = '';
 ?>
+<div id="particles-js"></div>
 <div class="container-fluid noads wp-spin-wheel-wrapper" id="wheel-wrapper" data-wheel-id="0"
     data-wheel-settings="<?php echo esc_attr(wp_json_encode($default_settings)); ?>"
     data-wheel-prizes="<?php echo esc_attr(wp_json_encode($default_prizes)); ?>">
@@ -2118,7 +2119,7 @@ $default_description = '';
                                         value="#000000" id="tcsw" placeholder="Text color sector white"> </div>
                             </div>
                             <hr>
-                            
+
                             <div class="form-check mb-3"> <input class="form-check-input" type="checkbox"
                                     id="show_border" checked=""> <label class="form-check-label" for="show_border"> Viền
                                     kim cương </label> </div>
@@ -2131,19 +2132,27 @@ $default_description = '';
                                 <div class="col-6">
                                     <div class="input-group mb-3"> <span class="input-group-text">Màu kim cương</span>
                                         <input type="color" class="form-control form-control-color" id="diamond_color"
-                                            value="#F6FA00"> </div>
+                                            value="#F6FA00">
+                                    </div>
                                 </div>
                             </div>
                         </fieldset>
                         <!-- text nút quay và ảnh nút quay -->
                         <fieldset class="border border-2 px-2">
-                            <legend class="float-none w-auto p-2 fs-6 fw-bold">Nút quay <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-down"><polyline points="6 9 12 15 18 9"></polyline></svg></legend>
+                            <legend class="float-none w-auto p-2 fs-6 fw-bold">Nút quay <svg
+                                    xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="feather feather-chevron-down">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg></legend>
 
                             <!-- Text nút quay -->
                             <div class="input-group mb-3">
                                 <span class="input-group-text">Text</span>
-                                <input type="text" class="form-control" id="btn-spin-label" placeholder="Quay" value="Quay">
-                                <button class="btn btn-outline-secondary" id="btn-apply-spin-label" type="button">Áp dụng</button>
+                                <input type="text" class="form-control" id="btn-spin-label" placeholder="Quay"
+                                    value="Quay">
+                                <button class="btn btn-outline-secondary" id="btn-apply-spin-label" type="button">Áp
+                                    dụng</button>
                             </div>
 
                             <!-- Ảnh nút quay: 2 tab tách biệt -->
@@ -2166,12 +2175,19 @@ $default_description = '';
                                 <!-- Tab 1: Upload từ máy -->
                                 <div class="tab-pane fade show active" id="spin-tab-upload">
                                     <div class="d-flex align-items-center gap-2 mb-2">
-                                        <label for="upload_spin_bg"
-                                            class="btn btn-outline-primary btn-sm mb-0">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:3px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                                        <label for="upload_spin_bg" class="btn btn-outline-primary btn-sm mb-0">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14"
+                                                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                                stroke-linecap="round" stroke-linejoin="round"
+                                                style="vertical-align:middle;margin-right:3px;">
+                                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                                <polyline points="17 8 12 3 7 8"></polyline>
+                                                <line x1="12" y1="3" x2="12" y2="15"></line>
+                                            </svg>
                                             Chọn ảnh từ máy
                                         </label>
-                                        <input type="file" id="upload_spin_bg" data-maxsize="2" class="d-none" accept="image/*">
+                                        <input type="file" id="upload_spin_bg" data-maxsize="2" class="d-none"
+                                            accept="image/*">
                                         <span class="small text-muted" id="spin-upload-info">JPG/PNG/WebP ≤ 2MB</span>
                                     </div>
                                 </div>
@@ -2180,44 +2196,55 @@ $default_description = '';
                                     <div class="input-group mb-2">
                                         <input type="url" class="form-control form-control-sm" id="btn-spin-img"
                                             value="" placeholder="https://example.com/nut.jpg">
-                                        <button class="btn btn-outline-secondary btn-sm" id="btn-apply-spin-img" type="button">Áp dụng</button>
+                                        <button class="btn btn-outline-secondary btn-sm" id="btn-apply-spin-img"
+                                            type="button">Áp dụng</button>
                                     </div>
                                 </div>
                             </div>
 
                             <!-- Preview chung (hiện khi có ảnh từ bất kỳ nguồn nào) -->
-                            <div id="spin-img-preview-wrap" style="display:none;" class="mb-1 d-flex align-items-center gap-3">
-                                <img id="spin-img-preview" src="https://placehold.co/100x100" alt="preview"
-                                    width="72" height="72"
-                                    class="rounded-circle border border-2 shadow-sm"
+                            <div id="spin-img-preview-wrap" style="display:none;"
+                                class="mb-1 d-flex align-items-center gap-3">
+                                <img id="spin-img-preview" src="https://placehold.co/100x100" alt="preview" width="72"
+                                    height="72" class="rounded-circle border border-2 shadow-sm"
                                     style="object-fit:cover;flex-shrink:0;">
                                 <div>
-                                    <div class="small text-muted mb-1" id="spin-img-preview-label">Đang dùng ảnh này</div>
-                                    <button class="btn btn-outline-danger btn-sm py-0 px-2" id="btn-clear-spin-img" type="button">
+                                    <div class="small text-muted mb-1" id="spin-img-preview-label">Đang dùng ảnh này
+                                    </div>
+                                    <button class="btn btn-outline-danger btn-sm py-0 px-2" id="btn-clear-spin-img"
+                                        type="button">
                                         ✕ Xoá ảnh
                                     </button>
                                 </div>
                             </div>
                         </fieldset>
                         <fieldset class="border border-2 px-2 mb-3">
-                            <legend class="float-none w-auto p-2 fs-6 fw-bold">Body (nền trang) <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-down"><polyline points="6 9 12 15 18 9"></polyline></svg></legend>
+                            <legend class="float-none w-auto p-2 fs-6 fw-bold">Body (nền trang) <svg
+                                    xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
+                                    fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" class="feather feather-chevron-down">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg></legend>
 
                             <!-- Màu nền + màu chữ -->
                             <div class="row g-2 mb-2">
                                 <div class="col-6">
                                     <div class="input-group input-group-sm">
                                         <span class="input-group-text">Màu nền</span>
-                                        <input type="color" class="form-control form-control-color" id="custom-bg-color" value="#ffffff">
+                                        <input type="color" class="form-control form-control-color" id="custom-bg-color"
+                                            value="#ffffff">
                                     </div>
                                 </div>
                                 <div class="col-6">
                                     <div class="input-group input-group-sm">
                                         <span class="input-group-text">Màu chữ</span>
-                                        <input type="color" class="form-control form-control-color" id="custom-color" value="#000000">
+                                        <input type="color" class="form-control form-control-color" id="custom-color"
+                                            value="#000000">
                                     </div>
                                 </div>
                             </div>
-                            <button class="btn btn-outline-primary btn-sm w-100 mb-3" id="btn-apply-body-color">Áp dụng màu</button>
+                            <button class="btn btn-outline-primary btn-sm w-100 mb-3" id="btn-apply-body-color">Áp dụng
+                                màu</button>
 
                             <hr class="my-2">
 
@@ -2225,7 +2252,13 @@ $default_description = '';
                             <div class="mb-1 small fw-semibold text-muted">Ảnh nền</div>
                             <div class="d-flex align-items-center gap-2 mb-2">
                                 <label for="upload_bgr" class="btn btn-outline-secondary btn-sm mb-0">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:3px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24"
+                                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" style="vertical-align:middle;margin-right:3px;">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                        <polyline points="17 8 12 3 7 8"></polyline>
+                                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                                    </svg>
                                     Upload ảnh
                                 </label>
                                 <input type="file" id="upload_bgr" data-maxsize="5" class="d-none" accept="image/*">
@@ -2233,13 +2266,17 @@ $default_description = '';
                             </div>
                             <div class="input-group input-group-sm mb-2">
                                 <span class="input-group-text">URL</span>
-                                <input type="url" class="form-control" id="custom-bg-img" placeholder="https://example.com/bg.jpg" value="">
-                                <button class="btn btn-outline-secondary" id="btn-apply-body-img" type="button">Áp dụng</button>
+                                <input type="url" class="form-control" id="custom-bg-img"
+                                    placeholder="https://example.com/bg.jpg" value="">
+                                <button class="btn btn-outline-secondary" id="btn-apply-body-img" type="button">Áp
+                                    dụng</button>
                             </div>
-                            <div id="bgr-preview-wrap" style="display:none;" class="mb-2 d-flex align-items-center gap-2">
-                                <img id="bgr-preview" src="" alt="" width="60" height="40"
+                            <div id="bgr-preview-wrap" style="display:none;"
+                                class="mb-2 d-flex align-items-center gap-2">
+                                <img id="bgr-preview" src="https://placehold.co/100x100" alt="" width="60" height="40"
                                     style="object-fit:cover;border-radius:4px;border:1px solid #ccc;flex-shrink:0;">
-                                <button class="btn btn-outline-danger btn-sm py-0 px-2" id="btn-clear-body-img" type="button">x Xoa</button>
+                                <button class="btn btn-outline-danger btn-sm py-0 px-2" id="btn-clear-body-img"
+                                    type="button">x Xoa</button>
                             </div>
 
                             <hr class="my-2">
@@ -2247,28 +2284,36 @@ $default_description = '';
                             <!-- Gradient -->
                             <div class="mb-1 small fw-semibold text-muted">Gradient</div>
                             <div class="d-flex flex-wrap gap-1 mb-2" id="gradient-swatches">
-                                <div class="sw-gradient-swatch" title="Cam do" data-gradient="conic-gradient(from 135deg, rgb(255, 255, 196) 0deg, rgb(255, 255, 196) 27.692deg, rgb(255, 237, 165) 55.385deg, rgb(255, 205, 149) 83.077deg, rgb(255, 170, 133) 110.769deg, rgb(255, 134, 116) 138.462deg, rgb(255, 97, 100) 166.154deg, rgb(245, 61, 85) 193.846deg, rgb(233, 28, 69) 221.538deg, rgb(220, 0, 55) 249.231deg, rgb(206, 0, 42) 276.923deg, rgb(192, 0, 29) 304.615deg, rgb(176, 0, 18) 332.308deg, rgb(176, 0, 18) 360deg)" style="width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid #dee2e6;background:conic-gradient(from 135deg,#ffffc4,#ff6164,#b00012);"></div>
-                                <div class="sw-gradient-swatch" title="Xanh bien" data-gradient="conic-gradient(from 90deg, rgb(164, 116, 81) 0deg, rgb(139, 160, 147) 83.077deg, rgb(88, 152, 160) 138.462deg, rgb(32, 116, 141) 193.846deg, rgb(0, 65, 97) 249.231deg, rgb(0, 18, 45) 304.615deg, rgb(0, 1, 22) 360deg)" style="width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid #dee2e6;background:conic-gradient(from 90deg,#a47451,#395ba0,#000116);"></div>
-                                <div class="sw-gradient-swatch" title="Tim" data-gradient="linear-gradient(135deg,#667eea 0%,#764ba2 100%)" style="width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid #dee2e6;background:linear-gradient(135deg,#667eea,#764ba2);"></div>
-                                <div class="sw-gradient-swatch" title="Hong tim" data-gradient="linear-gradient(135deg,#f093fb 0%,#f5576c 100%)" style="width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid #dee2e6;background:linear-gradient(135deg,#f093fb,#f5576c);"></div>
-                                <div class="sw-gradient-swatch" title="Xanh nuoc" data-gradient="linear-gradient(135deg,#4facfe 0%,#00f2fe 100%)" style="width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid #dee2e6;background:linear-gradient(135deg,#4facfe,#00f2fe);"></div>
-                                <div class="sw-gradient-swatch" title="Xanh la" data-gradient="linear-gradient(135deg,#43e97b 0%,#38f9d7 100%)" style="width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid #dee2e6;background:linear-gradient(135deg,#43e97b,#38f9d7);"></div>
-                                <div class="sw-gradient-swatch" title="Hong vang" data-gradient="linear-gradient(135deg,#fa709a 0%,#fee140 100%)" style="width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid #dee2e6;background:linear-gradient(135deg,#fa709a,#fee140);"></div>
-                                <div class="sw-gradient-swatch" title="Cau vong" data-gradient="radial-gradient(circle at 30% 30%,#ff6b6b,#feca57,#48dbfb,#ff9ff3)" style="width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid #dee2e6;background:radial-gradient(circle at 30% 30%,#ff6b6b,#feca57,#48dbfb,#ff9ff3);"></div>
+                                <div class="sw-gradient-swatch" title="Cam do"
+                                    data-gradient="conic-gradient(from 135deg, rgb(255, 255, 196) 0deg, rgb(255, 255, 196) 27.692deg, rgb(255, 255, 181) 27.692deg, rgb(255, 255, 181) 55.385deg, rgb(255, 237, 165) 55.385deg, rgb(255, 237, 165) 83.077deg, rgb(255, 205, 149) 83.077deg, rgb(255, 205, 149) 110.769deg, rgb(255, 170, 133) 110.769deg, rgb(255, 170, 133) 138.462deg, rgb(255, 134, 116) 138.462deg, rgb(255, 134, 116) 166.154deg, rgb(255, 97, 100) 166.154deg, rgb(255, 97, 100) 193.846deg, rgb(245, 61, 85) 193.846deg, rgb(245, 61, 85) 221.538deg, rgb(233, 28, 69) 221.538deg, rgb(233, 28, 69) 249.231deg, rgb(220, 0, 55) 249.231deg, rgb(220, 0, 55) 276.923deg, rgb(206, 0, 42) 276.923deg, rgb(206, 0, 42) 304.615deg, rgb(192, 0, 29) 304.615deg, rgb(192, 0, 29) 332.308deg, rgb(176, 0, 18) 332.308deg, rgb(176, 0, 18) 360deg)"
+                                    style="width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid #dee2e6;background:conic-gradient(from 135deg, rgb(255, 255, 196) 0deg, rgb(255, 255, 196) 27.692deg, rgb(255, 255, 181) 27.692deg, rgb(255, 255, 181) 55.385deg, rgb(255, 237, 165) 55.385deg, rgb(255, 237, 165) 83.077deg, rgb(255, 205, 149) 83.077deg, rgb(255, 205, 149) 110.769deg, rgb(255, 170, 133) 110.769deg, rgb(255, 170, 133) 138.462deg, rgb(255, 134, 116) 138.462deg, rgb(255, 134, 116) 166.154deg, rgb(255, 97, 100) 166.154deg, rgb(255, 97, 100) 193.846deg, rgb(245, 61, 85) 193.846deg, rgb(245, 61, 85) 221.538deg, rgb(233, 28, 69) 221.538deg, rgb(233, 28, 69) 249.231deg, rgb(220, 0, 55) 249.231deg, rgb(220, 0, 55) 276.923deg, rgb(206, 0, 42) 276.923deg, rgb(206, 0, 42) 304.615deg, rgb(192, 0, 29) 304.615deg, rgb(192, 0, 29) 332.308deg, rgb(176, 0, 18) 332.308deg, rgb(176, 0, 18) 360deg)">
+                                </div>
+                                <div class="sw-gradient-swatch" title="Xanh bien"
+                                    data-gradient="conic-gradient(from 90deg, rgb(164, 116, 81) 0deg, rgb(164, 116, 81) 27.692deg, rgb(164, 137, 107) 27.692deg, rgb(164, 137, 107) 55.385deg, rgb(156, 152, 129) 55.385deg, rgb(156, 152, 129) 83.077deg, rgb(139, 160, 147) 83.077deg, rgb(139, 160, 147) 110.769deg, rgb(115, 160, 157) 110.769deg, rgb(115, 160, 157) 138.462deg, rgb(88, 152, 160) 138.462deg, rgb(88, 152, 160) 166.154deg, rgb(59, 137, 154) 166.154deg, rgb(59, 137, 154) 193.846deg, rgb(32, 116, 141) 193.846deg, rgb(32, 116, 141) 221.538deg, rgb(9, 91, 121) 221.538deg, rgb(9, 91, 121) 249.231deg, rgb(0, 65, 97) 249.231deg, rgb(0, 65, 97) 276.923deg, rgb(0, 40, 71) 276.923deg, rgb(0, 40, 71) 304.615deg, rgb(0, 18, 45) 304.615deg, rgb(0, 18, 45) 332.308deg, rgb(0, 1, 22) 332.308deg, rgb(0, 1, 22) 360deg)"
+                                    style="width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid #dee2e6;background:conic-gradient(from 90deg, rgb(164, 116, 81) 0deg, rgb(164, 116, 81) 27.692deg, rgb(164, 137, 107) 27.692deg, rgb(164, 137, 107) 55.385deg, rgb(156, 152, 129) 55.385deg, rgb(156, 152, 129) 83.077deg, rgb(139, 160, 147) 83.077deg, rgb(139, 160, 147) 110.769deg, rgb(115, 160, 157) 110.769deg, rgb(115, 160, 157) 138.462deg, rgb(88, 152, 160) 138.462deg, rgb(88, 152, 160) 166.154deg, rgb(59, 137, 154) 166.154deg, rgb(59, 137, 154) 193.846deg, rgb(32, 116, 141) 193.846deg, rgb(32, 116, 141) 221.538deg, rgb(9, 91, 121) 221.538deg, rgb(9, 91, 121) 249.231deg, rgb(0, 65, 97) 249.231deg, rgb(0, 65, 97) 276.923deg, rgb(0, 40, 71) 276.923deg, rgb(0, 40, 71) 304.615deg, rgb(0, 18, 45) 304.615deg, rgb(0, 18, 45) 332.308deg, rgb(0, 1, 22) 332.308deg, rgb(0, 1, 22) 360deg)">
+                                </div>
+                                <div class="sw-gradient-swatch" title="Tim"
+                                    data-gradient="conic-gradient(from 45deg, rgb(250, 218, 97) 0deg, rgb(250, 218, 97) 27.692deg, rgb(248, 210, 86) 27.692deg, rgb(248, 210, 86) 55.385deg, rgb(248, 199, 82) 55.385deg, rgb(248, 199, 82) 83.077deg, rgb(250, 187, 86) 83.077deg, rgb(250, 187, 86) 110.769deg, rgb(253, 173, 98) 110.769deg, rgb(253, 173, 98) 138.462deg, rgb(255, 159, 115) 138.462deg, rgb(255, 159, 115) 166.154deg, rgb(255, 145, 136) 166.154deg, rgb(255, 145, 136) 193.846deg, rgb(255, 131, 158) 193.846deg, rgb(255, 131, 158) 221.538deg, rgb(255, 118, 179) 221.538deg, rgb(255, 118, 179) 249.231deg, rgb(255, 108, 196) 249.231deg, rgb(255, 108, 196) 276.923deg, rgb(255, 99, 206) 276.923deg, rgb(255, 99, 206) 304.615deg, rgb(255, 93, 210) 304.615deg, rgb(255, 93, 210) 332.308deg, rgb(255, 90, 205) 332.308deg, rgb(255, 90, 205) 360deg)"
+                                    style="width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid #dee2e6;background:conic-gradient(from 45deg, rgb(250, 218, 97) 0deg, rgb(250, 218, 97) 27.692deg, rgb(248, 210, 86) 27.692deg, rgb(248, 210, 86) 55.385deg, rgb(248, 199, 82) 55.385deg, rgb(248, 199, 82) 83.077deg, rgb(250, 187, 86) 83.077deg, rgb(250, 187, 86) 110.769deg, rgb(253, 173, 98) 110.769deg, rgb(253, 173, 98) 138.462deg, rgb(255, 159, 115) 138.462deg, rgb(255, 159, 115) 166.154deg, rgb(255, 145, 136) 166.154deg, rgb(255, 145, 136) 193.846deg, rgb(255, 131, 158) 193.846deg, rgb(255, 131, 158) 221.538deg, rgb(255, 118, 179) 221.538deg, rgb(255, 118, 179) 249.231deg, rgb(255, 108, 196) 249.231deg, rgb(255, 108, 196) 276.923deg, rgb(255, 99, 206) 276.923deg, rgb(255, 99, 206) 304.615deg, rgb(255, 93, 210) 304.615deg, rgb(255, 93, 210) 332.308deg, rgb(255, 90, 205) 332.308deg, rgb(255, 90, 205) 360deg)">
+                                </div>
                             </div>
                             <div class="d-flex gap-2 align-items-start mb-2">
-                                <div id="gradient-preview-box" style="width:44px;height:44px;border-radius:6px;border:1px solid #ccc;flex-shrink:0;transition:.2s;background:conic-gradient(from 90deg,#df3000,#feb81a,#df3000);"></div>
-                                <textarea class="form-control form-control-sm" id="bg-gradient" rows="2"
+                                <div id="gradient-preview-box"
+                                    style="width:44px;height:44px;border-radius:6px;border:1px solid #ccc;flex-shrink:0;transition:.2s;background:conic-gradient(from 90deg,#df3000,#feb81a,#df3000);">
+                                </div>
+                                <textarea class="form-control form-control-sm" id="bg-gradient" rows="4"
                                     placeholder="Nhap CSS gradient (vd: conic-gradient(...))">conic-gradient(from 90deg,#df3000 0deg,#feb81a 180deg,#df3000 360deg)</textarea>
                             </div>
-                            <button class="btn btn-outline-primary btn-sm w-100 mb-3" id="btn-apply-body-gradient">Ap dung gradient</button>
+                            <button class="btn btn-outline-primary btn-sm w-100 mb-3" id="btn-apply-body-gradient">Ap
+                                dung gradient</button>
 
                             <hr class="my-2">
 
                             <!-- Hieu ung -->
                             <div class="form-check mb-1">
                                 <input class="form-check-input" type="checkbox" checked id="show_particle">
-                                <label class="form-check-label" for="show_particle">Bat hieu ung <sup class="text-danger">Moi</sup></label>
+                                <label class="form-check-label" for="show_particle">Bat hieu ung <sup
+                                        class="text-danger">Moi</sup></label>
                             </div>
                             <select class="form-select form-select-sm mb-1" id="particle_type">
                                 <option value="default">Mac dinh</option>
@@ -2280,14 +2325,6 @@ $default_description = '';
                         </fieldset>
                     </div>
 
-
-
-                    <!-- option thay màu, bg -->
-                    </div>
-
-
-
-                    <!-- option thay màu, bg -->
                     <div class="tab-pane py-4 fade" id="media-tab-pane" role="tabpanel" aria-labelledby="media-tab"
                         tabindex="0">
                         <div id="uploaded-list" class="mb-3">
@@ -2415,14 +2452,18 @@ $default_description = '';
                             </div>
                         </div>
                     </div>
+
+                    <!-- option thay màu, bg -->
                 </div>
                 <div class="mb-3"> <button class="btn btn-primary w-100" id="btn_wheel_setting">Lưu
                         lại</button> </div>
                 <p class="text-center"><a href="javascript:void(0);" id="btn-reset-wheel"
                         class="link-secondary text-decoration-none">Reset về mặc định</a></p>
             </div>
+
         </div>
     </div>
+</div>
 </div>
 
 <script>

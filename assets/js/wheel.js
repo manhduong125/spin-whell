@@ -172,10 +172,11 @@ jQuery(document).ready(function($) {
 
         // Reset UI controls về giá trị mặc định
         applySettingsToUI({
-            animation: { duration: 6, confetti: false },
-            audio:     { start_sound: '0', start_sound_file: '', end_sound: '0', end_sound_file: '' },
-            ui:        { auto_remove: false, show_popup: false, popup_label: '', show_remove_button: false },
-            button:    { text: 'Quay', bg_type: 'color', color: '#ff0000', text_color: '#ffffff', background_image: '' },
+            animation:  { duration: 6, confetti: false },
+            audio:      { start_sound: '0', start_sound_file: '', end_sound: '0', end_sound_file: '' },
+            ui:         { auto_remove: false, show_popup: false, popup_label: '', show_remove_button: false },
+            button:     { text: 'Quay', bg_type: 'color', color: '#ff0000', text_color: '#ffffff', background_image: '' },
+            background: { gradient: DEFAULT_BG_GRADIENT, image: '', color: '' },
         });
 
         renderWheel();
@@ -206,10 +207,13 @@ jQuery(document).ready(function($) {
         }
     }
 
+    // Gradient mặc định cho #wheel-wrapper (phải khớp với CSS fallback)
+    var DEFAULT_BG_GRADIENT = 'conic-gradient(from 90deg, rgb(223, 48, 0) 0deg, rgb(223, 48, 0) 27.692deg, rgb(254, 96, 0) 27.692deg, rgb(254, 96, 0) 55.385deg, rgb(255, 145, 37) 55.385deg, rgb(255, 145, 37) 83.077deg, rgb(251, 187, 95) 83.077deg, rgb(251, 187, 95) 110.769deg, rgb(218, 217, 154) 110.769deg, rgb(218, 217, 154) 138.462deg, rgb(169, 230, 202) 138.462deg, rgb(169, 230, 202) 166.154deg, rgb(114, 224, 232) 166.154deg, rgb(114, 224, 232) 193.846deg, rgb(62, 201, 236) 193.846deg, rgb(62, 201, 236) 221.538deg, rgb(20, 163, 214) 221.538deg, rgb(20, 163, 214) 249.231deg, rgb(0, 116, 171) 249.231deg, rgb(0, 116, 171) 276.923deg, rgb(0, 67, 115) 276.923deg, rgb(0, 67, 115) 304.615deg, rgb(18, 22, 55) 304.615deg, rgb(18, 22, 55) 332.308deg, rgb(58, 0, 5) 332.308deg, rgb(58, 0, 5) 360deg)';
+
     function normalizeSettings(settings) {
         settings = settings || {};
         var background = settings.background || {};
-        var backgroundColor = '#ffffff';
+        var backgroundColor = '';
         var backgroundImage = '';
         var backgroundType = 'color';
 
@@ -217,7 +221,7 @@ jQuery(document).ready(function($) {
             backgroundColor = background;
         } else if ( typeof background === 'object' && background !== null ) {
             backgroundType = background.type || 'color';
-            backgroundColor = background.value || background.color || '#ffffff';
+            backgroundColor = background.value || background.color || '';
             backgroundImage = background.image || '';
         }
 
@@ -226,7 +230,8 @@ jQuery(document).ready(function($) {
                 type:     backgroundType,
                 color:    backgroundColor,
                 image:    backgroundImage,
-                gradient: background.gradient || '',
+                // nếu không có gì → dùng gradient mặc định
+                gradient: background.gradient || DEFAULT_BG_GRADIENT,
             },
             wheel: settings.wheel || {
                 size: 600,
@@ -315,12 +320,15 @@ jQuery(document).ready(function($) {
         closeTitleDescriptionEditor();
     }
 
+    // Bảng 6 màu mặc định cho các ô vòng quay
+    var DEFAULT_SECTOR_COLORS = ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899'];
+
     function normalizePrize(prize, index) {
         prize = prize || {};
         return {
             id: prize.id || prize.title + '-' + index,
             title: prize.title || prize.name || '',
-            color: prize.color || prize.background || (index % 2 === 0 ? '#ef4444' : '#f59e0b'),
+            color: prize.color || prize.background || DEFAULT_SECTOR_COLORS[ index % DEFAULT_SECTOR_COLORS.length ],
             description: prize.description || '',
         };
     }
@@ -500,7 +508,7 @@ jQuery(document).ready(function($) {
         wheelPrizes.forEach(function(prize, index) {
             var startAngle = index * angleStep;
             var endAngle = startAngle + angleStep;
-            var fillColor = prize.color || (index % 2 === 0 ? '#f16f6f' : '#f6c85f');
+            var fillColor = prize.color || DEFAULT_SECTOR_COLORS[ index % DEFAULT_SECTOR_COLORS.length ];
 
             ctx.beginPath();
             ctx.moveTo(centerX, centerY);
@@ -1098,13 +1106,24 @@ jQuery(document).ready(function($) {
         }
     });
 
+    // Shuffle mảng màu để mỗi lần fill ra màu khác nhau
+    function shuffleColors() {
+        var colors = DEFAULT_SECTOR_COLORS.slice();
+        for ( var i = colors.length - 1; i > 0; i-- ) {
+            var j = Math.floor( Math.random() * (i + 1) );
+            var tmp = colors[i]; colors[i] = colors[j]; colors[j] = tmp;
+        }
+        return colors;
+    }
+
     // ── Hàm fill prizes từ data-content (dùng chung) ──
     function fillPrizesFromContent( content ) {
         if ( ! content ) return;
         var titles = content.split('||').map(function(t) { return $.trim(t); }).filter(function(t) { return t !== ''; });
         if ( ! titles.length ) return;
+        var colors = shuffleColors();
         wheelPrizes = titles.map(function(title, index) {
-            return normalizePrize({ title: title }, index);
+            return normalizePrize({ title: title, color: colors[ index % colors.length ] }, index);
         });
         savePrizes();
         renderPrizeList();
@@ -1117,8 +1136,9 @@ jQuery(document).ready(function($) {
         if ( from > to ) { var tmp = from; from = to; to = tmp; }
         var titles = [];
         for ( var i = from; i <= to; i++ ) titles.push(String(i));
+        var colors = shuffleColors();
         wheelPrizes = titles.map(function(title, index) {
-            return normalizePrize({ title: title }, index);
+            return normalizePrize({ title: title, color: colors[ index % colors.length ] }, index);
         });
         savePrizes();
         renderPrizeList();
@@ -1159,7 +1179,115 @@ jQuery(document).ready(function($) {
         $extra.toggle( $(this).is(':checked') );
     }).trigger('change');
 
-    // ── show_remove_button: ẩn/hiện nút "Xóa ô này" trong popup kết quả ──
+    // ── Particles effect ──────────────────────────────────────────────────────
+
+    var PARTICLE_CONFIGS = {
+
+        default: {
+            particles: {
+                number: { value: 60, density: { enable: true, value_area: 800 } },
+                color: { value: ['#ff6b6b','#feca57','#48dbfb','#ff9ff3','#54a0ff','#5f27cd'] },
+                shape: { type: 'circle' },
+                opacity: { value: 0.6, random: true, anim: { enable: true, speed: 0.5, opacity_min: 0.1 } },
+                size: { value: 4, random: true },
+                line_linked: { enable: true, distance: 120, color: '#ffffff', opacity: 0.2, width: 1 },
+                move: { enable: true, speed: 2, direction: 'none', random: true, out_mode: 'out' }
+            },
+            interactivity: {
+                detect_on: 'canvas',
+                events: { onhover: { enable: false }, onclick: { enable: false } },
+            },
+            retina_detect: true
+        },
+
+        snow: {
+            particles: {
+                number: { value: 120, density: { enable: true, value_area: 800 } },
+                color: { value: '#ffffff' },
+                shape: { type: 'circle' },
+                opacity: { value: 0.8, random: true },
+                size: { value: 5, random: true },
+                line_linked: { enable: false },
+                move: { enable: true, speed: 2, direction: 'bottom', random: true, straight: false, out_mode: 'out', bounce: false }
+            },
+            interactivity: {
+                detect_on: 'canvas',
+                events: { onhover: { enable: false }, onclick: { enable: false } }
+            },
+            retina_detect: true
+        },
+
+        bubble: {
+            particles: {
+                number: { value: 40, density: { enable: true, value_area: 800 } },
+                color: { value: ['#a8edea','#fed6e3','#96fbc4','#f9f7d9','#ffecd2'] },
+                shape: { type: 'circle', stroke: { width: 2, color: '#ffffff' } },
+                opacity: { value: 0.4, random: true, anim: { enable: true, speed: 1, opacity_min: 0.1, sync: false } },
+                size: { value: 18, random: true, anim: { enable: true, speed: 3, size_min: 4, sync: false } },
+                line_linked: { enable: false },
+                move: { enable: true, speed: 1.5, direction: 'top', random: true, straight: false, out_mode: 'out' }
+            },
+            interactivity: {
+                detect_on: 'canvas',
+                events: { onhover: { enable: false }, onclick: { enable: false } }
+            },
+            retina_detect: true
+        },
+
+        heart: {
+            particles: {
+                number: { value: 30, density: { enable: true, value_area: 800 } },
+                color: { value: ['#ff6b6b','#ff4757','#ff6b81','#ff4500','#ffa502'] },
+                shape: {
+                    type: 'char',
+                    stroke: { width: 0 },
+                    character: { value: ['❤','💕','💖','💗'], font: 'Verdana', style: '', weight: '400' }
+                },
+                opacity: { value: 0.8, random: true, anim: { enable: true, speed: 0.5, opacity_min: 0.2 } },
+                size: { value: 14, random: true },
+                line_linked: { enable: false },
+                move: { enable: true, speed: 2, direction: 'top', random: true, straight: false, out_mode: 'out' }
+            },
+            interactivity: {
+                detect_on: 'canvas',
+                events: { onhover: { enable: false }, onclick: { enable: false } }
+            },
+            retina_detect: true
+        }
+    };
+
+    function initParticles() {
+        if ( typeof window.particlesJS === 'undefined' ) return;
+
+        var enabled = $('#show_particle').is(':checked');
+        var type    = $('#particle_type').val() || 'default';
+        var el      = document.getElementById('particles-js');
+        if ( ! el ) return;
+
+        // Dừng instance cũ nếu có
+        if ( window.pJSDom && window.pJSDom.length ) {
+            try { window.pJSDom[window.pJSDom.length - 1].pJS.fn.vendors.destroypJS(); } catch(e){}
+            window.pJSDom = [];
+        }
+
+        // Xoá canvas cũ để tránh stacking
+        el.innerHTML = '';
+
+        if ( ! enabled ) return;
+
+        var config = PARTICLE_CONFIGS[ type ] || PARTICLE_CONFIGS['default'];
+        window.particlesJS( 'particles-js', config );
+    }
+
+    // Khởi tạo khi trang load (delay nhỏ chờ particles.js sẵn)
+    setTimeout( initParticles, 300 );
+
+    // Live update khi user thay đổi checkbox hoặc select
+    $( '#show_particle, #particle_type' ).on( 'change', function() {
+        initParticles();
+    });
+
+    // ── End Particles ─────────────────────────────────────────────────────────
     // Nếu popup đang mở mà user thay đổi checkbox → cập nhật ngay.
     $('#show_remove_button').on('change', function() {
         if ( $('#modal-result').is(':visible') ) {
