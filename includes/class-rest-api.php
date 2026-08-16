@@ -290,7 +290,19 @@ class WP_Spin_Wheel_REST_API {
             return new WP_Error( 'not_logged_in', __( 'User not logged in.', 'wp-spin-wheel' ), array( 'status' => 401 ) );
         }
 
-        $wheel_id = WP_Spin_Wheel_Wheel::get_or_create_user_wheel( $user_id );
+        // Lấy đúng wheel_id được gửi từ client hoặc fallback về vòng quay mặc định của user
+        $target_id = absint( $request->get_param( 'wheel_id' ) ?: ( $request->get_param( 'id' ) ?: 0 ) );
+        $wheel_id = 0;
+        if ( $target_id ) {
+            $post = get_post( $target_id );
+            if ( $post && $post->post_type === 'spin_wheel' && ( (int) $post->post_author === $user_id || current_user_can( 'manage_options' ) ) ) {
+                $wheel_id = $target_id;
+            }
+        }
+        if ( ! $wheel_id ) {
+            $wheel_id = WP_Spin_Wheel_Wheel::get_or_create_user_wheel( $user_id );
+        }
+
         if ( ! $wheel_id ) {
             return new WP_Error( 'create_failed', __( 'Unable to find or create wheel for user.', 'wp-spin-wheel' ), array( 'status' => 500 ) );
         }
@@ -312,7 +324,6 @@ class WP_Spin_Wheel_REST_API {
         if ( ! empty( $settings ) && is_array( $settings ) ) {
             update_post_meta( $wheel_id, '_spin_wheel_overrides', wp_json_encode( $settings ) );
             update_post_meta( $wheel_id, '_spin_wheel_design', wp_json_encode( $settings ) );
-            update_user_meta( $user_id, 'wp_spin_wheel_options', $settings );
         }
 
         if ( is_array( $prizes ) ) {
@@ -323,6 +334,7 @@ class WP_Spin_Wheel_REST_API {
         return rest_ensure_response( array(
             'success'  => true,
             'wheel_id' => $wheel_id,
+            'title'    => get_the_title( $wheel_id ),
             'message'  => __( 'Đã lưu vòng quay thành công vào tài khoản của bạn.', 'wp-spin-wheel' ),
         ) );
     }
@@ -464,33 +476,8 @@ class WP_Spin_Wheel_REST_API {
         return new WP_Error( 'invalid', __( 'Invalid options payload.', 'wp-spin-wheel' ), array( 'status' => 400 ) );
     }
 
-    private function sync_prizes_db( $wheel_id, $prizes ) {
-        global $wpdb;
-        $table = $wpdb->prefix . 'spin_prizes';
-        $wpdb->delete( $table, array( 'wheel_id' => $wheel_id ), array( '%d' ) );
-        foreach ( $prizes as $prize ) {
-            if ( empty( $prize['title'] ) ) {
-                continue;
-            }
-            $wpdb->insert(
-                $table,
-                array(
-                    'wheel_id'    => $wheel_id,
-                    'title'       => sanitize_text_field( $prize['title'] ),
-                    'description' => sanitize_textarea_field( $prize['description'] ?? '' ),
-                    'color'       => sanitize_text_field( $prize['color'] ?? '' ),
-                    'image'       => esc_url_raw( $prize['image'] ?? '' ),
-                    'icon'        => esc_url_raw( $prize['icon'] ?? '' ),
-                    'weight'      => max( 1, intval( $prize['weight'] ?? 1 ) ),
-                    'stock'       => max( 0, intval( $prize['stock'] ?? 0 ) ),
-                    'initial_stock' => max( 0, intval( $prize['stock'] ?? 0 ) ),
-                    'status'      => sanitize_text_field( $prize['status'] ?? 'active' ),
-                    'sort_order'  => intval( $prize['sort_order'] ?? 0 ),
-                    'created_at'  => current_time( 'mysql' ),
-                ),
-                array( '%d', '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%d', '%s', '%d', '%s' )
-            );
-        }
+    public function sync_prizes_db( $wheel_id, $prizes ) {
+        return WP_Spin_Wheel_Prize::sync_prizes( $wheel_id, $prizes );
     }
 
     private function verify_nonce( $request ) {

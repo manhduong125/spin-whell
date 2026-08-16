@@ -43,25 +43,31 @@ $default_settings = array(
 $default_prizes = array();
 $default_title = '';
 $default_description = '';
-$wheel_id = 0;
 
-if (is_user_logged_in()) {
-    $current_user_id = get_current_user_id();
-    if ($current_user_id) {
-        $wheel_id = WP_Spin_Wheel_Wheel::get_or_create_user_wheel($current_user_id);
-        if ($wheel_id) {
-            $user_saved_settings = WP_Spin_Wheel_Helper::get_wheel_overrides($wheel_id);
-            if (! empty($user_saved_settings) && is_array($user_saved_settings)) {
-                $default_settings = array_replace_recursive($default_settings, $user_saved_settings);
-            }
-            $user_db_prizes = WP_Spin_Wheel_Prize::get_prizes($wheel_id);
-            if (! empty($user_db_prizes) && is_array($user_db_prizes)) {
-                $default_prizes = $user_db_prizes;
-            }
-            $default_title = get_the_title($wheel_id);
-            $default_description = get_post_field('post_content', $wheel_id);
+// Nếu chưa có wheel_id, kiểm tra tham số URL hoặc lấy theo user đăng nhập
+if (empty($wheel_id)) {
+    if (! empty($_GET['wheel_id'])) {
+        $wheel_id = absint($_GET['wheel_id']);
+    } elseif (is_user_logged_in()) {
+        $current_user_id = get_current_user_id();
+        if ($current_user_id) {
+            $wheel_id = WP_Spin_Wheel_Wheel::get_or_create_user_wheel($current_user_id);
         }
     }
+}
+
+// Nạp đúng cấu hình và giải thưởng của riêng wheel_id này
+if (! empty($wheel_id)) {
+    $wheel_saved_settings = WP_Spin_Wheel_Helper::get_wheel_overrides($wheel_id);
+    if (! empty($wheel_saved_settings) && is_array($wheel_saved_settings)) {
+        $default_settings = array_replace_recursive($default_settings, $wheel_saved_settings);
+    }
+    $wheel_db_prizes = WP_Spin_Wheel_Prize::get_prizes($wheel_id);
+    if (! empty($wheel_db_prizes) && is_array($wheel_db_prizes)) {
+        $default_prizes = $wheel_db_prizes;
+    }
+    $default_title = get_the_title($wheel_id);
+    $default_description = get_post_field('post_content', $wheel_id);
 }
 ?>
 <div id="particles-js"></div>
