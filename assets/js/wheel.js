@@ -46,101 +46,119 @@ jQuery(document).ready(function ($) {
                 text_color: currentBgImage ? '' : ($('#btn-spin-text-color').val() || '#ffffff'),
                 background_image: currentBgImage,
             },
-                    // background: đọc từ wheelSettings (được cập nhật trực tiếp bởi sw-media-apply)
-                    background: $.extend({}, wheelSettings.background || {}),
-                    wheel: {
-                        size: (wheelSettings.wheel && wheelSettings.wheel.size) || 600,
-                        border: (wheelSettings.wheel && wheelSettings.wheel.border) || 14,
-                        border_color: $('#border_color').length ? $('#border_color').val() : ((wheelSettings.wheel && wheelSettings.wheel.border_color) || '#FF4D00'),
-                        diamond_color: $('#diamond_color').length ? $('#diamond_color').val() : ((wheelSettings.wheel && wheelSettings.wheel.diamond_color) || '#F6FA00'),
-                        show_border: $('#show_border').length ? $('#show_border').is(':checked') : (wheelSettings.wheel ? wheelSettings.wheel.show_border !== false : true),
-                        shadow: (wheelSettings.wheel && wheelSettings.wheel.shadow) !== undefined ? wheelSettings.wheel.shadow : true,
-                    },
-                    sector_colors: getSelectedSectorColors(),
-                };
-            }
-            // Áp settings đã lưu vào các control trong modal
-            function applySettingsToUI(s) {
-                if (!s) return;
-                if (s.animation) {
-                    if (s.animation.duration !== undefined) {
-                        $('#duration').val(s.animation.duration);
+                            // background: luôn đồng bộ từ wheelSettings
+                            background: $.extend({}, wheelSettings.background || {}),
+                            wheel: {
+                                size: (wheelSettings.wheel && wheelSettings.wheel.size) || 600,
+                                border: (wheelSettings.wheel && wheelSettings.wheel.border) || 14,
+                                border_color: $('#border_color').length ? $('#border_color').val() : ((wheelSettings.wheel && wheelSettings.wheel.border_color) || '#FF4D00'),
+                                diamond_color: $('#diamond_color').length ? $('#diamond_color').val() : ((wheelSettings.wheel && wheelSettings.wheel.diamond_color) || '#F6FA00'),
+                                show_border: $('#show_border').length ? $('#show_border').is(':checked') : (wheelSettings.wheel ? wheelSettings.wheel.show_border !== false : true),
+                                shadow: (wheelSettings.wheel && wheelSettings.wheel.shadow) !== undefined ? wheelSettings.wheel.shadow : true,
+                            },
+                            sector_colors: getSelectedSectorColors(),
+                        };
                     }
-                    if (s.animation.confetti !== undefined) {
-                        $('#show_confetti').prop('checked', !!s.animation.confetti);
-                    }
-                }
-                if (s.audio) {
-                    if (s.audio.start_sound !== undefined) {
-                        $('#start_sound').val(s.audio.start_sound);
-                    }
-                    if (s.audio.start_sound_file !== undefined) {
-                        $('#start_sound_file').val(s.audio.start_sound_file);
-                    }
-                    if (s.audio.end_sound !== undefined) {
-                        $('#end_sound').val(s.audio.end_sound);
-                    }
-                    if (s.audio.end_sound_file !== undefined) {
-                        $('#end_sound_file').val(s.audio.end_sound_file);
-                    }
-                }
-                if (s.ui) {
-                    if (s.ui.auto_remove !== undefined) {
-                        $('#auto_remove').prop('checked', !!s.ui.auto_remove);
-                    }
-                    if (s.ui.show_popup !== undefined) {
-                        $('#show_popup').prop('checked', !!s.ui.show_popup);
-                    }
-                    if (s.ui.popup_label !== undefined) {
-                        $('#popup_label').val(s.ui.popup_label);
-                        $('#modal-result-popup-label').text(s.ui.popup_label || 'Bạn đã quay vào ô');
-                    }
-                    if (s.ui.show_remove_button !== undefined) {
-                        $('#show_remove_button').prop('checked', !!s.ui.show_remove_button);
-                    }
-                }
-                if (s.button) {
-                    var b = s.button;
-                    if (b.text !== undefined) {
-                        $('#btn-spin-label').val(b.text);
-                    }
-                    var isImage = b.bg_type === 'image' || (!b.bg_type && !!b.background_image);
-                    $('#switch_spin_bg_type').prop('checked', isImage);
-                    if (isImage) {
-                        $('#form_spin_bg_color').addClass('d-none');
-                        $('#form_spin_bg_image').removeClass('d-none');
-                        if (b.background_image !== undefined) {
-                            $('#btn-spin-img').val(b.background_image);
-                            updateSpinImgPreview(b.background_image);
+                    // Áp settings đã lưu vào các control trong modal
+                    function applySettingsToUI(s) {
+                        if (!s) return;
+                        if (s.animation) {
+                            if (s.animation.duration !== undefined) {
+                                $('#duration').val(s.animation.duration);
+                            }
+                            if (s.animation.confetti !== undefined) {
+                                $('#show_confetti').prop('checked', !!s.animation.confetti);
+                            }
                         }
-                    } else {
-                        $('#form_spin_bg_image').addClass('d-none');
-                        $('#form_spin_bg_color').removeClass('d-none');
-                        if (b.color) {
-                            $('#btn-spin-color').val(b.color);
+                        if (s.audio) {
+                            if (s.audio.start_sound !== undefined) {
+                                $('#start_sound').val(s.audio.start_sound);
+                            }
+                            if (s.audio.start_sound_file !== undefined) {
+                                $('#start_sound_file').val(s.audio.start_sound_file);
+                            }
+                            if (s.audio.end_sound !== undefined) {
+                                $('#end_sound').val(s.audio.end_sound);
+                            }
+                            if (s.audio.end_sound_file !== undefined) {
+                                $('#end_sound_file').val(s.audio.end_sound_file);
+                            }
                         }
-                        if (b.text_color) {
-                            $('#btn-spin-text-color').val(b.text_color);
+                        if (s.ui) {
+                            if (s.ui.auto_remove !== undefined) {
+                                $('#auto_remove').prop('checked', !!s.ui.auto_remove);
+                            }
+                            if (s.ui.show_popup !== undefined) {
+                                $('#show_popup').prop('checked', !!s.ui.show_popup);
+                            }
+                            if (s.ui.popup_label !== undefined) {
+                                $('#popup_label').val(s.ui.popup_label);
+                                $('#modal-result-popup-label').text(s.ui.popup_label || 'Bạn đã quay vào ô');
+                            }
+                            if (s.ui.show_remove_button !== undefined) {
+                                $('#show_remove_button').prop('checked', !!s.ui.show_remove_button);
+                            }
+                        }
+                        if (s.button) {
+                            var b = s.button;
+                            if (b.text !== undefined) {
+                                $('#btn-spin-label').val(b.text);
+                            }
+                            var isImage = b.bg_type === 'image' || (!b.bg_type && !!b.background_image);
+                            $('#switch_spin_bg_type').prop('checked', isImage);
+                            if (isImage) {
+                                $('#form_spin_bg_color').addClass('d-none');
+                                $('#form_spin_bg_image').removeClass('d-none');
+                                if (b.background_image !== undefined) {
+                                    $('#btn-spin-img').val(b.background_image);
+                                    updateSpinImgPreview(b.background_image);
+                                }
+                            } else {
+                                $('#form_spin_bg_image').addClass('d-none');
+                                $('#form_spin_bg_color').removeClass('d-none');
+                                if (b.color) {
+                                    $('#btn-spin-color').val(b.color);
+                                }
+                                if (b.text_color) {
+                                    $('#btn-spin-text-color').val(b.text_color);
+                                }
+                            }
+                        }
+                        if (s.background) {
+                            if (s.background.image) {
+                                $('#custom-bg-img').val(s.background.image);
+                                $('#bgr-preview').attr('src', s.background.image);
+                                $('#bgr-preview-wrap').show();
+                                $('#bg-gradient').val('');
+                                $('#gradient-preview-box').css('background', 'transparent');
+                            } else if (s.background.gradient) {
+                                $('#bg-gradient').val(s.background.gradient);
+                                $('#gradient-preview-box').css('background', s.background.gradient);
+                                $('#custom-bg-img').val('');
+                                $('#bgr-preview-wrap').hide();
+                                $('#bgr-preview').attr('src', '');
+                            }
+                            if (s.background.color) {
+                                $('#custom-bg-color').val(s.background.color);
+                            }
+                        }
+                        if (s.wheel) {
+                            if (s.wheel.border_color && $('#border_color').length) {
+                                $('#border_color').val(s.wheel.border_color);
+                            }
+                            if (s.wheel.diamond_color && $('#diamond_color').length) {
+                                $('#diamond_color').val(s.wheel.diamond_color);
+                            }
+                            if (s.wheel.show_border !== undefined && $('#show_border').length) {
+                                $('#show_border').prop('checked', !!s.wheel.show_border);
+                                if (s.wheel.show_border) {
+                                    $('#custom_border_color').show();
+                                } else {
+                                    $('#custom_border_color').hide();
+                                }
+                            }
                         }
                     }
-                }
-                if (s.wheel) {
-                    if (s.wheel.border_color && $('#border_color').length) {
-                        $('#border_color').val(s.wheel.border_color);
-                    }
-                    if (s.wheel.diamond_color && $('#diamond_color').length) {
-                        $('#diamond_color').val(s.wheel.diamond_color);
-                    }
-                    if (s.wheel.show_border !== undefined && $('#show_border').length) {
-                        $('#show_border').prop('checked', !!s.wheel.show_border);
-                        if (s.wheel.show_border) {
-                            $('#custom_border_color').show();
-                        } else {
-                            $('#custom_border_color').hide();
-                        }
-                    }
-                }
-            }
             // Merge saved settings vào wheelSettings
             function mergeUserSettings(saved) {
                 if (!saved) return;
@@ -416,6 +434,23 @@ jQuery(document).ready(function ($) {
         return String(str).replace(/"/g, '&quot;');
     }
 
+    // Tự động chuẩn hóa đường dẫn ảnh (hỗ trợ cả URL online lẫn đường dẫn tương đối trong plugin)
+    function resolveAssetUrl(url) {
+        if (!url) return '';
+        url = $.trim(url);
+        // Nếu là data URI hoặc URL đầy đủ (http/https/protocol-relative) -> giữ nguyên
+        if (/^(https?:|\/\/|data:)/i.test(url)) {
+            return url;
+        }
+        var pluginUrl = (typeof wp_spin_wheel_params !== 'undefined' && wp_spin_wheel_params.plugin_url)
+            ? wp_spin_wheel_params.plugin_url
+            : '/wp-content/plugins/spin-whell/';
+        if (!pluginUrl.endsWith('/')) pluginUrl += '/';
+        // Bỏ dấu / ở đầu url nếu có (ví dụ "/assets/..." -> "assets/...")
+        var cleanPath = url.replace(/^\/+/, '');
+        return pluginUrl + cleanPath;
+    }
+
     function loadAndRenderThemeDropdown() {
         var $dropdown = $('#myDropdown .dropdown-menu');
         if (!$dropdown.length) return;
@@ -447,9 +482,9 @@ jQuery(document).ready(function ($) {
                 var contentAttr = colors.join(',');
                 var borderAttr = (item.border || []).join(',');
                 var spinLabel = item.spin_label || '';
-                var spinImg = item.spin_img || '';
+                var spinImg = resolveAssetUrl(item.spin_img || '');
                 var isStroke = item.is_stroke || 'no';
-                var bgImg = item.bg_img || '';
+                var bgImg = resolveAssetUrl(item.bg_img || '');
                 var bgGradient = item.bg_gradient || '';
                 var title = item.title || '';
                 var tcsw = item.tcsw || '';
@@ -761,32 +796,25 @@ jQuery(document).ready(function ($) {
         var wrapper = $('#wheel-wrapper');
         var bg = wheelSettings.background || {};
 
-        if (bg.gradient) {
-            // Gradient: gán vào backgroundImage (gradient là image function trong CSS)
+        if (bg.image) {
+            // Ảnh URL hoặc Upload
             wrapper.css({
-                backgroundColor: 'transparent',
-                backgroundImage: bg.gradient,
-                backgroundSize: 'cover',
-                backgroundRepeat: 'no-repeat',
-                backgroundPosition: 'center center',
+                background: 'url("' + bg.image + '") center center / cover no-repeat',
             });
-        } else if (bg.image) {
-            // Ảnh URL
+        } else if (bg.gradient) {
+            // Gradient
             wrapper.css({
-                backgroundColor: bg.color || '',
-                backgroundImage: 'url(' + bg.image + ')',
-                backgroundSize: 'cover',
-                backgroundRepeat: 'no-repeat',
-                backgroundPosition: 'center center',
+                background: bg.gradient,
             });
-        } else {
+        } else if (bg.color) {
             // Màu nền thuần
             wrapper.css({
-                backgroundColor: bg.color || '',
-                backgroundImage: 'none',
-                backgroundSize: 'auto',
-                backgroundRepeat: 'repeat',
-                backgroundPosition: 'center',
+                background: bg.color,
+            });
+        } else {
+            // Mặc định
+            wrapper.css({
+                background: DEFAULT_BG_GRADIENT,
             });
         }
 
@@ -1378,12 +1406,37 @@ jQuery(document).ready(function ($) {
             wheelSettings.button.bg_type = 'image';
             wheelSettings.button.background_image = spinImg;
             updateSpinImgPreview(spinImg);
-            renderWheel();
+        }
+
+        // Áp dụng gradient nền hoặc ảnh nền từ theme nếu có
+        var bgGradient = $(this).attr('data-bg_gradient') || '';
+        var bgImg = $(this).attr('data-bg_img') || '';
+        if (bgGradient) {
+            if (!wheelSettings.background) wheelSettings.background = {};
+            wheelSettings.background.gradient = bgGradient;
+            wheelSettings.background.image = '';
+            wheelSettings.background.color = '';
+            $('#bg-gradient').val(bgGradient);
+            $('#gradient-preview-box').css('background', bgGradient);
+            $('#custom-bg-img').val('');
+            $('#bgr-preview-wrap').hide();
+            $('#bgr-preview').attr('src', '');
+        } else if (bgImg) {
+            if (!wheelSettings.background) wheelSettings.background = {};
+            wheelSettings.background.image = bgImg;
+            wheelSettings.background.gradient = '';
+            wheelSettings.background.color = '';
+            $('#custom-bg-img').val(bgImg);
+            $('#bgr-preview').attr('src', bgImg);
+            $('#bgr-preview-wrap').show();
+            $('#bg-gradient').val('');
+            $('#gradient-preview-box').css('background', 'transparent');
         }
 
         // Sync hội màu
         syncSectorColors();
         drawWheelCanvas(currentRotation);
+        renderWheel();
         // Lưu vào localStorage ngay
         localStorage.setItem(getSettingsStorageKey(), JSON.stringify(collectSettings()));
     });
@@ -1703,7 +1756,16 @@ jQuery(document).ready(function ($) {
     $('#btn-apply-body-img').on('click', function () {
         var url = $.trim($('#custom-bg-img').val());
         if (!url) return;
-        applyBodyImage(url, url.replace(/^https?:\/\/[^/]+/, '').substring(0, 40) + '...');
+        applyBodyImage(url, 'URL ảnh nền');
+        feedbackBtn($(this), 'Đã áp dụng \u2713');
+    });
+
+    // Nhấn Enter trong ô URL ảnh nền
+    $('#custom-bg-img').on('keydown', function (e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            $('#btn-apply-body-img').trigger('click');
+        }
     });
 
     // ── Body: Xoá ảnh nền ──
@@ -1716,29 +1778,51 @@ jQuery(document).ready(function ($) {
     // Helper: apply ảnh vào background #wheel-wrapper
     function applyBodyImage(src, label) {
         if (!wheelSettings.background) wheelSettings.background = {};
-        wheelSettings.background.image = src;
-        wheelSettings.background.gradient = '';
-        wheelSettings.background.color = '';
         if (src) {
+            wheelSettings.background.image = src;
+            wheelSettings.background.gradient = '';
+            wheelSettings.background.color = '';
+            $('#custom-bg-img').val(src);
             $('#bgr-preview').attr('src', src);
             $('#bgr-preview-wrap').show();
+            $('#bg-gradient').val('');
+            $('#gradient-preview-box').css('background', 'transparent');
+            $('.sw-gradient-swatch').css('outline', '');
         } else {
+            wheelSettings.background.image = '';
+            wheelSettings.background.gradient = DEFAULT_BG_GRADIENT;
+            wheelSettings.background.color = '';
+            $('#custom-bg-img').val('');
             $('#bgr-preview-wrap').hide();
             $('#bgr-preview').attr('src', '');
+            $('#bg-gradient').val(DEFAULT_BG_GRADIENT);
+            $('#gradient-preview-box').css('background', DEFAULT_BG_GRADIENT);
         }
         renderWheel();
         localStorage.setItem(getSettingsStorageKey(), JSON.stringify(collectSettings()));
     }
 
-    // ── Body: Swatches gradient nhanh ──
+    // ── Body: Swatches gradient nhanh (Click chọn là áp dụng ngay) ──
     $(document).on('click', '.sw-gradient-swatch', function () {
         var gradient = $(this).data('gradient') || '';
         if (!gradient) return;
+        if (!wheelSettings.background) wheelSettings.background = {};
+        wheelSettings.background.gradient = gradient;
+        wheelSettings.background.image = '';
+        wheelSettings.background.color = '';
+
         $('#bg-gradient').val(gradient);
         $('#gradient-preview-box').css('background', gradient);
+        $('#custom-bg-img').val('');
+        $('#bgr-preview-wrap').hide();
+        $('#bgr-preview').attr('src', '');
+
         // Đánh dấu swatch đang chọn
         $('.sw-gradient-swatch').css('outline', '');
         $(this).css('outline', '2px solid #0d6efd');
+
+        renderWheel();
+        localStorage.setItem(getSettingsStorageKey(), JSON.stringify(collectSettings()));
     });
 
     // ── Body: Preview live khi gõ gradient textarea ──
@@ -1749,12 +1833,17 @@ jQuery(document).ready(function ($) {
 
     // ── Body: Áp dụng gradient ──
     $('#btn-apply-body-gradient').on('click', function () {
-        var gradient = $.trim($('#bg-gradient').val());
-        if (!gradient) return;
+        var gradient = $.trim($('#bg-gradient').val()) || DEFAULT_BG_GRADIENT;
         if (!wheelSettings.background) wheelSettings.background = {};
         wheelSettings.background.gradient = gradient;
         wheelSettings.background.image = '';
         wheelSettings.background.color = '';
+
+        $('#gradient-preview-box').css('background', gradient);
+        $('#custom-bg-img').val('');
+        $('#bgr-preview-wrap').hide();
+        $('#bgr-preview').attr('src', '');
+
         renderWheel();
         localStorage.setItem(getSettingsStorageKey(), JSON.stringify(collectSettings()));
         feedbackBtn($(this), 'Đã áp dụng \u2713');
@@ -1848,7 +1937,6 @@ jQuery(document).ready(function ($) {
     function applySpinImage(src) {
         if (!wheelSettings.button) wheelSettings.button = {};
         wheelSettings.button.background_image = src;
-
         if (src) {
             // Có ảnh: ẩn text
             wheelSettings.button.text = '';
@@ -1856,12 +1944,6 @@ jQuery(document).ready(function ($) {
             // Hiện preview
             $('#spin-img-preview').attr('src', src);
             $('#spin-img-preview-wrap').show();
-            // Label: upload = data: prefix, thư viện/URL = domain
-            if (src.indexOf('data:') === 0) {
-                $('#spin-img-preview-label').text('Ảnh từ máy của bạn');
-            } else {
-                $('#spin-img-preview-label').text(src.replace(/^https?:\/\/[^/]+/, '').substring(0, 40) + '...');
-            }
         } else {
             // Xoá ảnh: trả text về
             wheelSettings.button.text = $.trim($('#btn-spin-label').val()) || 'Quay';
@@ -1869,10 +1951,9 @@ jQuery(document).ready(function ($) {
             $('#spin-img-preview-wrap').hide();
             $('#spin-img-preview').attr('src', '');
         }
-
-                renderWheel();
-                localStorage.setItem(getSettingsStorageKey(), JSON.stringify(collectSettings()));
-            }
+        renderWheel();
+        localStorage.setItem(getSettingsStorageKey(), JSON.stringify(collectSettings()));
+    }
 
             // ── Viền kim cương: Đổi màu viền canvas ──
             $('#border_color').on('input change', function () {

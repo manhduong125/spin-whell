@@ -42,7 +42,7 @@
                         "#FFFFFF"
                     ],
                     "spin_label": "",
-                    "spin_img": "https://vongquaymayman.co/wp-content/themes/twentytwentythree-child/assets/buttons/instagram.jpg",
+                    "spin_img": "/assets/buttons/instagram.jpg",
                     "is_stroke": "no",
                     "bg_img": "",
                     "bg_gradient": "",
@@ -63,7 +63,7 @@
                         "#F6FA00"
                     ],
                     "spin_label": "",
-                    "spin_img": "https://vongquaymayman.co/wp-content/themes/twentytwentythree-child/assets/buttons/instagram.jpg",
+                    "spin_img": "/assets/buttons/instagram.jpg",
                     "is_stroke": "no",
                     "bg_img": "",
                     "bg_gradient": "",
@@ -493,9 +493,9 @@
                         "#FFFFFF"
                     ],
                     "spin_label": "",
-                    "spin_img": "https://vongquaymayman.co/wp-content/themes/twentytwentythree-child/assets/buttons/halloween-2.png",
+                    "spin_img": "/assets/buttons/halloween-2.png",
                     "is_stroke": "no",
-                    "bg_img": "https://vongquaymayman.co/wp-content/themes/twentytwentythree-child/assets/background/halloween.jpg",
+                    "bg_img": "/assets/background/halloween.jpg",
                     "bg_gradient": "",
                     "tcsw": ""
                 },
@@ -687,9 +687,9 @@
                         "#FFFFFF"
                     ],
                     "spin_label": "Quay",
-                    "spin_img": "https://vongquaymayman.co/wp-content/themes/twentytwentythree-child/assets/buttons/christmas-4.png",
+                    "spin_img": "/assets/buttons/christmas-4.png",
                     "is_stroke": "no",
-                    "bg_img": "https://vongquaymayman.co/wp-content/themes/twentytwentythree-child/assets/background/christmas-2.jpg",
+                    "bg_img": "/assets/background/christmas-2.jpg",
                     "bg_gradient": "",
                     "tcsw": ""
                 },
@@ -704,9 +704,9 @@
                         "#FFFFFF"
                     ],
                     "spin_label": "Quay",
-                    "spin_img": "https://vongquaymayman.co/wp-content/themes/twentytwentythree-child/assets/buttons/christmas-5.png",
+                    "spin_img": "/assets/buttons/christmas-5.png",
                     "is_stroke": "no",
-                    "bg_img": "https://vongquaymayman.co/wp-content/themes/twentytwentythree-child/assets/background/christmas.jpg",
+                    "bg_img": "/assets/background/christmas.jpg",
                     "bg_gradient": "",
                     "tcsw": "#c71917"
                 }
@@ -848,7 +848,7 @@
                         "#f6fa00"
                     ],
                     "spin_label": "",
-                    "spin_img": "https://vongquaymayman.co/wp-content/themes/twentytwentythree-child/assets/buttons/vnflag.jpg",
+                    "spin_img": "/assets/buttons/vnflag.jpg",
                     "is_stroke": "no",
                     "bg_img": "",
                     "bg_gradient": "",
@@ -865,7 +865,7 @@
                         "#FFFFFF"
                     ],
                     "spin_label": "",
-                    "spin_img": "https://vongquaymayman.co/wp-content/themes/twentytwentythree-child/assets/buttons/vinfast.jpg",
+                    "spin_img": "/assets/buttons/vinfast.jpg",
                     "is_stroke": "no",
                     "bg_img": "",
                     "bg_gradient": "",
@@ -883,7 +883,7 @@
                         "#ffffff"
                     ],
                     "spin_label": "",
-                    "spin_img": "https://vongquaymayman.co/wp-content/themes/twentytwentythree-child/assets/buttons/america.jpg",
+                    "spin_img": "/assets/buttons/america.jpg",
                     "is_stroke": "no",
                     "bg_img": "",
                     "bg_gradient": "",
@@ -900,7 +900,7 @@
                         "#ffffff"
                     ],
                     "spin_label": "スピン",
-                    "spin_img": "https://vongquaymayman.co/wp-content/themes/twentytwentythree-child/assets/buttons/japan.jpg",
+                    "spin_img": "/assets/buttons/japan.jpg",
                     "is_stroke": "no",
                     "bg_img": "",
                     "bg_gradient": "",
@@ -918,7 +918,7 @@
                         "#ffffff"
                     ],
                     "spin_label": "",
-                    "spin_img": "https://vongquaymayman.co/wp-content/themes/twentytwentythree-child/assets/buttons/korea.jpg",
+                    "spin_img": "/assets/buttons/korea.jpg",
                     "is_stroke": "no",
                     "bg_img": "",
                     "bg_gradient": "",
@@ -1026,7 +1026,7 @@
                         "#FFFFFF"
                     ],
                     "spin_label": "",
-                    "spin_img": "https://vongquaymayman.co/wp-content/themes/twentytwentythree-child/assets/buttons/russia.jpg",
+                    "spin_img": "/assets/buttons/russia.jpg",
                     "is_stroke": "no",
                     "bg_img": "",
                     "bg_gradient": "",
