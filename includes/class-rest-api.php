@@ -68,6 +68,46 @@ class WP_Spin_Wheel_REST_API {
                 'permission_callback' => function() { return is_user_logged_in(); },
             ),
         ) );
+
+        // Danh sách và quản lý vòng quay của User
+        register_rest_route( 'spin-wheel/v1', '/user/wheels', array(
+            array(
+                'methods'             => 'GET',
+                'callback'            => array( $this, 'get_user_wheels_list' ),
+                'permission_callback' => function() { return is_user_logged_in(); },
+            ),
+            array(
+                'methods'             => 'POST',
+                'callback'            => array( $this, 'create_user_wheel_route' ),
+                'permission_callback' => function() { return is_user_logged_in(); },
+            ),
+        ) );
+
+        register_rest_route( 'spin-wheel/v1', '/user/wheels/(?P<id>\d+)', array(
+            array(
+                'methods'             => 'GET',
+                'callback'            => array( $this, 'get_single_user_wheel' ),
+                'permission_callback' => function() { return is_user_logged_in(); },
+            ),
+            array(
+                'methods'             => array( 'POST', 'PUT', 'PATCH' ),
+                'callback'            => array( $this, 'update_single_user_wheel' ),
+                'permission_callback' => function() { return is_user_logged_in(); },
+            ),
+            array(
+                'methods'             => 'DELETE',
+                'callback'            => array( $this, 'delete_user_wheel_route' ),
+                'permission_callback' => function() { return is_user_logged_in(); },
+            ),
+        ) );
+
+        register_rest_route( 'spin-wheel/v1', '/user/wheels/(?P<id>\d+)/duplicate', array(
+            array(
+                'methods'             => 'POST',
+                'callback'            => array( $this, 'duplicate_user_wheel_route' ),
+                'permission_callback' => function() { return is_user_logged_in(); },
+            ),
+        ) );
         // User options for logged-in users
         register_rest_route( 'spin-wheel/v1', '/users/me/options', array(
             array(
@@ -284,6 +324,127 @@ class WP_Spin_Wheel_REST_API {
             'success'  => true,
             'wheel_id' => $wheel_id,
             'message'  => __( 'Đã lưu vòng quay thành công vào tài khoản của bạn.', 'wp-spin-wheel' ),
+        ) );
+    }
+
+    public function get_user_wheels_list() {
+        $user_id = get_current_user_id();
+        if ( ! $user_id ) {
+            return new WP_Error( 'not_logged_in', __( 'User not logged in.', 'wp-spin-wheel' ), array( 'status' => 401 ) );
+        }
+        $wheels = WP_Spin_Wheel_Wheel::get_user_wheels( $user_id );
+        return rest_ensure_response( $wheels );
+    }
+
+    public function create_user_wheel_route( $request ) {
+        $user_id = get_current_user_id();
+        if ( ! $user_id ) {
+            return new WP_Error( 'not_logged_in', __( 'User not logged in.', 'wp-spin-wheel' ), array( 'status' => 401 ) );
+        }
+        $title    = $request->get_param( 'title' ) ?? '';
+        $settings = $request->get_param( 'settings' ) ?? array();
+        $prizes   = $request->get_param( 'prizes' ) ?? array();
+
+        $wheel_id = WP_Spin_Wheel_Wheel::create_user_wheel( $user_id, $title, $settings, $prizes );
+        if ( ! $wheel_id ) {
+            return new WP_Error( 'create_failed', __( 'Unable to create new wheel.', 'wp-spin-wheel' ), array( 'status' => 500 ) );
+        }
+
+        return rest_ensure_response( array(
+            'success'  => true,
+            'wheel_id' => $wheel_id,
+            'title'    => get_the_title( $wheel_id ),
+            'message'  => __( 'Đã tạo vòng quay mới thành công.', 'wp-spin-wheel' ),
+        ) );
+    }
+
+    public function get_single_user_wheel( $request ) {
+        $user_id = get_current_user_id();
+        $wheel_id = absint( $request['id'] );
+        $post = get_post( $wheel_id );
+        if ( ! $post || $post->post_type !== 'spin_wheel' || (int) $post->post_author !== $user_id ) {
+            return new WP_Error( 'not_found', __( 'Wheel not found or access denied.', 'wp-spin-wheel' ), array( 'status' => 404 ) );
+        }
+
+        $settings = WP_Spin_Wheel_Helper::get_wheel_overrides( $wheel_id );
+        $prizes   = WP_Spin_Wheel_Prize::get_prizes( $wheel_id );
+
+        return rest_ensure_response( array(
+            'id'          => $wheel_id,
+            'title'       => get_the_title( $wheel_id ),
+            'description' => get_post_field( 'post_content', $wheel_id ),
+            'settings'    => $settings,
+            'prizes'      => $prizes,
+        ) );
+    }
+
+    public function update_single_user_wheel( $request ) {
+        $user_id = get_current_user_id();
+        $wheel_id = absint( $request['id'] );
+        $post = get_post( $wheel_id );
+        if ( ! $post || $post->post_type !== 'spin_wheel' || (int) $post->post_author !== $user_id ) {
+            return new WP_Error( 'not_found', __( 'Wheel not found or access denied.', 'wp-spin-wheel' ), array( 'status' => 404 ) );
+        }
+
+        $title       = $request->get_param( 'title' );
+        $description = $request->get_param( 'description' );
+        $settings    = $request->get_param( 'settings' );
+        $prizes      = $request->get_param( 'prizes' );
+
+        $update_post = array( 'ID' => $wheel_id );
+        if ( isset( $title ) && '' !== trim( $title ) ) {
+            $update_post['post_title'] = sanitize_text_field( $title );
+        }
+        if ( isset( $description ) ) {
+            $update_post['post_content'] = wp_kses_post( $description );
+        }
+        wp_update_post( $update_post );
+
+        if ( ! empty( $settings ) && is_array( $settings ) ) {
+            update_post_meta( $wheel_id, '_spin_wheel_overrides', wp_json_encode( $settings ) );
+            update_post_meta( $wheel_id, '_spin_wheel_design', wp_json_encode( $settings ) );
+        }
+
+        if ( ! empty( $prizes ) && is_array( $prizes ) ) {
+            $this->sync_prizes_db( $wheel_id, $prizes );
+            update_post_meta( $wheel_id, '_spin_wheel_prizes_json', wp_json_encode( $prizes ) );
+        }
+
+        return rest_ensure_response( array(
+            'success'  => true,
+            'wheel_id' => $wheel_id,
+            'title'    => get_the_title( $wheel_id ),
+            'message'  => __( 'Đã cập nhật tiêu đề vòng quay thành công.', 'wp-spin-wheel' ),
+        ) );
+    }
+
+    public function duplicate_user_wheel_route( $request ) {
+        $user_id = get_current_user_id();
+        $wheel_id = absint( $request['id'] );
+        $new_id = WP_Spin_Wheel_Wheel::duplicate_user_wheel( $wheel_id, $user_id );
+        if ( ! $new_id ) {
+            return new WP_Error( 'duplicate_failed', __( 'Unable to duplicate wheel.', 'wp-spin-wheel' ), array( 'status' => 500 ) );
+        }
+
+        return rest_ensure_response( array(
+            'success'  => true,
+            'wheel_id' => $new_id,
+            'title'    => get_the_title( $new_id ),
+            'message'  => __( 'Đã nhân bản vòng quay thành công.', 'wp-spin-wheel' ),
+        ) );
+    }
+
+    public function delete_user_wheel_route( $request ) {
+        $user_id = get_current_user_id();
+        $wheel_id = absint( $request['id'] );
+        $deleted = WP_Spin_Wheel_Wheel::delete_user_wheel( $wheel_id, $user_id );
+        if ( ! $deleted ) {
+            return new WP_Error( 'delete_failed', __( 'Unable to delete wheel.', 'wp-spin-wheel' ), array( 'status' => 403 ) );
+        }
+
+        return rest_ensure_response( array(
+            'success' => true,
+            'message' => __( 'Đã xóa vòng quay thành công.', 'wp-spin-wheel' ),
         ) );
     }
 

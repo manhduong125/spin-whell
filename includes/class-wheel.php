@@ -226,4 +226,151 @@ class WP_Spin_Wheel_Wheel {
 
                 return absint( $post_id );
             }
+
+            /**
+             * Lấy danh sách tất cả vòng quay của một User
+             *
+             * @param int $user_id
+             * @return array
+             */
+            public static function get_user_wheels( $user_id ) {
+                $user_id = absint( $user_id );
+                if ( ! $user_id ) {
+                    return array();
+                }
+
+                $args = array(
+                    'post_type'      => 'spin_wheel',
+                    'post_status'    => array( 'publish', 'draft', 'private', 'pending' ),
+                    'author'         => $user_id,
+                    'posts_per_page' => 50,
+                    'orderby'        => 'ID',
+                    'order'          => 'DESC',
+                );
+                $posts = get_posts( $args );
+                $list = array();
+
+                foreach ( $posts as $p ) {
+                    $prizes = WP_Spin_Wheel_Prize::get_prizes( $p->ID );
+                    $list[] = array(
+                        'id'           => $p->ID,
+                        'title'        => $p->post_title ?: sprintf( __( 'Vòng quay #%d', 'wp-spin-wheel' ), $p->ID ),
+                        'created_at'   => get_the_date( 'd/m/Y H:i', $p->ID ),
+                        'prizes_count' => is_array( $prizes ) ? count( $prizes ) : 0,
+                        'shortcode'    => '[spin_wheel id="' . $p->ID . '"]',
+                    );
+                }
+
+                return $list;
+            }
+
+            /**
+             * Tạo mới vòng quay cho User
+             *
+             * @param int $user_id
+             * @param string $title
+             * @param array $settings
+             * @param array $prizes
+             * @return int Wheel Post ID
+             */
+            public static function create_user_wheel( $user_id, $title = '', $settings = array(), $prizes = array() ) {
+                $user_id = absint( $user_id );
+                if ( ! $user_id ) {
+                    return 0;
+                }
+
+                $title = trim( $title ) ?: sprintf( __( 'Vòng quay mới (%s)', 'wp-spin-wheel' ), current_time( 'd/m/Y H:i' ) );
+
+                $post_id = wp_insert_post( array(
+                    'post_title'   => sanitize_text_field( $title ),
+                    'post_content' => '',
+                    'post_status'  => 'publish',
+                    'post_type'    => 'spin_wheel',
+                    'post_author'  => $user_id,
+                ) );
+
+                if ( is_wp_error( $post_id ) || ! $post_id ) {
+                    return 0;
+                }
+
+                update_post_meta( $post_id, '_user_id', $user_id );
+
+                if ( ! empty( $settings ) && is_array( $settings ) ) {
+                    update_post_meta( $post_id, '_spin_wheel_overrides', wp_json_encode( $settings ) );
+                    update_post_meta( $post_id, '_spin_wheel_design', wp_json_encode( $settings ) );
+                }
+
+                if ( ! empty( $prizes ) && is_array( $prizes ) ) {
+                    if ( class_exists( 'WP_Spin_Wheel_Rest_API' ) ) {
+                        $rest = new WP_Spin_Wheel_Rest_API();
+                        $rest->sync_prizes_db( $post_id, $prizes );
+                    }
+                    update_post_meta( $post_id, '_spin_wheel_prizes_json', wp_json_encode( $prizes ) );
+                } else {
+                    $default_prizes = array(
+                        array( 'title' => 'Giải 1', 'color' => '#f87171', 'weight' => 10, 'stock' => 9999 ),
+                        array( 'title' => 'Giải 2', 'color' => '#60a5fa', 'weight' => 10, 'stock' => 9999 ),
+                        array( 'title' => 'Giải 3', 'color' => '#34d399', 'weight' => 10, 'stock' => 9999 ),
+                        array( 'title' => 'Giải 4', 'color' => '#fbbf24', 'weight' => 10, 'stock' => 9999 ),
+                        array( 'title' => 'Giải 5', 'color' => '#a78bfa', 'weight' => 10, 'stock' => 9999 ),
+                        array( 'title' => 'Giải 6', 'color' => '#f472b6', 'weight' => 10, 'stock' => 9999 ),
+                    );
+                    if ( class_exists( 'WP_Spin_Wheel_Rest_API' ) ) {
+                        $rest = new WP_Spin_Wheel_Rest_API();
+                        $rest->sync_prizes_db( $post_id, $default_prizes );
+                    }
+                    update_post_meta( $post_id, '_spin_wheel_prizes_json', wp_json_encode( $default_prizes ) );
+                }
+
+                return absint( $post_id );
+            }
+
+            /**
+             * Nhân bản vòng quay của user
+             *
+             * @param int $wheel_id
+             * @param int $user_id
+             * @return int New Wheel Post ID
+             */
+            public static function duplicate_user_wheel( $wheel_id, $user_id ) {
+                $wheel_id = absint( $wheel_id );
+                $user_id  = absint( $user_id );
+                if ( ! $wheel_id || ! $user_id ) {
+                    return 0;
+                }
+
+                $post = get_post( $wheel_id );
+                if ( ! $post || (int) $post->post_author !== $user_id ) {
+                    return 0;
+                }
+
+                $settings = WP_Spin_Wheel_Helper::get_wheel_overrides( $wheel_id );
+                $prizes   = WP_Spin_Wheel_Prize::get_prizes( $wheel_id );
+                $new_title = $post->post_title . ' (Bản sao)';
+
+                return self::create_user_wheel( $user_id, $new_title, $settings, $prizes );
+            }
+
+            /**
+             * Xóa vòng quay của user
+             *
+             * @param int $wheel_id
+             * @param int $user_id
+             * @return bool
+             */
+            public static function delete_user_wheel( $wheel_id, $user_id ) {
+                $wheel_id = absint( $wheel_id );
+                $user_id  = absint( $user_id );
+                if ( ! $wheel_id || ! $user_id ) {
+                    return false;
+                }
+
+                $post = get_post( $wheel_id );
+                if ( ! $post || (int) $post->post_author !== $user_id ) {
+                    return false;
+                }
+
+                wp_delete_post( $wheel_id, true );
+                return true;
+            }
         }

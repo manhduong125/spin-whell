@@ -2044,13 +2044,286 @@ jQuery(document).ready(function ($) {
                 localStorage.setItem(getSettingsStorageKey(), JSON.stringify(collectSettings()));
             });
 
-            // ── Viền kim cương: Bật / Tắt viền ──
-            $('#show_border').on('change', function () {
-                var isChecked = $(this).is(':checked');
-                $('#custom_border_color').toggle(isChecked);
-                if (!wheelSettings.wheel) wheelSettings.wheel = {};
-                wheelSettings.wheel.show_border = isChecked;
-                drawWheelCanvas(currentRotation);
-                localStorage.setItem(getSettingsStorageKey(), JSON.stringify(collectSettings()));
-            });
+                // ── Viền kim cương: Bật / Tắt viền ──
+                $('#show_border').on('change', function () {
+                    var isChecked = $(this).is(':checked');
+                    $('#custom_border_color').toggle(isChecked);
+                    if (!wheelSettings.wheel) wheelSettings.wheel = {};
+                    wheelSettings.wheel.show_border = isChecked;
+                    drawWheelCanvas(currentRotation);
+                    localStorage.setItem(getSettingsStorageKey(), JSON.stringify(collectSettings()));
+                });
+
+                // ══════════════════════════════════════════════════════════
+                // QUẢN LÝ DANH SÁCH VÒNG QUAY CỦA USER (#modalUserWheels)
+                // ══════════════════════════════════════════════════════════
+
+                function loadUserWheelsList() {
+                    var $wrap = $('#user-wheels-container');
+                    var $loading = $('#user-wheels-loading');
+                    var $tableWrap = $('#user-wheels-table-wrap');
+                    var $tbody = $('#user-wheels-list-tbody');
+
+                    if (typeof wp_spin_wheel_params === 'undefined' || !wp_spin_wheel_params.is_logged_in) {
+                        $loading.hide();
+                        $tableWrap.addClass('d-none');
+                        $wrap.html('<div class="alert alert-info py-3 text-center mb-0">Vui lòng đăng nhập tài khoản để lưu trữ và quản lý nhiều vòng quay của riêng bạn.</div>');
+                        return;
+                    }
+
+                    $loading.show();
+                    $tableWrap.addClass('d-none');
+
+                    $.ajax({
+                        url: wp_spin_wheel_params.rest_url + 'user/wheels',
+                        method: 'GET',
+                        beforeSend: function (xhr) {
+                            xhr.setRequestHeader('X-WP-Nonce', wp_spin_wheel_params.nonce);
+                        },
+                        success: function (list) {
+                            $loading.hide();
+                            if (!Array.isArray(list) || !list.length) {
+                                $tableWrap.addClass('d-none');
+                                $wrap.html('<div class="text-center py-4 text-muted">Bạn chưa có vòng quay nào. Nhấn <strong>Tạo vòng quay mới</strong> để bắt đầu!</div>');
+                                return;
+                            }
+
+                            var html = '';
+                            list.forEach(function (w) {
+                                var isCurrent = (parseInt(w.id, 10) === parseInt(wheelId, 10));
+                                html += '<tr class="' + (isCurrent ? 'table-primary bg-opacity-25' : '') + '">' +
+                                    '<td>' +
+                                    '<div class="fw-bold">' + escapeHtml(w.title) + ' ' +
+                                    (isCurrent ? '<span class="badge bg-success ms-1">Đang dùng</span>' : '') +
+                                    '</div>' +
+                                    '<div class="small text-muted">ID: #' + w.id + ' &bull; <code>' + escapeHtml(w.shortcode) + '</code></div>' +
+                                    '</td>' +
+                                    '<td class="text-center"><span class="badge bg-secondary rounded-pill">' + (w.prizes_count || 0) + ' giải</span></td>' +
+                                    '<td class="text-center small text-muted">' + escapeHtml(w.created_at || '') + '</td>' +
+                                    '<td class="text-end">' +
+                                    '<div class="btn-group btn-group-sm">' +
+                                    (!isCurrent ? '<button type="button" class="btn btn-outline-primary btn-switch-user-wheel" data-id="' + w.id + '">Dùng</button>' : '') +
+                                    '<button type="button" class="btn btn-outline-secondary btn-edit-user-wheel" data-id="' + w.id + '" data-title="' + escapeAttr(w.title) + '" title="Sửa tiêu đề"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg></button>' +
+                                    '<button type="button" class="btn btn-outline-secondary btn-dup-user-wheel" data-id="' + w.id + '" title="Nhân bản"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg></button>' +
+                                    '<button type="button" class="btn btn-outline-danger btn-del-user-wheel" data-id="' + w.id + '" title="Xóa"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>' +
+                                    '</div>' +
+                                    '</td>' +
+                                    '</tr>';
+                            });
+
+                            $tbody.html(html);
+                            $tableWrap.removeClass('d-none');
+                        },
+                        error: function (err) {
+                            $loading.hide();
+                            $wrap.html('<div class="alert alert-danger py-2 text-center mb-0">Không thể tải danh sách vòng quay.</div>');
+                        }
+                    });
+                }
+
+                // Mở modal danh sách vòng quay
+                $('#modalUserWheels').on('show.bs.modal', function () {
+                    loadUserWheelsList();
+                });
+
+                // Chuyển sang dùng vòng quay khác
+                $(document).on('click', '.btn-switch-user-wheel', function () {
+                    var id = $(this).data('id');
+                    if (!id) return;
+
+                    var $btn = $(this);
+                    $btn.prop('disabled', true).text('Đang nạp...');
+
+                    $.ajax({
+                        url: wp_spin_wheel_params.rest_url + 'user/wheels/' + id,
+                        method: 'GET',
+                        beforeSend: function (xhr) {
+                            xhr.setRequestHeader('X-WP-Nonce', wp_spin_wheel_params.nonce);
+                        },
+                        success: function (data) {
+                            if (data && data.id) {
+                                wheelId = data.id;
+                                $('#wheel-wrapper').attr('data-wheel-id', data.id);
+
+                                if (data.title) {
+                                    $('#txt-title, #vqmm-title').text(data.title);
+                                }
+                                if (data.description) {
+                                    $('#txt-desc, #vqmm-desc').text(data.description);
+                                }
+                                if (data.settings && typeof data.settings === 'object') {
+                                    mergeUserSettings(data.settings);
+                                    applySettingsToUI(data.settings);
+                                }
+                                if (Array.isArray(data.prizes) && data.prizes.length) {
+                                    wheelPrizes = data.prizes.map(normalizePrize);
+                                }
+
+                                renderPrizeList();
+                                syncSectorColors();
+                                renderWheel();
+                                drawWheelCanvas(0);
+
+                                // Đóng modal
+                                var modalEl = document.getElementById('modalUserWheels');
+                                if (modalEl) {
+                                    var modalInst = bootstrap.Modal.getInstance(modalEl);
+                                    if (modalInst) modalInst.hide();
+                                }
+                            }
+                        },
+                        complete: function () {
+                            $btn.prop('disabled', false).text('Dùng');
+                        }
+                    });
+                });
+
+                // Sửa / Đổi tên tiêu đề vòng quay
+    $(document).on('click', '.btn-edit-user-wheel', function () {
+        var id = $(this).data('id');
+        var currentTitle = $(this).data('title') || '';
+        if (!id) return;
+
+        var newTitle = prompt('Nhập tiêu đề mới cho vòng quay #' + id + ':', currentTitle);
+        if (newTitle === null) return;
+        newTitle = $.trim(newTitle);
+        if (!newTitle) {
+            alert('Tiêu đề không được để trống!');
+            return;
+        }
+
+        var $btn = $(this);
+        $btn.prop('disabled', true);
+
+        $.ajax({
+            url: wp_spin_wheel_params.rest_url + 'user/wheels/' + id,
+            method: 'POST',
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader('X-WP-Nonce', wp_spin_wheel_params.nonce);
+            },
+            contentType: 'application/json',
+            data: JSON.stringify({
+                title: newTitle
+            }),
+            success: function (res) {
+                if (res && res.success) {
+                    if (parseInt(id, 10) === parseInt(wheelId, 10)) {
+                        $('#txt-title, #vqmm-title').text(res.title || newTitle);
+                    }
+                    loadUserWheelsList();
+                }
+            },
+            error: function () {
+                alert('Không thể cập nhật tiêu đề vòng quay.');
+            },
+            complete: function () {
+                $btn.prop('disabled', false);
+            }
         });
+    });
+
+    // Khi sửa trực tiếp tiêu đề hoặc mô tả trên màn hình -> tự động đồng bộ lên server
+    $('#txt-title, #vqmm-title, #txt-desc, #vqmm-desc').on('blur', function () {
+        if (typeof wp_spin_wheel_params !== 'undefined' && wp_spin_wheel_params.is_logged_in) {
+            syncUserWheelToServer();
+        }
+    });
+
+    // Tạo mới vòng quay
+                $('#btn-create-new-user-wheel').on('click', function () {
+                    var title = prompt('Nhập tên cho vòng quay mới:', 'Vòng quay ' + new Date().toLocaleDateString('vi-VN'));
+                    if (title === null) return;
+                    title = $.trim(title) || 'Vòng quay mới';
+
+                    var $btn = $(this);
+                    $btn.prop('disabled', true);
+
+                    $.ajax({
+                        url: wp_spin_wheel_params.rest_url + 'user/wheels',
+                        method: 'POST',
+                        beforeSend: function (xhr) {
+                            xhr.setRequestHeader('X-WP-Nonce', wp_spin_wheel_params.nonce);
+                        },
+                        contentType: 'application/json',
+                        data: JSON.stringify({
+                            title: title,
+                            settings: collectSettings(),
+                            prizes: wheelPrizes
+                        }),
+                        success: function (res) {
+                            if (res && res.wheel_id) {
+                                wheelId = res.wheel_id;
+                                $('#wheel-wrapper').attr('data-wheel-id', res.wheel_id);
+                                $('#txt-title, #vqmm-title').text(res.title || title);
+                                loadUserWheelsList();
+
+                                // Đóng modal
+                                var modalEl = document.getElementById('modalUserWheels');
+                                if (modalEl) {
+                                    var modalInst = bootstrap.Modal.getInstance(modalEl);
+                                    if (modalInst) modalInst.hide();
+                                }
+                            }
+                        },
+                        error: function (err) {
+                            alert('Lỗi tạo vòng quay mới!');
+                        },
+                        complete: function () {
+                            $btn.prop('disabled', false);
+                        }
+                    });
+                });
+
+                // Nhân bản vòng quay
+                $(document).on('click', '.btn-dup-user-wheel', function () {
+                    var id = $(this).data('id');
+                    if (!id) return;
+
+                    var $btn = $(this);
+                    $btn.prop('disabled', true);
+
+                    $.ajax({
+                        url: wp_spin_wheel_params.rest_url + 'user/wheels/' + id + '/duplicate',
+                        method: 'POST',
+                        beforeSend: function (xhr) {
+                            xhr.setRequestHeader('X-WP-Nonce', wp_spin_wheel_params.nonce);
+                        },
+                        success: function (res) {
+                            loadUserWheelsList();
+                        },
+                        error: function () {
+                            alert('Không thể nhân bản vòng quay.');
+                        },
+                        complete: function () {
+                            $btn.prop('disabled', false);
+                        }
+                    });
+                });
+
+                // Xóa vòng quay
+                $(document).on('click', '.btn-del-user-wheel', function () {
+                    var id = $(this).data('id');
+                    if (!id) return;
+                    if (!confirm('Bạn có chắc chắn muốn xóa vòng quay này không?')) return;
+
+                    var $btn = $(this);
+                    $btn.prop('disabled', true);
+
+                    $.ajax({
+                        url: wp_spin_wheel_params.rest_url + 'user/wheels/' + id,
+                        method: 'DELETE',
+                        beforeSend: function (xhr) {
+                            xhr.setRequestHeader('X-WP-Nonce', wp_spin_wheel_params.nonce);
+                        },
+                        success: function (res) {
+                            loadUserWheelsList();
+                        },
+                        error: function () {
+                            alert('Không thể xóa vòng quay này.');
+                        },
+                        complete: function () {
+                            $btn.prop('disabled', false);
+                        }
+                    });
+                });
+            });
