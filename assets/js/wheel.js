@@ -12,9 +12,48 @@ jQuery(document).ready(function ($) {
     var idleAnimationId = null;
     var IDLE_SPEED = 0.001; // radians per frame (~0.17°/frame)
 
-    // Key lưu settings vào localStorage
+    // Key lưu settings vào localStorage (phân biệt guest và user_id)
     function getSettingsStorageKey() {
-        return 'wp_spin_wheel_ui_settings_' + (wheelId || '0');
+        var userId = (typeof wp_spin_wheel_params !== 'undefined' && wp_spin_wheel_params.user_id) ? wp_spin_wheel_params.user_id : 'guest';
+        return 'wp_spin_wheel_ui_settings_' + (wheelId || 'user_' + userId);
+    }
+
+    var syncTimeout = null;
+    // Đồng bộ lên server nếu user đã đăng nhập (Trường hợp 2)
+    function syncUserWheelToServer(customData) {
+        if (typeof wp_spin_wheel_params === 'undefined' || !wp_spin_wheel_params.is_logged_in) {
+            return; // Trường hợp 1: Chưa đăng nhập -> Chỉ lưu localStorage
+        }
+        clearTimeout(syncTimeout);
+        syncTimeout = setTimeout(function () {
+            var data = {
+                settings: collectSettings(),
+                prizes: wheelPrizes,
+                title: $.trim($('#txt-title').text() || $('#vqmm-title').text() || ''),
+                description: $.trim($('#txt-desc').text() || $('#vqmm-desc').text() || '')
+            };
+            if (customData) {
+                $.extend(data, customData);
+            }
+            $.ajax({
+                url: wp_spin_wheel_params.rest_url + 'user-wheel',
+                method: 'POST',
+                beforeSend: function (xhr) {
+                    xhr.setRequestHeader('X-WP-Nonce', wp_spin_wheel_params.nonce);
+                },
+                contentType: 'application/json',
+                data: JSON.stringify(data),
+                success: function (res) {
+                    if (res && res.wheel_id) {
+                        wheelId = res.wheel_id;
+                        $('#wheel-wrapper').attr('data-wheel-id', res.wheel_id);
+                    }
+                },
+                error: function (err) {
+                    console.warn('Lỗi lưu vòng quay lên server:', err);
+                }
+            });
+        }, 350);
     }
 
     // Đọc tất cả option từ modal settings thành object
@@ -187,10 +226,12 @@ jQuery(document).ready(function ($) {
             // Lưu settings + apply vào wheelSettings + re-render
             function saveWheelSettings() {
                 var s = collectSettings();
-                // Lưu localStorage
+                // 1. Lưu localStorage (cả 2 trường hợp)
                 localStorage.setItem(getSettingsStorageKey(), JSON.stringify(s));
-                // Merge vào wheelSettings đang dùng
+                // 2. Merge vào wheelSettings đang dùng
                 mergeUserSettings(s);
+                // 3. Nếu user đã đăng nhập: lưu vào post spin_wheel của user trên server (Trường hợp 2)
+                syncUserWheelToServer({ settings: s });
                 // Re-render vòng quay để áp dụng thay đổi giao diện
                 renderWheel();
                 // Feedback trên nút
@@ -527,9 +568,17 @@ jQuery(document).ready(function ($) {
         };
     }
 
+    function getStorageKey() {
+        var userId = (typeof wp_spin_wheel_params !== 'undefined' && wp_spin_wheel_params.user_id) ? wp_spin_wheel_params.user_id : 'guest';
+        return 'wp_spin_wheel_prizes_' + (wheelId || 'user_' + userId);
+    }
     function loadPrizes() {
         var prizes = parseJson(rawPrizes, []);
-        if (!wheelId) {
+        // Trường hợp 2: Nếu user đăng nhập và có dữ liệu từ server
+        if (typeof wp_spin_wheel_params !== 'undefined' && wp_spin_wheel_params.is_logged_in && wp_spin_wheel_params.user_wheel_data && Array.isArray(wp_spin_wheel_params.user_wheel_data.prizes) && wp_spin_wheel_params.user_wheel_data.prizes.length) {
+            prizes = wp_spin_wheel_params.user_wheel_data.prizes;
+        } else {
+            // Trường hợp 1: Tải từ localStorage
             var stored = parseJson(localStorage.getItem(getStorageKey()), null);
             if (Array.isArray(stored) && stored.length) {
                 prizes = stored;
@@ -537,11 +586,10 @@ jQuery(document).ready(function ($) {
         }
         return prizes.map(normalizePrize);
     }
-
     function savePrizes() {
-        if (!wheelId) {
-            localStorage.setItem(getStorageKey(), JSON.stringify(wheelPrizes));
-        }
+        localStorage.setItem(getStorageKey(), JSON.stringify(wheelPrizes));
+        // Trường hợp 2: Đồng bộ lên server bài viết spin_wheel của user
+        syncUserWheelToServer({ prizes: wheelPrizes });
     }
 
     function renderPrizeList() {
@@ -1078,11 +1126,24 @@ jQuery(document).ready(function ($) {
 
     wheelSettings = normalizeSettings(parseJson(rawSettings));
 
-    // Load settings đã lưu từ localStorage và merge vào wheelSettings + áp lên UI
-    var savedSettings = parseJson(localStorage.getItem(getSettingsStorageKey()), null);
-    if (savedSettings) {
-        mergeUserSettings(savedSettings);
-        applySettingsToUI(savedSettings);
+    // Trường hợp 2: Nếu user đã đăng nhập và có dữ liệu từ server bài viết spin_wheel
+    if (typeof wp_spin_wheel_params !== 'undefined' && wp_spin_wheel_params.is_logged_in && wp_spin_wheel_params.user_wheel_data) {
+        var uwd = wp_spin_wheel_params.user_wheel_data;
+        if (uwd.id) {
+            wheelId = uwd.id;
+            $('#wheel-wrapper').attr('data-wheel-id', uwd.id);
+        }
+        if (uwd.settings && typeof uwd.settings === 'object') {
+            mergeUserSettings(uwd.settings);
+            applySettingsToUI(uwd.settings);
+        }
+    } else {
+        // Trường hợp 1: User chưa đăng nhập -> Tải từ localStorage
+        var savedSettings = parseJson(localStorage.getItem(getSettingsStorageKey()), null);
+        if (savedSettings) {
+            mergeUserSettings(savedSettings);
+            applySettingsToUI(savedSettings);
+        }
     }
 
     wheelPrizes = loadPrizes();
@@ -1141,11 +1202,18 @@ jQuery(document).ready(function ($) {
             }
         });
 
-        // Use REST API for spin (server decides winner)
+        // Trường hợp khách chưa đăng nhập và không có wheelId -> Quay mượt mà ngay trên client
+        if (!wheelId && (typeof wp_spin_wheel_params === 'undefined' || !wp_spin_wheel_params.is_logged_in)) {
+            var randomIndex = Math.floor(Math.random() * wheelPrizes.length);
+            var localWinner = wheelPrizes[randomIndex] || { title: 'Chúc mừng bạn!', id: 'win-1' };
+            handleSpinSuccess(localWinner);
+            return;
+        }
+
+        // Trường hợp user có wheelId -> Gọi REST API máy chủ
         pendingRequest = true;
         var restBase = (wp_spin_wheel_params && wp_spin_wheel_params.rest_url) ? wp_spin_wheel_params.rest_url.replace(/\/$/, '') : (window.location.origin + '/wp-json/spin-wheel/v1');
-        var endpoint = restBase + '/wheels/' + wheelId + '/spin';
-
+        var endpoint = restBase + '/wheels/' + (wheelId || 0) + '/spin';
         fetch(endpoint, {
             method: 'POST',
             credentials: 'same-origin',
@@ -1153,7 +1221,10 @@ jQuery(document).ready(function ($) {
                 'Content-Type': 'application/json',
                 'X-WP-Nonce': (wp_spin_wheel_params && wp_spin_wheel_params.nonce) ? wp_spin_wheel_params.nonce : ''
             },
-            body: JSON.stringify({ form: form })
+            body: JSON.stringify({
+                form: form,
+                prizes: wheelPrizes
+            })
         }).then(function (res) {
             pendingRequest = false;
             if (!res.ok) {

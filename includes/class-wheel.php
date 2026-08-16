@@ -23,36 +23,64 @@ class WP_Spin_Wheel_Wheel {
         wp_send_json_success( array( 'prize' => $result ) );
     }
 
-    public static function spin_wheel( $wheel_id, $form_data = array() ) {
+    public static function spin_wheel( $wheel_id, $form_data = array(), $client_prizes = array() ) {
         $wheel_id = absint( $wheel_id );
-        if ( ! $wheel_id || get_post_type( $wheel_id ) !== 'spin_wheel' ) {
-            return new WP_Error( 'invalid_wheel', __( 'Invalid wheel.', 'wp-spin-wheel' ), array( 'status' => 404 ) );
-        }
-
-        $settings = WP_Spin_Wheel_Helper::get_wheel_settings( $wheel_id );
+        $settings = $wheel_id ? WP_Spin_Wheel_Helper::get_wheel_settings( $wheel_id ) : array();
         $form_data = is_array( $form_data ) ? $form_data : array();
 
-        $validation = self::validate_spin_request( $wheel_id, $settings, $form_data );
-        if ( is_wp_error( $validation ) ) {
-            return $validation;
+        if ( $wheel_id ) {
+            $validation = self::validate_spin_request( $wheel_id, $settings, $form_data );
+            if ( is_wp_error( $validation ) ) {
+                return $validation;
+            }
         }
 
-        $prizes = WP_Spin_Wheel_Prize::get_prizes( $wheel_id );
+        $prizes = $wheel_id ? WP_Spin_Wheel_Prize::get_prizes( $wheel_id ) : array();
+
+        // Nếu DB chưa có giải nhưng client gửi danh sách giải thưởng lên
+        if ( empty( $prizes ) && ! empty( $client_prizes ) && is_array( $client_prizes ) ) {
+            $prizes = $client_prizes;
+            if ( $wheel_id && class_exists( 'WP_Spin_Wheel_Rest_API' ) ) {
+                $rest = new WP_Spin_Wheel_Rest_API();
+                $rest->sync_prizes_db( $wheel_id, $client_prizes );
+                update_post_meta( $wheel_id, '_spin_wheel_prizes_json', wp_json_encode( $client_prizes ) );
+                $prizes = WP_Spin_Wheel_Prize::get_prizes( $wheel_id ) ?: $client_prizes;
+            }
+        }
+
+        // Fallback tạo giải thưởng mặc định nếu chưa có
         if ( empty( $prizes ) ) {
-            return new WP_Error( 'no_prizes', __( 'No prizes configured.', 'wp-spin-wheel' ), array( 'status' => 400 ) );
+            $default_prizes = array(
+                array( 'title' => 'Giải 1', 'color' => '#f87171', 'weight' => 10, 'stock' => 9999 ),
+                array( 'title' => 'Giải 2', 'color' => '#60a5fa', 'weight' => 10, 'stock' => 9999 ),
+                array( 'title' => 'Giải 3', 'color' => '#34d399', 'weight' => 10, 'stock' => 9999 ),
+                array( 'title' => 'Giải 4', 'color' => '#fbbf24', 'weight' => 10, 'stock' => 9999 ),
+                array( 'title' => 'Giải 5', 'color' => '#a78bfa', 'weight' => 10, 'stock' => 9999 ),
+                array( 'title' => 'Giải 6', 'color' => '#f472b6', 'weight' => 10, 'stock' => 9999 ),
+            );
+            if ( $wheel_id && class_exists( 'WP_Spin_Wheel_Rest_API' ) ) {
+                $rest = new WP_Spin_Wheel_Rest_API();
+                $rest->sync_prizes_db( $wheel_id, $default_prizes );
+                update_post_meta( $wheel_id, '_spin_wheel_prizes_json', wp_json_encode( $default_prizes ) );
+                $prizes = WP_Spin_Wheel_Prize::get_prizes( $wheel_id ) ?: $default_prizes;
+            } else {
+                $prizes = $default_prizes;
+            }
         }
 
         $winner = WP_Spin_Wheel_Random::pick_prize( $prizes );
         if ( ! $winner ) {
-            return new WP_Error( 'no_winner', __( 'No prize selected.', 'wp-spin-wheel' ), array( 'status' => 400 ) );
+            $winner = $prizes[ array_rand( $prizes ) ];
         }
 
-        if ( ! WP_Spin_Wheel_Prize::decrease_stock( $winner['id'] ?? 0 ) ) {
-            return new WP_Error( 'stock_error', __( 'Unable to decrease prize stock.', 'wp-spin-wheel' ), array( 'status' => 500 ) );
+        if ( ! empty( $winner['id'] ) ) {
+            WP_Spin_Wheel_Prize::decrease_stock( $winner['id'] );
         }
 
-        $history = new WP_Spin_Wheel_History();
-        $history->record_spin( $wheel_id, $winner['id'] ?? 0, $form_data );
+        if ( $wheel_id ) {
+            $history = new WP_Spin_Wheel_History();
+            $history->record_spin( $wheel_id, $winner['id'] ?? 0, $form_data );
+        }
 
         return $winner;
     }
@@ -114,10 +142,88 @@ class WP_Spin_Wheel_Wheel {
                 break;
         }
 
-        if ( $count >= $limit ) {
-            return new WP_Error( 'spin_limit_reached', __( 'You have reached the spin limit for this wheel.', 'wp-spin-wheel' ), array( 'status' => 429 ) );
-        }
+                if ( $count >= $limit ) {
+                    return new WP_Error( 'spin_limit_reached', __( 'You have reached the spin limit for this wheel.', 'wp-spin-wheel' ), array( 'status' => 429 ) );
+                }
+                return true;
+            }
 
-        return true;
-    }
-}
+            /**
+             * Lấy hoặc tạo bài viết spin_wheel duy nhất cho mỗi User ID
+             *
+             * @param int $user_id
+             * @return int Wheel Post ID
+             */
+            public static function get_or_create_user_wheel( $user_id ) {
+                $user_id = absint( $user_id );
+                if ( ! $user_id ) {
+                    return 0;
+                }
+
+                // Tìm bài viết spin_wheel do user này tạo
+                $args = array(
+                    'post_type'      => 'spin_wheel',
+                    'post_status'    => array( 'publish', 'draft', 'private', 'pending' ),
+                    'author'         => $user_id,
+                    'posts_per_page' => 1,
+                    'orderby'        => 'ID',
+                    'order'          => 'ASC',
+                    'fields'         => 'ids',
+                );
+                $wheels = get_posts( $args );
+
+                if ( ! empty( $wheels ) ) {
+                    return absint( $wheels[0] );
+                }
+
+                // Kiểm tra theo meta _user_id nếu có
+                $meta_wheels = get_posts( array(
+                    'post_type'      => 'spin_wheel',
+                    'post_status'    => array( 'publish', 'draft', 'private', 'pending' ),
+                    'posts_per_page' => 1,
+                    'meta_key'       => '_user_id',
+                    'meta_value'     => $user_id,
+                    'fields'         => 'ids',
+                ) );
+
+                if ( ! empty( $meta_wheels ) ) {
+                    return absint( $meta_wheels[0] );
+                }
+
+                // Chưa có -> Tạo mới 1 vòng quay cho user này
+                $user = get_userdata( $user_id );
+                $user_name = $user ? ( $user->display_name ?: $user->user_login ) : 'User #' . $user_id;
+                $title = sprintf( __( 'Vòng quay của %s', 'wp-spin-wheel' ), $user_name );
+
+                $post_id = wp_insert_post( array(
+                    'post_title'   => $title,
+                    'post_content' => '',
+                    'post_status'  => 'publish',
+                    'post_type'    => 'spin_wheel',
+                    'post_author'  => $user_id,
+                ) );
+
+                if ( is_wp_error( $post_id ) || ! $post_id ) {
+                    return 0;
+                }
+
+                update_post_meta( $post_id, '_user_id', $user_id );
+
+                // Khởi tạo giải thưởng mặc định ban đầu cho bài viết wheel mới
+                $default_prizes = array(
+                    array( 'title' => 'Giải 1', 'color' => '#f87171', 'weight' => 10, 'stock' => 9999 ),
+                    array( 'title' => 'Giải 2', 'color' => '#60a5fa', 'weight' => 10, 'stock' => 9999 ),
+                    array( 'title' => 'Giải 3', 'color' => '#34d399', 'weight' => 10, 'stock' => 9999 ),
+                    array( 'title' => 'Giải 4', 'color' => '#fbbf24', 'weight' => 10, 'stock' => 9999 ),
+                    array( 'title' => 'Giải 5', 'color' => '#a78bfa', 'weight' => 10, 'stock' => 9999 ),
+                    array( 'title' => 'Giải 6', 'color' => '#f472b6', 'weight' => 10, 'stock' => 9999 ),
+                );
+                if ( class_exists( 'WP_Spin_Wheel_Rest_API' ) ) {
+                    $rest = new WP_Spin_Wheel_Rest_API();
+                    $rest->sync_prizes_db( $post_id, $default_prizes );
+                }
+                update_post_meta( $post_id, '_spin_wheel_prizes_json', wp_json_encode( $default_prizes ) );
+
+                return absint( $post_id );
+            }
+        }

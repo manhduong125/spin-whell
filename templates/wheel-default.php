@@ -40,13 +40,32 @@ $default_settings = array(
         'end_sound_file'   => $_end_sound_file,
     ),
 );
-
 $default_prizes = array();
 $default_title = '';
 $default_description = '';
+$wheel_id = 0;
+
+if (is_user_logged_in()) {
+    $current_user_id = get_current_user_id();
+    if ($current_user_id) {
+        $wheel_id = WP_Spin_Wheel_Wheel::get_or_create_user_wheel($current_user_id);
+        if ($wheel_id) {
+            $user_saved_settings = WP_Spin_Wheel_Helper::get_wheel_overrides($wheel_id);
+            if (! empty($user_saved_settings) && is_array($user_saved_settings)) {
+                $default_settings = array_replace_recursive($default_settings, $user_saved_settings);
+            }
+            $user_db_prizes = WP_Spin_Wheel_Prize::get_prizes($wheel_id);
+            if (! empty($user_db_prizes) && is_array($user_db_prizes)) {
+                $default_prizes = $user_db_prizes;
+            }
+            $default_title = get_the_title($wheel_id);
+            $default_description = get_post_field('post_content', $wheel_id);
+        }
+    }
+}
 ?>
 <div id="particles-js"></div>
-<div class="container-fluid noads wp-spin-wheel-wrapper" id="wheel-wrapper" data-wheel-id="0"
+<div class="container-fluid noads wp-spin-wheel-wrapper" id="wheel-wrapper" data-wheel-id="<?php echo esc_attr($wheel_id); ?>"
     data-wheel-settings="<?php echo esc_attr(wp_json_encode($default_settings)); ?>"
     data-wheel-prizes="<?php echo esc_attr(wp_json_encode($default_prizes)); ?>">
     <div class="row" id="row-wheel">
@@ -169,7 +188,7 @@ $default_description = '';
                             <div id="sector_list" class="form-control section-list rounded-0" readonly
                                 placeholder="<?php esc_attr_e('Danh sách phần thưởng', 'wp-spin-wheel'); ?>">
                                 <?php foreach ($default_prizes as $prize) : ?>
-                                <div><?php echo esc_html($prize['title']); ?></div>
+                                    <div><?php echo esc_html($prize['title']); ?></div>
                                 <?php endforeach; ?>
                             </div>
                         </div>
@@ -191,6 +210,7 @@ $default_description = '';
     </div>
 </div>
 
+<!-- Sửa tiêu đề và mô tả -->
 <div class="modal" id="modal-edit" tabindex="-1" style="display: none;" aria-modal="true" aria-hidden="true"
     role="dialog">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable" id="modal-dialog">
@@ -375,19 +395,26 @@ $default_description = '';
                 <ul class="nav nav-tabs" id="myTab" role="tablist">
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active" id="gen-setting-tab" data-bs-toggle="tab" data-bs-target="#gen-setting-tab-pane" type="button" role="tab" aria-controls="gen-setting-tab-pane" aria-selected="true">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="3"></circle>
+                                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                            </svg>
                             <span>Chung</span>
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
                         <button class="nav-link" id="appearance-tab" data-bs-toggle="tab" data-bs-target="#appearance-tab-pane" type="button" role="tab" aria-controls="appearance-tab-pane" aria-selected="false">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+                            </svg>
                             <span>Giao diện</span>
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
                         <button class="nav-link" id="media-tab" data-bs-toggle="tab" data-bs-target="#media-tab-pane" type="button" role="tab" aria-controls="media-tab-pane" aria-selected="false">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                            </svg>
                             <span>Thư viện</span>
                         </button>
                     </li>
@@ -408,37 +435,37 @@ $default_description = '';
                                         <?php selected(in_array($_start_sound, array('0', ''), true), true); ?>>Tắt
                                         tiếng</option>
                                     <?php if (! empty($_audios_start)) : ?>
-                                    <option value="random" <?php selected($_start_sound, 'random'); ?>>Ngẫu nhiên
-                                    </option>
+                                        <option value="random" <?php selected($_start_sound, 'random'); ?>>Ngẫu nhiên
+                                        </option>
                                     <?php endif; ?>
                                     <?php if (! empty($_audios_start)) : ?>
-                                    <optgroup label="── Thư viện nhạc ──">
-                                        <?php foreach ($_audios_start as $_as) :
+                                        <optgroup label="── Thư viện nhạc ──">
+                                            <?php foreach ($_audios_start as $_as) :
                                                 $_as_id  = $_as['id'] ?? '';
                                                 $_as_url = $_as['config']['file'] ?? '';
                                                 $_as_lbl = $_as['name'] ?? '';
                                             ?>
-                                        <option value="<?php echo esc_attr($_as_id); ?>"
-                                            data-url="<?php echo esc_url($_as_url); ?>"
-                                            <?php selected($_start_sound, $_as_id); ?>><?php echo esc_html($_as_lbl); ?>
-                                        </option>
-                                        <?php endforeach; ?>
-                                    </optgroup>
+                                                <option value="<?php echo esc_attr($_as_id); ?>"
+                                                    data-url="<?php echo esc_url($_as_url); ?>"
+                                                    <?php selected($_start_sound, $_as_id); ?>><?php echo esc_html($_as_lbl); ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </optgroup>
                                     <?php endif; ?>
                                 </select>
                                 <button type="button" class="btn btn-outline-secondary sw-btn-preview"
                                     data-target="start_sound" data-audios="<?php
-                                                    $_audios_start_map = array_values(array_map(
-                                                        function ($a) {
-                                                            return array(
-                                                                'id'  => $a['id'] ?? '',
-                                                                'url' => $a['config']['file'] ?? '',
-                                                            );
-                                                        },
-                                                        $_audios_start
-                                                    ));
-                                                    echo esc_attr(wp_json_encode($_audios_start_map));
-                                                    ?>" title="Nghe thử">
+                                                                            $_audios_start_map = array_values(array_map(
+                                                                                function ($a) {
+                                                                                    return array(
+                                                                                        'id'  => $a['id'] ?? '',
+                                                                                        'url' => $a['config']['file'] ?? '',
+                                                                                    );
+                                                                                },
+                                                                                $_audios_start
+                                                                            ));
+                                                                            echo esc_attr(wp_json_encode($_audios_start_map));
+                                                                            ?>" title="Nghe thử">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                         stroke-linejoin="round" class="feather feather-play">
@@ -474,39 +501,39 @@ $default_description = '';
                                         <?php selected(in_array($_end_sound, array('0', ''), true), true); ?>>Tắt tiếng
                                     </option>
                                     <?php if (! empty($_audios_end)) : ?>
-                                    <option value="random" <?php selected($_end_sound, 'random'); ?>>Ngẫu nhiên</option>
+                                        <option value="random" <?php selected($_end_sound, 'random'); ?>>Ngẫu nhiên</option>
                                     <?php endif; ?>
                                     <option value="read" <?php selected($_end_sound, 'read'); ?>>Đọc kết quả</option>
                                     <option value="slot_end" <?php selected($_end_sound, 'slot_end'); ?>>Slot end
                                     </option>
                                     <?php if (! empty($_audios_end)) : ?>
-                                    <optgroup label="── Thư viện nhạc ──">
-                                        <?php foreach ($_audios_end as $_ae) :
+                                        <optgroup label="── Thư viện nhạc ──">
+                                            <?php foreach ($_audios_end as $_ae) :
                                                 $_ae_id  = $_ae['id'] ?? '';
                                                 $_ae_url = $_ae['config']['file'] ?? '';
                                                 $_ae_lbl = $_ae['name'] ?? '';
                                             ?>
-                                        <option value="<?php echo esc_attr($_ae_id); ?>"
-                                            data-url="<?php echo esc_url($_ae_url); ?>"
-                                            <?php selected($_end_sound, $_ae_id); ?>><?php echo esc_html($_ae_lbl); ?>
-                                        </option>
-                                        <?php endforeach; ?>
-                                    </optgroup>
+                                                <option value="<?php echo esc_attr($_ae_id); ?>"
+                                                    data-url="<?php echo esc_url($_ae_url); ?>"
+                                                    <?php selected($_end_sound, $_ae_id); ?>><?php echo esc_html($_ae_lbl); ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </optgroup>
                                     <?php endif; ?>
                                 </select>
                                 <button type="button" class="btn btn-outline-secondary sw-btn-preview"
                                     data-target="end_sound" data-audios="<?php
-                                                    $_audios_end_map = array_values(array_map(
-                                                        function ($a) {
-                                                            return array(
-                                                                'id'  => $a['id'] ?? '',
-                                                                'url' => $a['config']['file'] ?? '',
-                                                            );
-                                                        },
-                                                        $_audios_end
-                                                    ));
-                                                    echo esc_attr(wp_json_encode($_audios_end_map));
-                                                    ?>" title="Nghe thử">
+                                                                            $_audios_end_map = array_values(array_map(
+                                                                                function ($a) {
+                                                                                    return array(
+                                                                                        'id'  => $a['id'] ?? '',
+                                                                                        'url' => $a['config']['file'] ?? '',
+                                                                                    );
+                                                                                },
+                                                                                $_audios_end
+                                                                            ));
+                                                                            echo esc_attr(wp_json_encode($_audios_end_map));
+                                                                            ?>" title="Nghe thử">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"
                                         fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
                                         stroke-linejoin="round" class="feather feather-play">
@@ -543,8 +570,8 @@ $default_description = '';
                                 );
                                 foreach ($duration_options as $_sec => $_label) :
                                 ?>
-                                <option value="<?php echo esc_attr($_sec); ?>" <?php selected((int) $_dur, $_sec); ?>>
-                                    <?php echo esc_html($_label); ?></option>
+                                    <option value="<?php echo esc_attr($_sec); ?>" <?php selected((int) $_dur, $_sec); ?>>
+                                        <?php echo esc_html($_label); ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
@@ -940,32 +967,32 @@ $default_description = '';
                                                 <?php
                                                 $_btn_dir  = WP_SPIN_WHEEL_PATH . 'assets/buttons/';
                                                 $_btn_url  = WP_SPIN_WHEEL_URL . 'assets/buttons/';
-                                                $_btn_files = glob( $_btn_dir . '*.{jpg,jpeg,png,gif,webp}', GLOB_BRACE );
-                                                if ( ! empty( $_btn_files ) ) :
+                                                $_btn_files = glob($_btn_dir . '*.{jpg,jpeg,png,gif,webp}', GLOB_BRACE);
+                                                if (! empty($_btn_files)) :
                                                     $_btn_i = 0;
-                                                    foreach ( $_btn_files as $_btn_file ) :
+                                                    foreach ($_btn_files as $_btn_file) :
                                                         $_btn_i++;
-                                                        $_btn_name = pathinfo( $_btn_file, PATHINFO_FILENAME );
-                                                        $_btn_file_url = $_btn_url . rawurlencode( basename( $_btn_file ) );
+                                                        $_btn_name = pathinfo($_btn_file, PATHINFO_FILENAME);
+                                                        $_btn_file_url = $_btn_url . rawurlencode(basename($_btn_file));
                                                 ?>
-                                                <tr>
-                                                    <td><span class="badge bg-secondary"><?php echo esc_html( $_btn_i ); ?></span></td>
-                                                    <td class="small"><?php echo esc_html( $_btn_name ); ?></td>
-                                                    <td><img
-                                                                src="<?php echo esc_url( $_btn_file_url ); ?>"
-                                                                width="50" height="50"
-                                                                class="border border-1 rounded-1"></td>
-                                                    <td><button class="btn btn-sm btn-secondary sw-media-apply"
-                                                            data-type="btn"
-                                                            data-url="<?php echo esc_url( $_btn_file_url ); ?>">Nút
-                                                            Quay</button></td>
-                                                    <td>∗</td>
-                                                </tr>
-                                                <?php endforeach; ?>
+                                                        <tr>
+                                                            <td><span class="badge bg-secondary"><?php echo esc_html($_btn_i); ?></span></td>
+                                                            <td class="small"><?php echo esc_html($_btn_name); ?></td>
+                                                            <td><img
+                                                                    src="<?php echo esc_url($_btn_file_url); ?>"
+                                                                    width="50" height="50"
+                                                                    class="border border-1 rounded-1"></td>
+                                                            <td><button class="btn btn-sm btn-secondary sw-media-apply"
+                                                                    data-type="btn"
+                                                                    data-url="<?php echo esc_url($_btn_file_url); ?>">Nút
+                                                                    Quay</button></td>
+                                                            <td>∗</td>
+                                                        </tr>
+                                                    <?php endforeach; ?>
                                                 <?php else : ?>
-                                                <tr>
-                                                    <td colspan="5" class="text-center text-muted small">Không có ảnh nút quay</td>
-                                                </tr>
+                                                    <tr>
+                                                        <td colspan="5" class="text-center text-muted small">Không có ảnh nút quay</td>
+                                                    </tr>
                                                 <?php endif; ?>
                                             </tbody>
                                         </table>
@@ -989,32 +1016,32 @@ $default_description = '';
                                                 <?php
                                                 $_bgr_dir  = WP_SPIN_WHEEL_PATH . 'assets/background/';
                                                 $_bgr_url  = WP_SPIN_WHEEL_URL . 'assets/background/';
-                                                $_bgr_files = glob( $_bgr_dir . '*.{jpg,jpeg,png,gif,webp}', GLOB_BRACE );
-                                                if ( ! empty( $_bgr_files ) ) :
+                                                $_bgr_files = glob($_bgr_dir . '*.{jpg,jpeg,png,gif,webp}', GLOB_BRACE);
+                                                if (! empty($_bgr_files)) :
                                                     $_bgr_i = 0;
-                                                    foreach ( $_bgr_files as $_bgr_file ) :
+                                                    foreach ($_bgr_files as $_bgr_file) :
                                                         $_bgr_i++;
-                                                        $_bgr_name = pathinfo( $_bgr_file, PATHINFO_FILENAME );
-                                                        $_bgr_file_url = $_bgr_url . rawurlencode( basename( $_bgr_file ) );
+                                                        $_bgr_name = pathinfo($_bgr_file, PATHINFO_FILENAME);
+                                                        $_bgr_file_url = $_bgr_url . rawurlencode(basename($_bgr_file));
                                                 ?>
-                                                <tr>
-                                                    <td><span class="badge bg-secondary"><?php echo esc_html( $_bgr_i ); ?></span></td>
-                                                    <td class="small"><?php echo esc_html( $_bgr_name ); ?></td>
-                                                    <td><img
-                                                                src="<?php echo esc_url( $_bgr_file_url ); ?>"
-                                                                width="50" height="50"
-                                                                class="border border-1 rounded-1"></td>
-                                                    <td><button class="btn btn-sm btn-secondary sw-media-apply"
-                                                            data-type="bgr"
-                                                            data-url="<?php echo esc_url( $_bgr_file_url ); ?>">Nền</button>
-                                                    </td>
-                                                    <td>∗</td>
-                                                </tr>
-                                                <?php endforeach; ?>
+                                                        <tr>
+                                                            <td><span class="badge bg-secondary"><?php echo esc_html($_bgr_i); ?></span></td>
+                                                            <td class="small"><?php echo esc_html($_bgr_name); ?></td>
+                                                            <td><img
+                                                                    src="<?php echo esc_url($_bgr_file_url); ?>"
+                                                                    width="50" height="50"
+                                                                    class="border border-1 rounded-1"></td>
+                                                            <td><button class="btn btn-sm btn-secondary sw-media-apply"
+                                                                    data-type="bgr"
+                                                                    data-url="<?php echo esc_url($_bgr_file_url); ?>">Nền</button>
+                                                            </td>
+                                                            <td>∗</td>
+                                                        </tr>
+                                                    <?php endforeach; ?>
                                                 <?php else : ?>
-                                                <tr>
-                                                    <td colspan="5" class="text-center text-muted small">Không có ảnh nền</td>
-                                                </tr>
+                                                    <tr>
+                                                        <td colspan="5" class="text-center text-muted small">Không có ảnh nền</td>
+                                                    </tr>
                                                 <?php endif; ?>
                                             </tbody>
                                         </table>
@@ -1037,20 +1064,20 @@ $default_description = '';
                                                 <?php
                                                 $_grd_file = WP_SPIN_WHEEL_PATH . 'assets/gradients.txt';
                                                 $_grd_gradients = array();
-                                                if ( file_exists( $_grd_file ) ) {
-                                                    $_grd_lines = file( $_grd_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES );
-                                                    if ( is_array( $_grd_lines ) ) {
+                                                if (file_exists($_grd_file)) {
+                                                    $_grd_lines = file($_grd_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+                                                    if (is_array($_grd_lines)) {
                                                         $_grd_section = '';
-                                                        foreach ( $_grd_lines as $_grd_line ) {
-                                                            $_grd_line = trim( $_grd_line );
-                                                            if ( '' === $_grd_line ) {
+                                                        foreach ($_grd_lines as $_grd_line) {
+                                                            $_grd_line = trim($_grd_line);
+                                                            if ('' === $_grd_line) {
                                                                 continue;
                                                             }
-                                                            if ( preg_match( '/^\[(.+)\]$/', $_grd_line, $_grd_m ) ) {
+                                                            if (preg_match('/^\[(.+)\]$/', $_grd_line, $_grd_m)) {
                                                                 $_grd_section = $_grd_m[1];
                                                                 continue;
                                                             }
-                                                            if ( strpos( $_grd_line, 'gradient(' ) !== false ) {
+                                                            if (strpos($_grd_line, 'gradient(') !== false) {
                                                                 $_grd_gradients[] = array(
                                                                     'section' => $_grd_section,
                                                                     'value'   => $_grd_line,
@@ -1059,32 +1086,32 @@ $default_description = '';
                                                         }
                                                     }
                                                 }
-                                                if ( ! empty( $_grd_gradients ) ) :
+                                                if (! empty($_grd_gradients)) :
                                                     $_grd_i = 0;
-                                                    foreach ( $_grd_gradients as $_grd_item ) :
+                                                    foreach ($_grd_gradients as $_grd_item) :
                                                         $_grd_i++;
-                                                        $_grd_name = ( ! empty( $_grd_item['section'] ) ? $_grd_item['section'] . '-' : '' ) . $_grd_i;
+                                                        $_grd_name = (! empty($_grd_item['section']) ? $_grd_item['section'] . '-' : '') . $_grd_i;
                                                 ?>
-                                                <tr>
-                                                    <td><span class="badge bg-secondary"><?php echo esc_html( $_grd_i ); ?></span></td>
-                                                    <td class="small"><?php echo esc_html( $_grd_name ); ?></td>
-                                                    <td>
-                                                        <div class="sw-gradient-preview"
-                                                            data-gradient="<?php echo esc_attr( $_grd_item['value'] ); ?>"
-                                                            style="width:50px;height:50px;border:1px solid #ccc;background:<?php echo esc_attr( $_grd_item['value'] ); ?>">
-                                                        </div>
-                                                    </td>
-                                                    <td><button class="btn btn-sm btn-secondary sw-media-apply"
-                                                            data-type="grd"
-                                                            data-gradient="<?php echo esc_attr( $_grd_item['value'] ); ?>">Nền</button>
-                                                    </td>
-                                                    <td>∗</td>
-                                                </tr>
-                                                <?php endforeach; ?>
+                                                        <tr>
+                                                            <td><span class="badge bg-secondary"><?php echo esc_html($_grd_i); ?></span></td>
+                                                            <td class="small"><?php echo esc_html($_grd_name); ?></td>
+                                                            <td>
+                                                                <div class="sw-gradient-preview"
+                                                                    data-gradient="<?php echo esc_attr($_grd_item['value']); ?>"
+                                                                    style="width:50px;height:50px;border:1px solid #ccc;background:<?php echo esc_attr($_grd_item['value']); ?>">
+                                                                </div>
+                                                            </td>
+                                                            <td><button class="btn btn-sm btn-secondary sw-media-apply"
+                                                                    data-type="grd"
+                                                                    data-gradient="<?php echo esc_attr($_grd_item['value']); ?>">Nền</button>
+                                                            </td>
+                                                            <td>∗</td>
+                                                        </tr>
+                                                    <?php endforeach; ?>
                                                 <?php else : ?>
-                                                <tr>
-                                                    <td colspan="5" class="text-center text-muted small">Không có gradient</td>
-                                                </tr>
+                                                    <tr>
+                                                        <td colspan="5" class="text-center text-muted small">Không có gradient</td>
+                                                    </tr>
                                                 <?php endif; ?>
                                             </tbody>
                                         </table>
@@ -1108,107 +1135,107 @@ $default_description = '';
 </div>
 
 <script>
-(function($) {
-    /* ── Audio preview cho select nhạc bắt đầu / kết thúc ── */
-    var $player = null;
-    var playingBtn = null;
+    (function($) {
+        /* ── Audio preview cho select nhạc bắt đầu / kết thúc ── */
+        var $player = null;
+        var playingBtn = null;
 
-    function getPlayer() {
-        if (!$player || !$player.length) $player = $('#sw-audio-preview');
-        return $player;
-    }
-
-    // Dừng player và reset icon nút đang phát
-    function stopPreview() {
-        var p = getPlayer();
-        if (p.length) {
-            p[0].pause();
-            p[0].currentTime = 0;
-            p.attr('src', '');
+        function getPlayer() {
+            if (!$player || !$player.length) $player = $('#sw-audio-preview');
+            return $player;
         }
-        if (playingBtn) {
-            $(playingBtn).find('[data-feather]').attr('data-feather', 'play');
+
+        // Dừng player và reset icon nút đang phát
+        function stopPreview() {
+            var p = getPlayer();
+            if (p.length) {
+                p[0].pause();
+                p[0].currentTime = 0;
+                p.attr('src', '');
+            }
+            if (playingBtn) {
+                $(playingBtn).find('[data-feather]').attr('data-feather', 'play');
+                if (typeof feather !== 'undefined') feather.replace();
+                playingBtn = null;
+            }
+        }
+
+        // Phát URL — click lần 2 vào cùng nút thì dừng
+        function playUrl(url, btn) {
+            if (!url) return;
+            if (playingBtn === btn) {
+                stopPreview();
+                return;
+            }
+            stopPreview();
+            var p = getPlayer();
+            p.attr('src', url);
+            p[0].play().catch(function() {});
+            $(btn).find('[data-feather]').attr('data-feather', 'square');
             if (typeof feather !== 'undefined') feather.replace();
-            playingBtn = null;
+            playingBtn = btn;
+            p[0].onended = function() {
+                $(btn).find('[data-feather]').attr('data-feather', 'play');
+                if (typeof feather !== 'undefined') feather.replace();
+                playingBtn = null;
+            };
         }
-    }
 
-    // Phát URL — click lần 2 vào cùng nút thì dừng
-    function playUrl(url, btn) {
-        if (!url) return;
-        if (playingBtn === btn) {
+        // Lấy URL từ option đang chọn trong select
+        function getUrlFromSelect($select, audios) {
+            var val = $select.val();
+            if (!val || val === '0') return null; // Tắt tiếng → không phát
+
+            if (val === 'random') {
+                // Ngẫu nhiên → pick 1 bài trong thư viện
+                var list = (audios || []).filter(function(a) {
+                    return !!a.url;
+                });
+                if (!list.length) return null;
+                return list[Math.floor(Math.random() * list.length)].url;
+            }
+
+            // Option thư viện nhạc có data-url
+            return $select.find('option:selected').data('url') || null;
+        }
+
+        // Nút play của select (class .sw-btn-preview, data-target = id của <select>)
+        $(document).on('click', '.sw-btn-preview', function() {
+            var btn = this;
+            var audios = $(btn).data('audios') || [];
+            var $sel = $('#' + $(btn).data('target'));
+            var url = getUrlFromSelect($sel, audios);
+            if (!url) {
+                stopPreview();
+                return;
+            }
+            playUrl(url, btn);
+        });
+
+        // Nút play nhactik.com — bắt đầu
+        $(document).on('click', '#btn-start-sound-play-file', function() {
+            var fileId = $.trim($('#start_sound_file').val());
+            if (!fileId) {
+                stopPreview();
+                return;
+            }
+            playUrl('https://nhactik.com/play/' + fileId + '.mp3', this);
+        });
+
+        // Nút play nhactik.com — kết thúc
+        $(document).on('click', '#btn-end-sound-play-file', function() {
+            var fileId = $.trim($('#end_sound_file').val());
+            if (!fileId) {
+                stopPreview();
+                return;
+            }
+            playUrl('https://nhactik.com/play/' + fileId + '.mp3', this);
+        });
+
+        // Dừng nhạc khi đóng modal settings
+        $(document).on('hide.bs.modal', '#modalSettings', function() {
             stopPreview();
-            return;
-        }
-        stopPreview();
-        var p = getPlayer();
-        p.attr('src', url);
-        p[0].play().catch(function() {});
-        $(btn).find('[data-feather]').attr('data-feather', 'square');
-        if (typeof feather !== 'undefined') feather.replace();
-        playingBtn = btn;
-        p[0].onended = function() {
-            $(btn).find('[data-feather]').attr('data-feather', 'play');
-            if (typeof feather !== 'undefined') feather.replace();
-            playingBtn = null;
-        };
-    }
+        });
 
-    // Lấy URL từ option đang chọn trong select
-    function getUrlFromSelect($select, audios) {
-        var val = $select.val();
-        if (!val || val === '0') return null; // Tắt tiếng → không phát
-
-        if (val === 'random') {
-            // Ngẫu nhiên → pick 1 bài trong thư viện
-            var list = (audios || []).filter(function(a) {
-                return !!a.url;
-            });
-            if (!list.length) return null;
-            return list[Math.floor(Math.random() * list.length)].url;
-        }
-
-        // Option thư viện nhạc có data-url
-        return $select.find('option:selected').data('url') || null;
-    }
-
-    // Nút play của select (class .sw-btn-preview, data-target = id của <select>)
-    $(document).on('click', '.sw-btn-preview', function() {
-        var btn = this;
-        var audios = $(btn).data('audios') || [];
-        var $sel = $('#' + $(btn).data('target'));
-        var url = getUrlFromSelect($sel, audios);
-        if (!url) {
-            stopPreview();
-            return;
-        }
-        playUrl(url, btn);
-    });
-
-    // Nút play nhactik.com — bắt đầu
-    $(document).on('click', '#btn-start-sound-play-file', function() {
-        var fileId = $.trim($('#start_sound_file').val());
-        if (!fileId) {
-            stopPreview();
-            return;
-        }
-        playUrl('https://nhactik.com/play/' + fileId + '.mp3', this);
-    });
-
-    // Nút play nhactik.com — kết thúc
-    $(document).on('click', '#btn-end-sound-play-file', function() {
-        var fileId = $.trim($('#end_sound_file').val());
-        if (!fileId) {
-            stopPreview();
-            return;
-        }
-        playUrl('https://nhactik.com/play/' + fileId + '.mp3', this);
-    });
-
-    // Dừng nhạc khi đóng modal settings
-    $(document).on('hide.bs.modal', '#modalSettings', function() {
-        stopPreview();
-    });
-
-})(jQuery);
+    })(jQuery);
 </script>
