@@ -2052,10 +2052,7 @@ $default_description = '';
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="d-flex justify-content-between mb-3"><span>Tùy chỉnh màu sắc</span> <a
-                                            class="text-primary text-decoration-none" target="_blank"
-                                            href="https://vongquaymayman.co/meo-chon-mau-sac-dep/">Mẹo chọn màu đẹp°</a>
-                                    </div>
+                                    <div class="d-flex justify-content-between mb-3"><span>Hội màu sắc vòng quay</span></div>
                                     <div class="row g-1 g-lg-1 mb-3">
                                         <div class="col-2 col-lg-2">
                                             <div class="d-flex">

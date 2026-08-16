@@ -48,6 +48,7 @@ jQuery(document).ready(function($) {
             },
             // background: đọc từ wheelSettings (được cập nhật trực tiếp bởi sw-media-apply)
             background: $.extend( {}, wheelSettings.background || {} ),
+            sector_colors: getSelectedSectorColors(),
         };
     }
 
@@ -139,6 +140,9 @@ jQuery(document).ready(function($) {
         }
         if ( saved.background ) {
             wheelSettings.background = $.extend( {}, wheelSettings.background, saved.background );
+        }
+        if ( saved.sector_colors ) {
+            wheelSettings.sector_colors = saved.sector_colors;
         }
     }
 
@@ -322,6 +326,70 @@ jQuery(document).ready(function($) {
 
     // Bảng 6 màu mặc định cho các ô vòng quay
     var DEFAULT_SECTOR_COLORS = ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899'];
+
+    // ── Hội màu sắc vòng quay ──
+    var SECTOR_COLOR_SLOTS = 6;
+
+    // Lấy danh sách màu đang chọn từ các checkbox
+    function getSelectedSectorColors() {
+        var colors = [];
+        for ( var i = 1; i <= SECTOR_COLOR_SLOTS; i++ ) {
+            var $chk = $('#chkcolor-' + i);
+            if ( $chk.length && $chk.is(':checked') ) {
+                var val = $('#color-' + i).val() || '';
+                if ( val ) colors.push( val );
+            }
+        }
+        return colors;
+    }
+
+    // Sync màu trong `wheelPrizes` với hội màu đã chọn
+    function syncSectorColors() {
+        if ( ! wheelPrizes.length ) return;
+        var colors = getSelectedSectorColors();
+        wheelPrizes.forEach(function(prize, index) {
+            prize.color = colors.length ? colors[ index % colors.length ] : DEFAULT_SECTOR_COLORS[ index % DEFAULT_SECTOR_COLORS.length ];
+        });
+        savePrizes();
+        renderPrizeList();
+        renderWheel();
+    }
+
+    // Render các pill màu đã chọn
+    function renderSectorColorPills() {
+        var $list = $('#sector-colors-list');
+        if ( ! $list.length ) return;
+
+        $list.empty();
+        var colors = getSelectedSectorColors();
+
+        if ( ! colors.length ) {
+            $list.html('<span class="text-muted small">Chưa chọn màu nào</span>');
+            return;
+        }
+
+        colors.forEach(function(color, index) {
+            var $pill = $('<span/>', {
+                'class': 'badge rounded-pill sw-sector-color-pill',
+                css: {
+                    backgroundColor: color,
+                    color: '#ffffff',
+                    cursor: 'pointer',
+                    fontSize: '12px',
+                },
+                'data-color-index': index,
+                'data-color-value': color,
+                'data-slot': index + 1,
+            });
+            $pill.text( color + ' ' );
+            $('<span/>', {
+                'class': 'sw-remove-color',
+                css: { marginLeft: '4px', cursor: 'pointer' },
+                text: '×',
+            }).appendTo($pill);
+            $list.append($pill);
+        });
+    }
 
     function normalizePrize(prize, index) {
         prize = prize || {};
@@ -865,6 +933,17 @@ jQuery(document).ready(function($) {
 
     wheelPrizes = loadPrizes();
     renderPrizeList();
+
+    // Khởi tạo hội màu sắc
+    renderSectorColorPills();
+    if ( savedSettings && savedSettings.sector_colors ) {
+        wheelPrizes.forEach(function(prize, index) {
+            prize.color = savedSettings.sector_colors[ index % savedSettings.sector_colors.length ];
+        });
+        savePrizes();
+        renderPrizeList();
+    }
+
     renderWheel();
     startIdleAnimation();
 
@@ -1104,6 +1183,64 @@ jQuery(document).ready(function($) {
         if ( confirm('Reset tất cả cài đặt về mặc định?') ) {
             resetWheelSettings();
         }
+    });
+
+    // ── Áp dụng một chủ đề: chọn màu từ data-content vào hội màu ──
+    $('#myDropdown').on('click', '.dropdown-item', function(e) {
+        e.preventDefault();
+        var content = $(this).attr('data-content') || '';
+        if ( ! content ) return;
+        var themeColors = content.split(',').map(function(c) { return $.trim(c); }).filter(function(c) { return c !== ''; });
+        if ( ! themeColors.length ) return;
+
+        // Bỏ check tất cả checkbox màu trước
+        $('input[name="chkcolor"]').prop('checked', false);
+        // Checks riêng từng màu
+        themeColors.forEach(function(color, index) {
+            var slot = index + 1;
+            if ( slot > SECTOR_COLOR_SLOTS ) return;
+            $('#chkcolor-' + slot).prop('checked', true);
+            $('#color-' + slot).val(color);
+        });
+        // Sync hội màu
+        syncSectorColors();
+        // Lưu vào localStorage ngay
+        localStorage.setItem( getSettingsStorageKey(), JSON.stringify( collectSettings() ) );
+    });
+
+    // ── Hội màu sắc: checkbox thay đổi ──
+    $(document).on('change', 'input[name="chkcolor"]', function() {
+        renderSectorColorPills();
+        syncSectorColors();
+    });
+
+    // ── Hội màu sắc: đổi giá trị màu ──
+    $(document).on('input', '.sw-sector-color-input, [id^="color-"]', function() {
+        renderSectorColorPills();
+        syncSectorColors();
+    });
+
+    // ── Hội màu sắc: click pill để đổi màu ──
+    $(document).on('click', '.sw-sector-color-pill', function(e) {
+        if ( $(e.target).hasClass('sw-remove-color') ) return;
+        var index = parseInt( $(this).data('slot'), 10 );
+        var $input = $('#color-' + index);
+        if ( $input.length ) {
+            $input.trigger('click');
+        }
+    });
+
+    // ── Hội màu sắc: click × để xóa màu khỏi hội ──
+    $(document).on('click', '.sw-remove-color', function(e) {
+        e.stopPropagation();
+        var $pill = $(this).closest('.sw-sector-color-pill');
+        var slot = parseInt( $pill.attr('data-slot'), 10 );
+        var $chk = $('#chkcolor-' + slot);
+        var $input = $('#color-' + slot);
+        if ( $chk.length ) $chk.prop('checked', false);
+        if ( $input.length ) $input.val('');
+        renderSectorColorPills();
+        syncSectorColors();
     });
 
     // Shuffle mảng màu để mỗi lần fill ra màu khác nhau
