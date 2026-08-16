@@ -258,6 +258,7 @@ class WP_Spin_Wheel_Wheel {
                         'created_at'   => get_the_date( 'd/m/Y H:i', $p->ID ),
                         'prizes_count' => is_array( $prizes ) ? count( $prizes ) : 0,
                         'shortcode'    => '[spin_wheel id="' . $p->ID . '"]',
+                        'permalink'    => get_permalink( $p->ID ),
                     );
                 }
 

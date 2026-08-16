@@ -25,6 +25,10 @@ if ( ! defined( 'WP_SPIN_WHEEL_PATH' ) ) {
     define( 'WP_SPIN_WHEEL_PATH', plugin_dir_path( WP_SPIN_WHEEL_FILE ) );
 }
 
+if ( ! defined( 'WP_SPIN_WHEEL_DIR' ) ) {
+    define( 'WP_SPIN_WHEEL_DIR', WP_SPIN_WHEEL_PATH );
+}
+
 if ( ! defined( 'WP_SPIN_WHEEL_URL' ) ) {
     define( 'WP_SPIN_WHEEL_URL', plugin_dir_url( WP_SPIN_WHEEL_FILE ) );
 }
