@@ -876,8 +876,7 @@ $default_description = '';
                                 <textarea class="form-control form-control-sm" id="bg-gradient" rows="4"
                                     placeholder="Nhap CSS gradient (vd: conic-gradient(...))">conic-gradient(from 90deg,#df3000 0deg,#feb81a 180deg,#df3000 360deg)</textarea>
                             </div>
-                            <button class="btn btn-outline-primary btn-sm w-100 mb-3" id="btn-apply-body-gradient">Ap
-                                dung gradient</button>
+                            <button class="btn btn-outline-primary btn-sm w-100 mb-3" id="btn-apply-body-gradient">Áp dụng gradient</button>
 
                             <hr class="my-2">
 
