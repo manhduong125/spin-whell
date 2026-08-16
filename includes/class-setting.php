@@ -34,9 +34,6 @@ class WP_Spin_Wheel_Settings {
 
     private function get_default_item_groups() {
         return array(
-            'bg_gradients' => array(),
-            'bg_images'    => array(),
-            'buttons'      => array(),
             'audios_start' => array(),
             'audios_end'   => array(),
         );
@@ -44,23 +41,6 @@ class WP_Spin_Wheel_Settings {
 
     private function get_group_key_from_type( $type ) {
         $type = is_string( $type ) ? sanitize_key( $type ) : '';
-
-        if ( in_array( $type, array( 'bg_gradient', 'bg_gradients' ), true ) ) {
-            return 'bg_gradients';
-        }
-
-        if ( in_array( $type, array( 'bg_image', 'bg_images' ), true ) ) {
-            return 'bg_images';
-        }
-
-        // Backward compat: 'backgrounds' cũ map về bg_images
-        if ( in_array( $type, array( 'background', 'backgrounds', 'spin_wheel_background' ), true ) ) {
-            return 'bg_images';
-        }
-
-        if ( in_array( $type, array( 'button', 'buttons', 'spin_wheel_button' ), true ) ) {
-            return 'buttons';
-        }
 
         if ( in_array( $type, array( 'audio_start', 'audios_start', 'spin_wheel_audio_start' ), true ) ) {
             return 'audios_start';
@@ -103,25 +83,6 @@ class WP_Spin_Wheel_Settings {
     private function build_item_config( $group_key, $payload ) {
         $payload = is_array( $payload ) ? $payload : array();
 
-        if ( 'bg_gradients' === $group_key ) {
-            return array(
-                'gradient' => sanitize_text_field( wp_unslash( $payload['spin_wheel_setting_bg_gradient'] ?? '' ) ),
-            );
-        }
-
-        if ( 'bg_images' === $group_key ) {
-            return array(
-                'image' => esc_url_raw( wp_unslash( $payload['spin_wheel_setting_bg_image'] ?? '' ) ),
-            );
-        }
-
-        if ( 'buttons' === $group_key ) {
-            return array(
-                'color'            => sanitize_hex_color( wp_unslash( $payload['spin_wheel_setting_button_color'] ?? '#2563eb' ) ) ?: '#2563eb',
-                'background_image' => esc_url_raw( wp_unslash( $payload['spin_wheel_setting_button_background_image'] ?? '' ) ),
-            );
-        }
-
         if ( 'audios_start' === $group_key || 'audios_end' === $group_key ) {
             return array(
                 'file' => esc_url_raw( wp_unslash( $payload['spin_wheel_setting_audio_file'] ?? '' ) ),
@@ -155,7 +116,7 @@ class WP_Spin_Wheel_Settings {
         $action    = sanitize_text_field( wp_unslash( $_POST['spin_wheel_setting_item_action'] ) );
         $group_key = $this->get_group_key_from_type( wp_unslash( $_POST['spin_wheel_setting_item_group'] ?? '' ) );
 
-        if ( ! in_array( $group_key, array( 'bg_gradients', 'bg_images', 'buttons', 'audios_start', 'audios_end' ), true ) ) {
+        if ( ! in_array( $group_key, array( 'audios_start', 'audios_end' ), true ) ) {
             return;
         }
 
@@ -379,47 +340,13 @@ class WP_Spin_Wheel_Settings {
     /**
      * Render các trường input cho từng group, dùng chung cho form thêm và form sửa.
      *
-     * @param string $group_key   'backgrounds' | 'buttons' | 'pointers'
+     * @param string $group_key   'audios_start' | 'audios_end'
      * @param array  $cfg         Mảng config hiện tại (rỗng khi thêm mới)
      * @return string HTML các hàng <tr> của form-table
      */
     private function render_item_fields( $group_key, $cfg = array() ) {
         $cfg = is_array( $cfg ) ? $cfg : array();
         $out = '';
-
-        if ( 'bg_gradients' === $group_key ) {
-            $gradient = $cfg['gradient'] ?? '';
-            $out .= '<tr><th style="padding:4px 8px;width:160px">' . esc_html__( 'CSS Gradient', 'wp-spin-wheel' ) . '</th><td style="padding:4px 8px">';
-            $out .= '<input type="text" name="spin_wheel_setting_bg_gradient" value="' . esc_attr( $gradient ) . '" class="widefat" placeholder="linear-gradient(135deg, #f06, #4a90e2)" />';
-            $out .= '<small style="display:block;margin-top:4px;color:#666;">' . esc_html__( 'Ví dụ: linear-gradient(135deg, #f06, #4a90e2)', 'wp-spin-wheel' ) . '</small>';
-            if ( $gradient ) {
-                $out .= '<div style="margin-top:6px;width:100%;height:32px;border-radius:4px;background:' . esc_attr( $gradient ) . ';border:1px solid #ddd;"></div>';
-            }
-            $out .= '</td></tr>';
-        }
-
-        if ( 'bg_images' === $group_key ) {
-            $image = $cfg['image'] ?? '';
-            $out .= '<tr><th style="padding:4px 8px;width:160px">' . esc_html__( 'URL hình ảnh', 'wp-spin-wheel' ) . '</th><td style="padding:4px 8px">';
-            $out .= '<input type="text" name="spin_wheel_setting_bg_image" value="' . esc_attr( $image ) . '" class="widefat" placeholder="https://example.com/bg.jpg" />';
-            if ( $image ) {
-                $out .= '<div style="margin-top:6px;"><img src="' . esc_url( $image ) . '" style="max-height:60px;border-radius:4px;border:1px solid #ddd;" /></div>';
-            }
-            $out .= '</td></tr>';
-        }
-
-        if ( 'buttons' === $group_key ) {
-            $color   = $cfg['color'] ?? '#2563eb';
-            $bg_img  = $cfg['background_image'] ?? '';
-
-            $out .= '<tr><th style="padding:4px 8px;width:160px">' . esc_html__( 'Màu nền nút', 'wp-spin-wheel' ) . '</th><td style="padding:4px 8px">';
-            $out .= '<input type="color" name="spin_wheel_setting_button_color" value="' . esc_attr( $color ) . '" style="width:60px;height:36px;" /></td></tr>';
-
-            $out .= '<tr><th style="padding:4px 8px">' . esc_html__( 'Ảnh nền nút (URL)', 'wp-spin-wheel' ) . '</th><td style="padding:4px 8px">';
-            $out .= '<input type="text" name="spin_wheel_setting_button_background_image" value="' . esc_attr( $bg_img ) . '" class="widefat" placeholder="https://example.com/btn.png" />';
-            $out .= '<small style="display:block;margin-top:4px;color:#666;">' . esc_html__( 'Nếu có ảnh nền sẽ ưu tiên hiển thị hơn màu.', 'wp-spin-wheel' ) . '</small>';
-            $out .= '</td></tr>';
-        }
 
         if ( 'audios_start' === $group_key || 'audios_end' === $group_key ) {
             $file = $cfg['file'] ?? '';
@@ -455,18 +382,6 @@ class WP_Spin_Wheel_Settings {
                 <div class="inside">
                     <?php
                     $group_definitions = array(
-                        'bg_gradients' => array(
-                            'title' => __( 'Background Gradient', 'wp-spin-wheel' ),
-                            'name'  => __( 'Gradient', 'wp-spin-wheel' ),
-                        ),
-                        'bg_images' => array(
-                            'title' => __( 'Background Image', 'wp-spin-wheel' ),
-                            'name'  => __( 'Image', 'wp-spin-wheel' ),
-                        ),
-                        'buttons' => array(
-                            'title' => __( 'Button', 'wp-spin-wheel' ),
-                            'name'  => __( 'Button', 'wp-spin-wheel' ),
-                        ),
                         'audios_start' => array(
                             'title' => __( 'Nhạc bắt đầu', 'wp-spin-wheel' ),
                             'name'  => __( 'Nhạc bắt đầu', 'wp-spin-wheel' ),
@@ -539,30 +454,7 @@ class WP_Spin_Wheel_Settings {
                                                 <td><?php echo esc_html( $item['name'] ?? '' ); ?></td>
                                                 <td>
                                                     <?php
-                                                    if ( 'bg_gradients' === $group_key ) {
-                                                        $gradient = $cfg['gradient'] ?? '';
-                                                        if ( $gradient ) {
-                                                            echo '<span style="display:inline-block;width:80px;height:18px;border-radius:3px;background:' . esc_attr( $gradient ) . ';border:1px solid #ccc;vertical-align:middle;"></span> ';
-                                                            echo '<small>' . esc_html( mb_strimwidth( $gradient, 0, 40, '…' ) ) . '</small>';
-                                                        } else {
-                                                            echo '<em style="color:#999;">' . esc_html__( 'Chưa có gradient', 'wp-spin-wheel' ) . '</em>';
-                                                        }
-                                                    } elseif ( 'bg_images' === $group_key ) {
-                                                        $image = $cfg['image'] ?? '';
-                                                        if ( $image ) {
-                                                            echo '<img src="' . esc_url( $image ) . '" style="max-height:32px;border-radius:3px;border:1px solid #ccc;vertical-align:middle;" /> ';
-                                                            echo '<small>' . esc_html( basename( $image ) ) . '</small>';
-                                                        } else {
-                                                            echo '<em style="color:#999;">' . esc_html__( 'Chưa có ảnh', 'wp-spin-wheel' ) . '</em>';
-                                                        }
-                                                    } elseif ( 'buttons' === $group_key ) {
-                                                        if ( ! empty( $cfg['background_image'] ) ) {
-                                                            echo '<img src="' . esc_url( $cfg['background_image'] ) . '" style="max-height:28px;border-radius:3px;border:1px solid #ccc;vertical-align:middle;" />';
-                                                        } elseif ( ! empty( $cfg['color'] ) ) {
-                                                            echo '<span style="display:inline-block;width:28px;height:18px;background:' . esc_attr( $cfg['color'] ) . ';border:1px solid #ccc;vertical-align:middle;border-radius:2px;"></span> ';
-                                                            echo '<small>' . esc_html( $cfg['color'] ) . '</small>';
-                                                        }
-                                                    } elseif ( 'audios_start' === $group_key || 'audios_end' === $group_key ) {
+                                                    if ( 'audios_start' === $group_key || 'audios_end' === $group_key ) {
                                                         $file = $cfg['file'] ?? '';
                                                         if ( $file ) {
                                                             echo '<a href="' . esc_url( $file ) . '" target="_blank">' . esc_html( basename( $file ) ) . '</a>';

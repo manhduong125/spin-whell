@@ -2113,10 +2113,7 @@ $default_description = '';
                                         </div>
                                     </div>
                                 </div>
-                                <div class="d-flex mb-3"> <span class="me-2">Màu chữ khi sector trắng:</span> <input
-                                        type="color"
-                                        class="form-control form-control-sm form-control-color m-0 p-0 border-0"
-                                        value="#000000" id="tcsw" placeholder="Text color sector white"> </div>
+                                
                             </div>
                             <hr>
 

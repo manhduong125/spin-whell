@@ -56,18 +56,6 @@ class WP_Spin_Wheel_Helper {
     private static function normalize_setting_group( $type ) {
         $type = is_string( $type ) ? sanitize_key( $type ) : '';
 
-        if ( in_array( $type, array( 'background', 'backgrounds', 'spin_wheel_background' ), true ) ) {
-            return 'backgrounds';
-        }
-
-        if ( in_array( $type, array( 'button', 'buttons', 'spin_wheel_button' ), true ) ) {
-            return 'buttons';
-        }
-
-        if ( in_array( $type, array( 'pointer', 'pointers', 'spin_wheel_pointer' ), true ) ) {
-            return 'pointers';
-        }
-
         if ( in_array( $type, array( 'audio_start', 'audios_start', 'spin_wheel_audio_start' ), true ) ) {
             return 'audios_start';
         }
