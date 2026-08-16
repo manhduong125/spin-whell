@@ -21,7 +21,7 @@ class WP_Spin_Wheel_History {
                 'ip'       => isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '',
                 'created_at' => current_time( 'mysql' ),
             ),
-            array( '%d', '%d', '%s', '%s', '%s', '%s', '%s', '%s' )
+            array( '%d', '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s' )
         );
     }
 

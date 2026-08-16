@@ -6,7 +6,11 @@ jQuery(document).ready(function($) {
     $('#add-spin-prize').on('click', function(e) {
         e.preventDefault();
         var html = template.replace(/__index__/g, index);
-        container.append(html);
+        var $newRow = $(html);
+        container.append($newRow);
+        if ( typeof $.fn.wpColorPicker === 'function' ) {
+            $newRow.find('.wp-spin-wheel-color-field').wpColorPicker();
+        }
         index++;
     });
 

@@ -1,3 +1,7 @@
-.wp-spin-wheel-dashboard { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin-top: 20px; }
-.wp-spin-wheel-dashboard .stat-item { background: #fff; padding: 20px; border: 1px solid #ddd; border-radius: 6px; text-align: center; }
-.wp-spin-wheel-dashboard .stat-item strong { display: block; font-size: 2rem; margin-bottom: 8px; }
+.wp-spin-wheel-dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-top: 20px; }
+.wp-spin-wheel-dashboard .stat-item { background: #fff; padding: 20px; border: 1px solid #e2e8f0; border-radius: 8px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+.wp-spin-wheel-dashboard .stat-item strong { display: block; font-size: 2.2rem; margin-bottom: 8px; color: #1e293b; }
+.wp-spin-wheel-dashboard .stat-item span { color: #64748b; font-size: 0.95rem; }
+.spin-prize-item { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px; margin-bottom: 10px; transition: border-color 0.2s; }
+.spin-prize-item:hover { border-color: #cbd5e1; }
+

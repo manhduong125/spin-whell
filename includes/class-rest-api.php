@@ -46,12 +46,12 @@ class WP_Spin_Wheel_REST_API {
             array(
                 'methods'             => 'PUT',
                 'callback'            => array( $this, 'update_wheel' ),
-                'permission_callback' => '__return_true',
+                'permission_callback' => function() { return is_user_logged_in(); },
             ),
             array(
                 'methods'             => 'DELETE',
                 'callback'            => array( $this, 'delete_wheel' ),
-                'permission_callback' => '__return_true',
+                'permission_callback' => function() { return is_user_logged_in(); },
             ),
         ) );
 
@@ -242,7 +242,7 @@ class WP_Spin_Wheel_REST_API {
                     'sort_order'  => intval( $prize['sort_order'] ?? 0 ),
                     'created_at'  => current_time( 'mysql' ),
                 ),
-                array( '%d', '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%d', '%d', '%s' )
+                array( '%d', '%s', '%s', '%s', '%s', '%s', '%d', '%d', '%d', '%s', '%d', '%s' )
             );
         }
     }
