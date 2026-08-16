@@ -2366,20 +2366,37 @@ $default_description = '';
                                                 </tr>
                                             </thead>
                                             <tbody id="mediaButtonBody">
+                                                <?php
+                                                $_btn_dir  = WP_SPIN_WHEEL_PATH . 'assets/buttons/';
+                                                $_btn_url  = WP_SPIN_WHEEL_URL . 'assets/buttons/';
+                                                $_btn_files = glob( $_btn_dir . '*.{jpg,jpeg,png,gif,webp}', GLOB_BRACE );
+                                                if ( ! empty( $_btn_files ) ) :
+                                                    $_btn_i = 0;
+                                                    foreach ( $_btn_files as $_btn_file ) :
+                                                        $_btn_i++;
+                                                        $_btn_name = pathinfo( $_btn_file, PATHINFO_FILENAME );
+                                                        $_btn_file_url = $_btn_url . rawurlencode( basename( $_btn_file ) );
+                                                ?>
                                                 <tr>
-                                                    <td><span class="badge bg-secondary">1</span></td>
-                                                    <td class="small">30_04</td>
-                                                    <td><a href="https://vongquaymayman.co/wp-content/themes/twentytwentythree-child/assets/buttons/30_04.jpg"
+                                                    <td><span class="badge bg-secondary"><?php echo esc_html( $_btn_i ); ?></span></td>
+                                                    <td class="small"><?php echo esc_html( $_btn_name ); ?></td>
+                                                    <td><a href="<?php echo esc_url( $_btn_file_url ); ?>"
                                                             target="_blank"><img
-                                                                src="https://vongquaymayman.co/wp-content/themes/twentytwentythree-child/assets/buttons/30_04.jpg"
+                                                                src="<?php echo esc_url( $_btn_file_url ); ?>"
                                                                 width="50" height="50"
                                                                 class="border border-1 rounded-1"></a></td>
                                                     <td><button class="btn btn-sm btn-secondary sw-media-apply"
                                                             data-type="btn"
-                                                            data-url="https://vongquaymayman.co/wp-content/themes/twentytwentythree-child/assets/buttons/30_04.jpg">Nút
+                                                            data-url="<?php echo esc_url( $_btn_file_url ); ?>">Nút
                                                             Quay</button></td>
                                                     <td>∗</td>
                                                 </tr>
+                                                <?php endforeach; ?>
+                                                <?php else : ?>
+                                                <tr>
+                                                    <td colspan="5" class="text-center text-muted small">Không có ảnh nút quay</td>
+                                                </tr>
+                                                <?php endif; ?>
                                             </tbody>
                                         </table>
                                     </div>
@@ -2399,20 +2416,37 @@ $default_description = '';
                                                 </tr>
                                             </thead>
                                             <tbody id="mediaBackgroundBody">
+                                                <?php
+                                                $_bgr_dir  = WP_SPIN_WHEEL_PATH . 'assets/background/';
+                                                $_bgr_url  = WP_SPIN_WHEEL_URL . 'assets/background/';
+                                                $_bgr_files = glob( $_bgr_dir . '*.{jpg,jpeg,png,gif,webp}', GLOB_BRACE );
+                                                if ( ! empty( $_bgr_files ) ) :
+                                                    $_bgr_i = 0;
+                                                    foreach ( $_bgr_files as $_bgr_file ) :
+                                                        $_bgr_i++;
+                                                        $_bgr_name = pathinfo( $_bgr_file, PATHINFO_FILENAME );
+                                                        $_bgr_file_url = $_bgr_url . rawurlencode( basename( $_bgr_file ) );
+                                                ?>
                                                 <tr>
-                                                    <td><span class="badge bg-secondary">1</span></td>
-                                                    <td class="small">black-friday</td>
-                                                    <td><a href="https://vongquaymayman.co/wp-content/themes/twentytwentythree-child/assets/background/black-friday.jpg"
+                                                    <td><span class="badge bg-secondary"><?php echo esc_html( $_bgr_i ); ?></span></td>
+                                                    <td class="small"><?php echo esc_html( $_bgr_name ); ?></td>
+                                                    <td><a href="<?php echo esc_url( $_bgr_file_url ); ?>"
                                                             target="_blank"><img
-                                                                src="https://vongquaymayman.co/wp-content/themes/twentytwentythree-child/assets/background/black-friday.jpg"
+                                                                src="<?php echo esc_url( $_bgr_file_url ); ?>"
                                                                 width="50" height="50"
                                                                 class="border border-1 rounded-1"></a></td>
                                                     <td><button class="btn btn-sm btn-secondary sw-media-apply"
                                                             data-type="bgr"
-                                                            data-url="https://vongquaymayman.co/wp-content/themes/twentytwentythree-child/assets/background/black-friday.jpg">Nền</button>
+                                                            data-url="<?php echo esc_url( $_bgr_file_url ); ?>">Nền</button>
                                                     </td>
                                                     <td>∗</td>
                                                 </tr>
+                                                <?php endforeach; ?>
+                                                <?php else : ?>
+                                                <tr>
+                                                    <td colspan="5" class="text-center text-muted small">Không có ảnh nền</td>
+                                                </tr>
+                                                <?php endif; ?>
                                             </tbody>
                                         </table>
                                     </div>
@@ -2431,20 +2465,58 @@ $default_description = '';
                                                 </tr>
                                             </thead>
                                             <tbody id="mediaGradientBody">
+                                                <?php
+                                                $_grd_file = WP_SPIN_WHEEL_PATH . 'assets/gradients.txt';
+                                                $_grd_gradients = array();
+                                                if ( file_exists( $_grd_file ) ) {
+                                                    $_grd_lines = file( $_grd_file, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES );
+                                                    if ( is_array( $_grd_lines ) ) {
+                                                        $_grd_section = '';
+                                                        foreach ( $_grd_lines as $_grd_line ) {
+                                                            $_grd_line = trim( $_grd_line );
+                                                            if ( '' === $_grd_line ) {
+                                                                continue;
+                                                            }
+                                                            if ( preg_match( '/^\[(.+)\]$/', $_grd_line, $_grd_m ) ) {
+                                                                $_grd_section = $_grd_m[1];
+                                                                continue;
+                                                            }
+                                                            if ( strpos( $_grd_line, 'gradient(' ) !== false ) {
+                                                                $_grd_gradients[] = array(
+                                                                    'section' => $_grd_section,
+                                                                    'value'   => $_grd_line,
+                                                                );
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                                if ( ! empty( $_grd_gradients ) ) :
+                                                    $_grd_i = 0;
+                                                    foreach ( $_grd_gradients as $_grd_item ) :
+                                                        $_grd_i++;
+                                                        $_grd_name = ( ! empty( $_grd_item['section'] ) ? $_grd_item['section'] . '-' : '' ) . $_grd_i;
+                                                ?>
                                                 <tr>
-                                                    <td><span class="badge bg-secondary">1</span></td>
-                                                    <td class="small">linearswatch-1</td>
+                                                    <td><span class="badge bg-secondary"><?php echo esc_html( $_grd_i ); ?></span></td>
+                                                    <td class="small"><?php echo esc_html( $_grd_name ); ?></td>
                                                     <td>
                                                         <div class="sw-gradient-preview"
-                                                            data-gradient="conic-gradient(from 135deg, rgb(255, 255, 196) 0deg, rgb(255, 255, 196) 27.692deg, rgb(255, 255, 181) 27.692deg, rgb(255, 255, 181) 55.385deg, rgb(255, 237, 165) 55.385deg, rgb(255, 237, 165) 83.077deg, rgb(255, 205, 149) 83.077deg, rgb(255, 205, 149) 110.769deg, rgb(255, 170, 133) 110.769deg, rgb(255, 170, 133) 138.462deg, rgb(255, 134, 116) 138.462deg, rgb(255, 134, 116) 166.154deg, rgb(255, 97, 100) 166.154deg, rgb(255, 97, 100) 193.846deg, rgb(245, 61, 85) 193.846deg, rgb(245, 61, 85) 221.538deg, rgb(233, 28, 69) 221.538deg, rgb(233, 28, 69) 249.231deg, rgb(220, 0, 55) 249.231deg, rgb(220, 0, 55) 276.923deg, rgb(206, 0, 42) 276.923deg, rgb(206, 0, 42) 304.615deg, rgb(192, 0, 29) 304.615deg, rgb(192, 0, 29) 332.308deg, rgb(176, 0, 18) 332.308deg, rgb(176, 0, 18) 360deg)"
-                                                            style="width:50px;height:50px;border:1px solid #ccc;background:conic-gradient(from 135deg, rgb(255, 255, 196) 0deg, rgb(255, 255, 196) 27.692deg, rgb(255, 255, 181) 27.692deg, rgb(255, 255, 181) 55.385deg, rgb(255, 237, 165) 55.385deg, rgb(255, 237, 165) 83.077deg, rgb(255, 205, 149) 83.077deg, rgb(255, 205, 149) 110.769deg, rgb(255, 170, 133) 110.769deg, rgb(255, 170, 133) 138.462deg, rgb(255, 134, 116) 138.462deg, rgb(255, 134, 116) 166.154deg, rgb(255, 97, 100) 166.154deg, rgb(255, 97, 100) 193.846deg, rgb(245, 61, 85) 193.846deg, rgb(245, 61, 85) 221.538deg, rgb(233, 28, 69) 221.538deg, rgb(233, 28, 69) 249.231deg, rgb(220, 0, 55) 249.231deg, rgb(220, 0, 55) 276.923deg, rgb(206, 0, 42) 276.923deg, rgb(206, 0, 42) 304.615deg, rgb(192, 0, 29) 304.615deg, rgb(192, 0, 29) 332.308deg, rgb(176, 0, 18) 332.308deg, rgb(176, 0, 18) 360deg)">
+                                                            data-gradient="<?php echo esc_attr( $_grd_item['value'] ); ?>"
+                                                            style="width:50px;height:50px;border:1px solid #ccc;background:<?php echo esc_attr( $_grd_item['value'] ); ?>">
                                                         </div>
                                                     </td>
                                                     <td><button class="btn btn-sm btn-secondary sw-media-apply"
-                                                            data-type="grd">Nền</button>
+                                                            data-type="grd"
+                                                            data-gradient="<?php echo esc_attr( $_grd_item['value'] ); ?>">Nền</button>
                                                     </td>
                                                     <td>∗</td>
                                                 </tr>
+                                                <?php endforeach; ?>
+                                                <?php else : ?>
+                                                <tr>
+                                                    <td colspan="5" class="text-center text-muted small">Không có gradient</td>
+                                                </tr>
+                                                <?php endif; ?>
                                             </tbody>
                                         </table>
                                     </div>
