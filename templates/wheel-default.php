@@ -20,7 +20,7 @@ $default_settings = array(
     'wheel' => array(
         'size'         => 600,
         'border'       => 12,
-        'border_color' => '#ffffff',
+        'border_color' => '#ff4d00',
         'shadow'       => true,
     ),
     'button' => array(
@@ -2110,7 +2110,7 @@ $default_description = '';
                                         </div>
                                     </div>
                                 </div>
-                                
+
                             </div>
                             <hr>
 

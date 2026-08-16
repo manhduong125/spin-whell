@@ -1,6 +1,6 @@
-jQuery(document).ready(function($) {
+jQuery(document).ready(function ($) {
     var container = $('#wheel-wrapper');
-    var wheelId = parseInt( container.data('wheel-id'), 10 ) || 0;
+    var wheelId = parseInt(container.data('wheel-id'), 10) || 0;
     var nonce = container.data('nonce');
     var rawSettings = container.attr('data-wheel-settings');
     var rawPrizes = container.attr('data-wheel-prizes');
@@ -21,176 +21,189 @@ jQuery(document).ready(function($) {
     function collectSettings() {
         var spinBgIsImage = $('#switch_spin_bg_type').is(':checked');
         // background_image có thể là URL hoặc dataURL từ upload — luôn lấy từ wheelSettings
-        var currentBgImage = ( wheelSettings.button && wheelSettings.button.background_image ) || '';
+        var currentBgImage = (wheelSettings.button && wheelSettings.button.background_image) || '';
         return {
             animation: {
-                duration: parseFloat( $('#duration').val() ) || 6,
-                confetti:  $('#show_confetti').is(':checked'),
+                duration: parseFloat($('#duration').val()) || 6,
+                confetti: $('#show_confetti').is(':checked'),
             },
             audio: {
-                start_sound:      $('#start_sound').val() || '0',
-                start_sound_file: $.trim( $('#start_sound_file').val() ),
-                end_sound:        $('#end_sound').val() || '0',
-                end_sound_file:   $.trim( $('#end_sound_file').val() ),
+                start_sound: $('#start_sound').val() || '0',
+                start_sound_file: $.trim($('#start_sound_file').val()),
+                end_sound: $('#end_sound').val() || '0',
+                end_sound_file: $.trim($('#end_sound_file').val()),
             },
             ui: {
-                auto_remove:        $('#auto_remove').is(':checked'),
-                show_popup:         $('#show_popup').is(':checked'),
-                popup_label:        $.trim( $('#popup_label').val() ),
+                auto_remove: $('#auto_remove').is(':checked'),
+                show_popup: $('#show_popup').is(':checked'),
+                popup_label: $.trim($('#popup_label').val()),
                 show_remove_button: $('#show_remove_button').is(':checked'),
             },
             button: {
-                text:             $.trim( $('#btn-spin-label').val() ),
-                bg_type:          currentBgImage ? 'image' : 'color',
-                color:            currentBgImage ? '' : ( $('#btn-spin-color').val() || '#ff0000' ),
-                text_color:       currentBgImage ? '' : ( $('#btn-spin-text-color').val() || '#ffffff' ),
+                text: $.trim($('#btn-spin-label').val()),
+                bg_type: currentBgImage ? 'image' : 'color',
+                color: currentBgImage ? '' : ($('#btn-spin-color').val() || '#ff0000'),
+                text_color: currentBgImage ? '' : ($('#btn-spin-text-color').val() || '#ffffff'),
                 background_image: currentBgImage,
             },
-            // background: đọc từ wheelSettings (được cập nhật trực tiếp bởi sw-media-apply)
-            background: $.extend( {}, wheelSettings.background || {} ),
-            sector_colors: getSelectedSectorColors(),
-        };
-    }
-
-    // Áp settings đã lưu vào các control trong modal
-    function applySettingsToUI( s ) {
-        if ( ! s ) return;
-
-        if ( s.animation ) {
-            if ( s.animation.duration !== undefined ) {
-                $('#duration').val( s.animation.duration );
+                    // background: đọc từ wheelSettings (được cập nhật trực tiếp bởi sw-media-apply)
+                    background: $.extend({}, wheelSettings.background || {}),
+                    wheel: {
+                        size: (wheelSettings.wheel && wheelSettings.wheel.size) || 600,
+                        border: (wheelSettings.wheel && wheelSettings.wheel.border) || 14,
+                        border_color: $('#border_color').length ? $('#border_color').val() : ((wheelSettings.wheel && wheelSettings.wheel.border_color) || '#FF4D00'),
+                        diamond_color: $('#diamond_color').length ? $('#diamond_color').val() : ((wheelSettings.wheel && wheelSettings.wheel.diamond_color) || '#F6FA00'),
+                        show_border: $('#show_border').length ? $('#show_border').is(':checked') : (wheelSettings.wheel ? wheelSettings.wheel.show_border !== false : true),
+                        shadow: (wheelSettings.wheel && wheelSettings.wheel.shadow) !== undefined ? wheelSettings.wheel.shadow : true,
+                    },
+                    sector_colors: getSelectedSectorColors(),
+                };
             }
-            if ( s.animation.confetti !== undefined ) {
-                $('#show_confetti').prop('checked', !! s.animation.confetti );
-            }
-        }
-
-        if ( s.audio ) {
-            if ( s.audio.start_sound !== undefined ) {
-                $('#start_sound').val( s.audio.start_sound );
-            }
-            if ( s.audio.start_sound_file !== undefined ) {
-                $('#start_sound_file').val( s.audio.start_sound_file );
-            }
-            if ( s.audio.end_sound !== undefined ) {
-                $('#end_sound').val( s.audio.end_sound );
-            }
-            if ( s.audio.end_sound_file !== undefined ) {
-                $('#end_sound_file').val( s.audio.end_sound_file );
-            }
-        }
-
-        if ( s.ui ) {
-            if ( s.ui.auto_remove !== undefined ) {
-                $('#auto_remove').prop('checked', !! s.ui.auto_remove );
-            }
-            if ( s.ui.show_popup !== undefined ) {
-                $('#show_popup').prop('checked', !! s.ui.show_popup );
-            }
-            if ( s.ui.popup_label !== undefined ) {
-                $('#popup_label').val( s.ui.popup_label );
-                $('#modal-result-popup-label').text( s.ui.popup_label || 'Bạn đã quay vào ô' );
-            }
-            if ( s.ui.show_remove_button !== undefined ) {
-                $('#show_remove_button').prop('checked', !! s.ui.show_remove_button );
-            }
-        }
-
-        if ( s.button ) {
-            var b = s.button;
-            if ( b.text !== undefined ) {
-                $('#btn-spin-label').val( b.text );
-            }
-            var isImage = b.bg_type === 'image' || ( ! b.bg_type && !! b.background_image );
-            $('#switch_spin_bg_type').prop('checked', isImage);
-            if ( isImage ) {
-                $('#form_spin_bg_color').addClass('d-none');
-                $('#form_spin_bg_image').removeClass('d-none');
-                if ( b.background_image !== undefined ) {
-                    $('#btn-spin-img').val( b.background_image );
-                    updateSpinImgPreview( b.background_image );
+            // Áp settings đã lưu vào các control trong modal
+            function applySettingsToUI(s) {
+                if (!s) return;
+                if (s.animation) {
+                    if (s.animation.duration !== undefined) {
+                        $('#duration').val(s.animation.duration);
+                    }
+                    if (s.animation.confetti !== undefined) {
+                        $('#show_confetti').prop('checked', !!s.animation.confetti);
+                    }
                 }
-            } else {
-                $('#form_spin_bg_image').addClass('d-none');
-                $('#form_spin_bg_color').removeClass('d-none');
-                if ( b.color ) {
-                    $('#btn-spin-color').val( b.color );
+                if (s.audio) {
+                    if (s.audio.start_sound !== undefined) {
+                        $('#start_sound').val(s.audio.start_sound);
+                    }
+                    if (s.audio.start_sound_file !== undefined) {
+                        $('#start_sound_file').val(s.audio.start_sound_file);
+                    }
+                    if (s.audio.end_sound !== undefined) {
+                        $('#end_sound').val(s.audio.end_sound);
+                    }
+                    if (s.audio.end_sound_file !== undefined) {
+                        $('#end_sound_file').val(s.audio.end_sound_file);
+                    }
                 }
-                if ( b.text_color ) {
-                    $('#btn-spin-text-color').val( b.text_color );
+                if (s.ui) {
+                    if (s.ui.auto_remove !== undefined) {
+                        $('#auto_remove').prop('checked', !!s.ui.auto_remove);
+                    }
+                    if (s.ui.show_popup !== undefined) {
+                        $('#show_popup').prop('checked', !!s.ui.show_popup);
+                    }
+                    if (s.ui.popup_label !== undefined) {
+                        $('#popup_label').val(s.ui.popup_label);
+                        $('#modal-result-popup-label').text(s.ui.popup_label || 'Bạn đã quay vào ô');
+                    }
+                    if (s.ui.show_remove_button !== undefined) {
+                        $('#show_remove_button').prop('checked', !!s.ui.show_remove_button);
+                    }
+                }
+                if (s.button) {
+                    var b = s.button;
+                    if (b.text !== undefined) {
+                        $('#btn-spin-label').val(b.text);
+                    }
+                    var isImage = b.bg_type === 'image' || (!b.bg_type && !!b.background_image);
+                    $('#switch_spin_bg_type').prop('checked', isImage);
+                    if (isImage) {
+                        $('#form_spin_bg_color').addClass('d-none');
+                        $('#form_spin_bg_image').removeClass('d-none');
+                        if (b.background_image !== undefined) {
+                            $('#btn-spin-img').val(b.background_image);
+                            updateSpinImgPreview(b.background_image);
+                        }
+                    } else {
+                        $('#form_spin_bg_image').addClass('d-none');
+                        $('#form_spin_bg_color').removeClass('d-none');
+                        if (b.color) {
+                            $('#btn-spin-color').val(b.color);
+                        }
+                        if (b.text_color) {
+                            $('#btn-spin-text-color').val(b.text_color);
+                        }
+                    }
+                }
+                if (s.wheel) {
+                    if (s.wheel.border_color && $('#border_color').length) {
+                        $('#border_color').val(s.wheel.border_color);
+                    }
+                    if (s.wheel.diamond_color && $('#diamond_color').length) {
+                        $('#diamond_color').val(s.wheel.diamond_color);
+                    }
+                    if (s.wheel.show_border !== undefined && $('#show_border').length) {
+                        $('#show_border').prop('checked', !!s.wheel.show_border);
+                        if (s.wheel.show_border) {
+                            $('#custom_border_color').show();
+                        } else {
+                            $('#custom_border_color').hide();
+                        }
+                    }
                 }
             }
-        }
-    }
-
-    // Merge saved settings vào wheelSettings
-    function mergeUserSettings( saved ) {
-        if ( ! saved ) return;
-        if ( saved.animation ) {
-            wheelSettings.animation = $.extend( {}, wheelSettings.animation, saved.animation );
-        }
-        if ( saved.audio ) {
-            wheelSettings.audio = $.extend( {}, wheelSettings.audio, saved.audio );
-        }
-        if ( saved.ui ) {
-            wheelSettings.ui = $.extend( {}, wheelSettings.ui, saved.ui );
-        }
-        if ( saved.button ) {
-            wheelSettings.button = $.extend( {}, wheelSettings.button, saved.button );
-        }
-        if ( saved.background ) {
-            wheelSettings.background = $.extend( {}, wheelSettings.background, saved.background );
-        }
-        if ( saved.sector_colors ) {
-            wheelSettings.sector_colors = saved.sector_colors;
-        }
-    }
-
-    // Lưu settings + apply vào wheelSettings + re-render
-    function saveWheelSettings() {
-        var s = collectSettings();
-
-        // Lưu localStorage
-        localStorage.setItem( getSettingsStorageKey(), JSON.stringify(s) );
-
-        // Merge vào wheelSettings đang dùng
-        mergeUserSettings( s );
-
-        // Re-render vòng quay để áp dụng thay đổi giao diện
-        renderWheel();
-
-        // Feedback trên nút
-        var $btn = $('#btn_wheel_setting');
-        $btn.text('Đã lưu \u2713').addClass('btn-success').removeClass('btn-primary');
-        setTimeout( function() {
-            $btn.text('Lưu lại').removeClass('btn-success').addClass('btn-primary');
-        }, 1500 );
-    }
-
-    // Reset về default
-    function resetWheelSettings() {
-        localStorage.removeItem( getSettingsStorageKey() );
-
-        // Reset wheelSettings về default từ data attribute
-        wheelSettings = normalizeSettings( parseJson(rawSettings) );
-
-        // Reset UI controls về giá trị mặc định
-        applySettingsToUI({
-            animation:  { duration: 6, confetti: false },
-            audio:      { start_sound: '0', start_sound_file: '', end_sound: '0', end_sound_file: '' },
-            ui:         { auto_remove: false, show_popup: false, popup_label: '', show_remove_button: false },
-            button:     { text: 'Quay', bg_type: 'color', color: '#ff0000', text_color: '#ffffff', background_image: '' },
-            background: { gradient: DEFAULT_BG_GRADIENT, image: '', color: '' },
-        });
-
-        renderWheel();
-    }
+            // Merge saved settings vào wheelSettings
+            function mergeUserSettings(saved) {
+                if (!saved) return;
+                if (saved.animation) {
+                    wheelSettings.animation = $.extend({}, wheelSettings.animation, saved.animation);
+                }
+                if (saved.audio) {
+                    wheelSettings.audio = $.extend({}, wheelSettings.audio, saved.audio);
+                }
+                if (saved.ui) {
+                    wheelSettings.ui = $.extend({}, wheelSettings.ui, saved.ui);
+                }
+                if (saved.button) {
+                    wheelSettings.button = $.extend({}, wheelSettings.button, saved.button);
+                }
+                if (saved.background) {
+                    wheelSettings.background = $.extend({}, wheelSettings.background, saved.background);
+                }
+                if (saved.wheel) {
+                    wheelSettings.wheel = $.extend({}, wheelSettings.wheel, saved.wheel);
+                }
+                if (saved.sector_colors) {
+                    wheelSettings.sector_colors = saved.sector_colors;
+                }
+            }
+            // Lưu settings + apply vào wheelSettings + re-render
+            function saveWheelSettings() {
+                var s = collectSettings();
+                // Lưu localStorage
+                localStorage.setItem(getSettingsStorageKey(), JSON.stringify(s));
+                // Merge vào wheelSettings đang dùng
+                mergeUserSettings(s);
+                // Re-render vòng quay để áp dụng thay đổi giao diện
+                renderWheel();
+                // Feedback trên nút
+                var $btn = $('#btn_wheel_setting');
+                $btn.text('Đã lưu \u2713').addClass('btn-success').removeClass('btn-primary');
+                setTimeout(function () {
+                    $btn.text('Lưu lại').removeClass('btn-success').addClass('btn-primary');
+                }, 1500);
+            }
+            // Reset về default
+            function resetWheelSettings() {
+                localStorage.removeItem(getSettingsStorageKey());
+                // Reset wheelSettings về default từ data attribute
+                wheelSettings = normalizeSettings(parseJson(rawSettings));
+                // Reset UI controls về giá trị mặc định
+                applySettingsToUI({
+                    animation: { duration: 6, confetti: false },
+                    audio: { start_sound: '0', start_sound_file: '', end_sound: '0', end_sound_file: '' },
+                    ui: { auto_remove: false, show_popup: false, popup_label: '', show_remove_button: false },
+                    button: { text: 'Quay', bg_type: 'color', color: '#ff0000', text_color: '#ffffff', background_image: '' },
+                    background: { gradient: DEFAULT_BG_GRADIENT, image: '', color: '' },
+                    wheel: { border_color: '#FF4D00', diamond_color: '#F6FA00', show_border: true, border: 14 },
+                });
+                renderWheel();
+            }
 
     // Cập nhật preview ảnh nút quay
-    function updateSpinImgPreview( url ) {
+    function updateSpinImgPreview(url) {
         var $wrap = $('#spin-img-preview-wrap');
-        var $img  = $('#spin-img-preview');
-        if ( url ) {
+        var $img = $('#spin-img-preview');
+        if (url) {
             $img.attr('src', url);
             $wrap.show();
         } else {
@@ -200,7 +213,7 @@ jQuery(document).ready(function($) {
     }
 
     function parseJson(value, fallback) {
-        if ( ! value ) {
+        if (!value) {
             return fallback;
         }
         try {
@@ -221,9 +234,9 @@ jQuery(document).ready(function($) {
         var backgroundImage = '';
         var backgroundType = 'color';
 
-        if ( typeof background === 'string' ) {
+        if (typeof background === 'string') {
             backgroundColor = background;
-        } else if ( typeof background === 'object' && background !== null ) {
+        } else if (typeof background === 'object' && background !== null) {
             backgroundType = background.type || 'color';
             backgroundColor = background.value || background.color || '';
             backgroundImage = background.image || '';
@@ -231,17 +244,19 @@ jQuery(document).ready(function($) {
 
         return {
             background: {
-                type:     backgroundType,
-                color:    backgroundColor,
-                image:    backgroundImage,
+                type: backgroundType,
+                color: backgroundColor,
+                image: backgroundImage,
                 // nếu không có gì → dùng gradient mặc định
                 gradient: background.gradient || DEFAULT_BG_GRADIENT,
             },
-            wheel: settings.wheel || {
-                size: 600,
-                border: 8,
-                border_color: '#ffffff',
-                shadow: true,
+            wheel: {
+                size: (settings.wheel && settings.wheel.size) || 600,
+                border: (settings.wheel && settings.wheel.border) !== undefined ? settings.wheel.border : 14,
+                border_color: (settings.wheel && settings.wheel.border_color) || ($('#border_color').length ? $('#border_color').val() : '#FF4D00'),
+                diamond_color: (settings.wheel && settings.wheel.diamond_color) || ($('#diamond_color').length ? $('#diamond_color').val() : '#F6FA00'),
+                show_border: (settings.wheel && settings.wheel.show_border) !== undefined ? !!settings.wheel.show_border : ($('#show_border').length ? $('#show_border').is(':checked') : true),
+                shadow: (settings.wheel && settings.wheel.shadow) !== undefined ? settings.wheel.shadow : true,
             },
             button: settings.button || {
                 text: 'QUAY',
@@ -284,18 +299,18 @@ jQuery(document).ready(function($) {
         var title = $.trim($('#editTitle').val());
         var description = $.trim($('#editDesc').val());
 
-        if ( ! title ) {
+        if (!title) {
             title = 'Vòng quay may mắn';
         }
 
         $('#vqmm-title').text(title);
-        if ( description ) {
+        if (description) {
             $('#vqmm-desc').html(description.replace(/\n/g, '<br>'));
         } else {
             $('#vqmm-desc').empty();
         }
 
-        if ( wheelId && nonce ) {
+        if (wheelId && nonce) {
             $.ajax({
                 url: wp_spin_wheel_params.rest_url + 'wheels/' + wheelId,
                 type: 'PUT',
@@ -310,10 +325,10 @@ jQuery(document).ready(function($) {
                     settings: {},
                     prizes: wheelPrizes,
                 }),
-                success: function() {
+                success: function () {
                     $('#edit-mode-txt').text('Đã lưu');
                 },
-                error: function() {
+                error: function () {
                     $('#edit-mode-txt').text('Lưu thất bại');
                 },
             });
@@ -333,11 +348,11 @@ jQuery(document).ready(function($) {
     // Lấy danh sách màu đang chọn từ các checkbox
     function getSelectedSectorColors() {
         var colors = [];
-        for ( var i = 1; i <= SECTOR_COLOR_SLOTS; i++ ) {
+        for (var i = 1; i <= SECTOR_COLOR_SLOTS; i++) {
             var $chk = $('#chkcolor-' + i);
-            if ( $chk.length && $chk.is(':checked') ) {
+            if ($chk.length && $chk.is(':checked')) {
                 var val = $('#color-' + i).val() || '';
-                if ( val ) colors.push( val );
+                if (val) colors.push(val);
             }
         }
         return colors;
@@ -345,10 +360,10 @@ jQuery(document).ready(function($) {
 
     // Sync màu trong `wheelPrizes` với hội màu đã chọn
     function syncSectorColors() {
-        if ( ! wheelPrizes.length ) return;
+        if (!wheelPrizes.length) return;
         var colors = getSelectedSectorColors();
-        wheelPrizes.forEach(function(prize, index) {
-            prize.color = colors.length ? colors[ index % colors.length ] : DEFAULT_SECTOR_COLORS[ index % DEFAULT_SECTOR_COLORS.length ];
+        wheelPrizes.forEach(function (prize, index) {
+            prize.color = colors.length ? colors[index % colors.length] : DEFAULT_SECTOR_COLORS[index % DEFAULT_SECTOR_COLORS.length];
         });
         savePrizes();
         renderPrizeList();
@@ -358,17 +373,17 @@ jQuery(document).ready(function($) {
     // Render các pill màu đã chọn
     function renderSectorColorPills() {
         var $list = $('#sector-colors-list');
-        if ( ! $list.length ) return;
+        if (!$list.length) return;
 
         $list.empty();
         var colors = getSelectedSectorColors();
 
-        if ( ! colors.length ) {
+        if (!colors.length) {
             $list.html('<span class="text-muted small">Chưa chọn màu nào</span>');
             return;
         }
 
-        colors.forEach(function(color, index) {
+        colors.forEach(function (color, index) {
             var $pill = $('<span/>', {
                 'class': 'badge rounded-pill sw-sector-color-pill',
                 css: {
@@ -381,7 +396,7 @@ jQuery(document).ready(function($) {
                 'data-color-value': color,
                 'data-slot': index + 1,
             });
-            $pill.text( color + ' ' );
+            $pill.text(color + ' ');
             $('<span/>', {
                 'class': 'sw-remove-color',
                 css: { marginLeft: '4px', cursor: 'pointer' },
@@ -396,16 +411,16 @@ jQuery(document).ready(function($) {
         return {
             id: prize.id || prize.title + '-' + index,
             title: prize.title || prize.name || '',
-            color: prize.color || prize.background || DEFAULT_SECTOR_COLORS[ index % DEFAULT_SECTOR_COLORS.length ],
+            color: prize.color || prize.background || DEFAULT_SECTOR_COLORS[index % DEFAULT_SECTOR_COLORS.length],
             description: prize.description || '',
         };
     }
 
     function loadPrizes() {
         var prizes = parseJson(rawPrizes, []);
-        if ( ! wheelId ) {
+        if (!wheelId) {
             var stored = parseJson(localStorage.getItem(getStorageKey()), null);
-            if ( Array.isArray(stored) && stored.length ) {
+            if (Array.isArray(stored) && stored.length) {
                 prizes = stored;
             }
         }
@@ -413,7 +428,7 @@ jQuery(document).ready(function($) {
     }
 
     function savePrizes() {
-        if ( ! wheelId ) {
+        if (!wheelId) {
             localStorage.setItem(getStorageKey(), JSON.stringify(wheelPrizes));
         }
     }
@@ -422,13 +437,13 @@ jQuery(document).ready(function($) {
         var list = $('#sector_list');
         list.empty();
 
-        if ( ! wheelPrizes.length ) {
+        if (!wheelPrizes.length) {
             list.removeClass('has-prizes');
             updateEntriesCount();
             return;
         }
 
-        wheelPrizes.forEach(function(prize, index) {
+        wheelPrizes.forEach(function (prize, index) {
             var item = $('<div/>', {
                 'class': 'wheel-prize-item d-flex justify-content-between align-items-center',
                 'data-index': index,
@@ -465,13 +480,13 @@ jQuery(document).ready(function($) {
     }
 
     function sortPrizes(ascending) {
-        wheelPrizes.sort(function(a, b) {
+        wheelPrizes.sort(function (a, b) {
             var titleA = (a.title || '').toLowerCase();
             var titleB = (b.title || '').toLowerCase();
-            if ( titleA < titleB ) {
+            if (titleA < titleB) {
                 return ascending ? -1 : 1;
             }
-            if ( titleA > titleB ) {
+            if (titleA > titleB) {
                 return ascending ? 1 : -1;
             }
             return 0;
@@ -484,7 +499,7 @@ jQuery(document).ready(function($) {
     function addPrize(title, color) {
         title = $.trim(title);
         color = color || '#10b981';
-        if ( ! title ) {
+        if (!title) {
             return;
         }
         wheelPrizes.push({
@@ -499,7 +514,7 @@ jQuery(document).ready(function($) {
     }
 
     function removePrize(index) {
-        if ( index < 0 || index >= wheelPrizes.length ) {
+        if (index < 0 || index >= wheelPrizes.length) {
             return;
         }
         wheelPrizes.splice(index, 1);
@@ -528,14 +543,14 @@ jQuery(document).ready(function($) {
     }
 
     function getPrizeIndex(prize) {
-        return wheelPrizes.findIndex(function(item) {
+        return wheelPrizes.findIndex(function (item) {
             return item.id === prize.id || item.title === prize.title;
         });
     }
 
     function drawWheelCanvas(rotation) {
         var canvas = document.getElementById('wheel');
-        if ( ! canvas || ! wheelPrizes.length ) {
+        if (!canvas || !wheelPrizes.length) {
             return;
         }
 
@@ -543,7 +558,17 @@ jQuery(document).ready(function($) {
         var ctx = canvas.getContext('2d');
         var centerX = size / 2;
         var centerY = size / 2;
-        var radius = centerX - wheelSettings.wheel.border;
+
+        var showBorder = (wheelSettings.wheel && wheelSettings.wheel.show_border) !== undefined ? wheelSettings.wheel.show_border : true;
+        if ($('#show_border').length) {
+            showBorder = $('#show_border').is(':checked');
+        }
+        var borderColor = (wheelSettings.wheel && wheelSettings.wheel.border_color) || ($('#border_color').length ? $('#border_color').val() : '#FF4D00');
+        var diamondColor = (wheelSettings.wheel && wheelSettings.wheel.diamond_color) || ($('#diamond_color').length ? $('#diamond_color').val() : '#F6FA00');
+
+        var borderWidth = showBorder ? Math.max(14, (wheelSettings.wheel && wheelSettings.wheel.border) || 14) : 0;
+        var sliceRadius = centerX - borderWidth;
+        var borderRingRadius = centerX - borderWidth / 2;
         var segmentCount = wheelPrizes.length;
         var angleStep = (Math.PI * 2) / segmentCount;
 
@@ -558,29 +583,28 @@ jQuery(document).ready(function($) {
         ctx.rotate(rotation);
         ctx.translate(-centerX, -centerY);
 
-        if ( wheelSettings.wheel.shadow ) {
+        if (wheelSettings.wheel.shadow) {
             ctx.shadowColor = 'rgba(0,0,0,0.15)';
             ctx.shadowBlur = 20;
         }
 
+        // Nền vòng tròn phía sau
         ctx.beginPath();
-        ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+        ctx.arc(centerX, centerY, centerX - 1, 0, Math.PI * 2);
         ctx.fillStyle = wheelSettings.background.color || '#ffffff';
         ctx.fill();
-        ctx.lineWidth = wheelSettings.wheel.border;
-        ctx.strokeStyle = wheelSettings.wheel.border_color;
-        ctx.stroke();
 
         ctx.shadowColor = 'transparent';
 
-        wheelPrizes.forEach(function(prize, index) {
+        // Vẽ từng ô phần thưởng (sector slices)
+        wheelPrizes.forEach(function (prize, index) {
             var startAngle = index * angleStep;
             var endAngle = startAngle + angleStep;
-            var fillColor = prize.color || DEFAULT_SECTOR_COLORS[ index % DEFAULT_SECTOR_COLORS.length ];
+            var fillColor = prize.color || DEFAULT_SECTOR_COLORS[index % DEFAULT_SECTOR_COLORS.length];
 
             ctx.beginPath();
             ctx.moveTo(centerX, centerY);
-            ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+            ctx.arc(centerX, centerY, sliceRadius, startAngle, endAngle);
             ctx.closePath();
             ctx.fillStyle = fillColor;
             ctx.fill();
@@ -590,7 +614,7 @@ jQuery(document).ready(function($) {
 
             ctx.save();
             var textAngle = startAngle + angleStep / 2;
-            var textRadius = radius * 0.65;
+            var textRadius = sliceRadius * 0.65;
             ctx.translate(centerX + Math.cos(textAngle) * textRadius, centerY + Math.sin(textAngle) * textRadius);
             ctx.rotate(textAngle);
             ctx.fillStyle = '#ffffff';
@@ -599,21 +623,47 @@ jQuery(document).ready(function($) {
             ctx.textBaseline = 'middle';
             var text = prize.title || prize.name || 'Prize';
             var lines = text.split('\n');
-            lines.forEach(function(line, lineIndex) {
+            lines.forEach(function (line, lineIndex) {
                 ctx.fillText(line, 0, (lineIndex - (lines.length - 1) / 2) * 22);
             });
             ctx.restore();
         });
 
+        // Vẽ viền ngoài và các nút kim cương nếu bật showBorder
+        if (showBorder && borderWidth > 0) {
+            // 1. Viền ngoài cùng (Màu viền: borderColor)
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, borderRingRadius, 0, Math.PI * 2);
+            ctx.lineWidth = borderWidth;
+            ctx.strokeStyle = borderColor;
+            ctx.stroke();
+
+            // 2. Các nút / chấm tròn kim cương (Màu kim cương: diamondColor)
+            var dotRadius = Math.max(3.5, Math.min(borderWidth * 0.3, 5.5));
+            for (var i = 0; i < segmentCount; i++) {
+                var pinAngle = (i + 0.5) * angleStep;
+                var pinX = centerX + Math.cos(pinAngle) * borderRingRadius;
+                var pinY = centerY + Math.sin(pinAngle) * borderRingRadius;
+
+                ctx.beginPath();
+                ctx.arc(pinX, pinY, dotRadius, 0, Math.PI * 2);
+                ctx.fillStyle = diamondColor;
+                ctx.fill();
+                ctx.lineWidth = 1;
+                ctx.strokeStyle = 'rgba(0, 0, 0, 0.25)';
+                ctx.stroke();
+            }
+        }
+
         ctx.restore();
     }
 
     function startIdleAnimation() {
-        if ( idleAnimationId ) {
+        if (idleAnimationId) {
             return;
         }
         function idleStep() {
-            if ( spinning ) {
+            if (spinning) {
                 idleAnimationId = null;
                 return;
             }
@@ -625,7 +675,7 @@ jQuery(document).ready(function($) {
     }
 
     function stopIdleAnimation() {
-        if ( idleAnimationId ) {
+        if (idleAnimationId) {
             cancelAnimationFrame(idleAnimationId);
             idleAnimationId = null;
         }
@@ -633,24 +683,24 @@ jQuery(document).ready(function($) {
 
     function renderWheel() {
         var wrapper = $('#wheel-wrapper');
-        var bg      = wheelSettings.background || {};
+        var bg = wheelSettings.background || {};
 
-        if ( bg.gradient ) {
+        if (bg.gradient) {
             // Gradient: gán vào backgroundImage (gradient là image function trong CSS)
             wrapper.css({
-                backgroundColor:    'transparent',
-                backgroundImage:    bg.gradient,
-                backgroundSize:     'cover',
-                backgroundRepeat:   'no-repeat',
+                backgroundColor: 'transparent',
+                backgroundImage: bg.gradient,
+                backgroundSize: 'cover',
+                backgroundRepeat: 'no-repeat',
                 backgroundPosition: 'center center',
             });
-        } else if ( bg.image ) {
+        } else if (bg.image) {
             // Ảnh URL
             wrapper.css({
                 backgroundColor: bg.color || '',
                 backgroundImage: 'url(' + bg.image + ')',
-                backgroundSize:     'cover',
-                backgroundRepeat:   'no-repeat',
+                backgroundSize: 'cover',
+                backgroundRepeat: 'no-repeat',
                 backgroundPosition: 'center center',
             });
         } else {
@@ -658,8 +708,8 @@ jQuery(document).ready(function($) {
             wrapper.css({
                 backgroundColor: bg.color || '',
                 backgroundImage: 'none',
-                backgroundSize:     'auto',
-                backgroundRepeat:   'repeat',
+                backgroundSize: 'auto',
+                backgroundRepeat: 'repeat',
                 backgroundPosition: 'center',
             });
         }
@@ -667,22 +717,22 @@ jQuery(document).ready(function($) {
         var btnText = wheelSettings.button.text !== undefined ? wheelSettings.button.text : 'QUAY NGAY';
         $('#spin').text(btnText);
         $('#spin').css({
-            backgroundColor: wheelSettings.button.background_image ? 'transparent' : ( wheelSettings.button.color || '#ff0000' ),
+            backgroundColor: wheelSettings.button.background_image ? 'transparent' : (wheelSettings.button.color || '#ff0000'),
             backgroundImage: wheelSettings.button.background_image ? 'url(' + wheelSettings.button.background_image + ')' : 'none',
-            color: wheelSettings.button.background_image ? 'transparent' : ( wheelSettings.button.text_color || '#ffffff' ),
+            color: wheelSettings.button.background_image ? 'transparent' : (wheelSettings.button.text_color || '#ffffff'),
             borderRadius: (wheelSettings.button.radius || 50) + 'px',
             backgroundSize: wheelSettings.button.background_image ? 'cover' : '',
             backgroundRepeat: wheelSettings.button.background_image ? 'no-repeat' : '',
             backgroundPosition: wheelSettings.button.background_image ? 'center center' : '',
         });
 
-        if ( wheelSettings.custom_css ) {
+        if (wheelSettings.custom_css) {
             var styleId = 'wp-spin-wheel-custom-css-' + wheelId;
-            var styleTag = document.getElementById( styleId );
-            if ( ! styleTag ) {
-                styleTag = document.createElement( 'style' );
+            var styleTag = document.getElementById(styleId);
+            if (!styleTag) {
+                styleTag = document.createElement('style');
                 styleTag.id = styleId;
-                document.head.appendChild( styleTag );
+                document.head.appendChild(styleTag);
             }
             styleTag.textContent = wheelSettings.custom_css;
         }
@@ -691,7 +741,7 @@ jQuery(document).ready(function($) {
     }
 
     function animateSpin(targetIndex, callback) {
-        if ( spinning || ! wheelPrizes.length ) {
+        if (spinning || !wheelPrizes.length) {
             return;
         }
 
@@ -703,7 +753,7 @@ jQuery(document).ready(function($) {
         var segmentCount = wheelPrizes.length;
         var angleStep = (Math.PI * 2) / segmentCount;
         var normalizedRotation = currentRotation % (Math.PI * 2);
-        if ( normalizedRotation < 0 ) {
+        if (normalizedRotation < 0) {
             normalizedRotation += Math.PI * 2;
         }
 
@@ -711,7 +761,7 @@ jQuery(document).ready(function($) {
         var targetAngle = pointerAngle - (targetIndex + 0.5) * angleStep;
         var rotations = 4;
         var totalRotation = rotations * Math.PI * 2 + targetAngle - normalizedRotation;
-        while ( totalRotation < 0 ) {
+        while (totalRotation < 0) {
             totalRotation += Math.PI * 2;
         }
 
@@ -720,7 +770,7 @@ jQuery(document).ready(function($) {
         var startTime = null;
 
         function step(timestamp) {
-            if ( ! startTime ) {
+            if (!startTime) {
                 startTime = timestamp;
             }
             var elapsed = timestamp - startTime;
@@ -730,7 +780,7 @@ jQuery(document).ready(function($) {
             currentRotation = rotation;
             drawWheelCanvas(currentRotation);
 
-            if ( progress < 1 ) {
+            if (progress < 1) {
                 requestAnimationFrame(step);
                 return;
             }
@@ -743,11 +793,11 @@ jQuery(document).ready(function($) {
             stopSpinAudio();
             playEndAudio();
 
-            if ( wheelSettings.animation.confetti && typeof window.confetti === 'function' ) {
+            if (wheelSettings.animation.confetti && typeof window.confetti === 'function') {
                 window.confetti();
             }
 
-            if ( typeof callback === 'function' ) {
+            if (typeof callback === 'function') {
                 callback();
             }
 
@@ -760,8 +810,8 @@ jQuery(document).ready(function($) {
     var autoRemoveTimer = null;
 
     // ── Audio engine cho vòng quay ──
-    var spinAudioEl  = null;  // nhạc đang chạy khi quay
-    var endAudioEl   = null;  // nhạc kết thúc
+    var spinAudioEl = null;  // nhạc đang chạy khi quay
+    var endAudioEl = null;  // nhạc kết thúc
 
     function createAudio() {
         var el = document.createElement('audio');
@@ -771,63 +821,63 @@ jQuery(document).ready(function($) {
 
     // Lấy URL file nhạc từ value của select
     // value có thể là: '0' (tắt) | 'random' | 'slot_start' | 'conquay' | ... | ID thư viện
-    function resolveAudioUrl( soundVal, soundFileVal, selectId ) {
-        if ( ! soundVal || soundVal === '0' ) return null;
+    function resolveAudioUrl(soundVal, soundFileVal, selectId) {
+        if (!soundVal || soundVal === '0') return null;
 
         // Nhactik file ID ưu tiên nếu có
-        if ( soundFileVal ) {
+        if (soundFileVal) {
             return 'https://nhactik.com/play/' + soundFileVal + '.mp3';
         }
 
-        if ( soundVal === 'random' ) {
+        if (soundVal === 'random') {
             // Lấy toàn bộ option có data-url trong select tương ứng
             var urls = [];
-            $( '#' + selectId + ' option[data-url]' ).each(function() {
+            $('#' + selectId + ' option[data-url]').each(function () {
                 var u = $(this).data('url');
-                if ( u ) urls.push( u );
+                if (u) urls.push(u);
             });
-            if ( ! urls.length ) return null;
-            return urls[ Math.floor( Math.random() * urls.length ) ];
+            if (!urls.length) return null;
+            return urls[Math.floor(Math.random() * urls.length)];
         }
 
         // Các âm thanh built-in — trỏ vào thư mục assets/sound/
-        var pluginUrl = ( wp_spin_wheel_params && wp_spin_wheel_params.plugin_url )
+        var pluginUrl = (wp_spin_wheel_params && wp_spin_wheel_params.plugin_url)
             ? wp_spin_wheel_params.plugin_url.replace(/\/$/, '')
             : '';
         var builtIn = {
             slot_start: pluginUrl ? pluginUrl + '/assets/sound/slot_start.mp3' : null,
-            conquay:    pluginUrl ? pluginUrl + '/assets/sound/conquay.mp3'    : null,
-            slot_end:   pluginUrl ? pluginUrl + '/assets/sound/slot_end.mp3'   : null,
-            read:       null,
+            conquay: pluginUrl ? pluginUrl + '/assets/sound/conquay.mp3' : null,
+            slot_end: pluginUrl ? pluginUrl + '/assets/sound/slot_end.mp3' : null,
+            read: null,
         };
-        if ( builtIn[ soundVal ] !== undefined ) {
-            return builtIn[ soundVal ] || null;
+        if (builtIn[soundVal] !== undefined) {
+            return builtIn[soundVal] || null;
         }
 
         // Là ID item trong thư viện — lấy data-url từ option
-        var $opt = $( '#' + selectId + ' option[value="' + soundVal + '"]' );
+        var $opt = $('#' + selectId + ' option[value="' + soundVal + '"]');
         return $opt.data('url') || null;
     }
 
     function playSpinAudio() {
         var audio = wheelSettings.audio || {};
         var url = resolveAudioUrl(
-            audio.start_sound      || $('#start_sound').val(),
+            audio.start_sound || $('#start_sound').val(),
             audio.start_sound_file || $('#start_sound_file').val(),
             'start_sound'
         );
-        if ( ! url ) return;
+        if (!url) return;
 
-        if ( spinAudioEl ) { spinAudioEl.pause(); }
+        if (spinAudioEl) { spinAudioEl.pause(); }
         spinAudioEl = createAudio();
         spinAudioEl.src = url;
         spinAudioEl.loop = true;   // nhạc bắt đầu lặp lại trong khi quay
         spinAudioEl.volume = 0.8;
-        spinAudioEl.play().catch(function(){});
+        spinAudioEl.play().catch(function () { });
     }
 
     function stopSpinAudio() {
-        if ( spinAudioEl ) {
+        if (spinAudioEl) {
             spinAudioEl.pause();
             spinAudioEl.currentTime = 0;
             spinAudioEl = null;
@@ -837,53 +887,53 @@ jQuery(document).ready(function($) {
     function playEndAudio() {
         var audio = wheelSettings.audio || {};
         var url = resolveAudioUrl(
-            audio.end_sound      || $('#end_sound').val(),
+            audio.end_sound || $('#end_sound').val(),
             audio.end_sound_file || $('#end_sound_file').val(),
             'end_sound'
         );
-        if ( ! url ) return;
+        if (!url) return;
 
-        if ( endAudioEl ) { endAudioEl.pause(); }
+        if (endAudioEl) { endAudioEl.pause(); }
         endAudioEl = createAudio();
         endAudioEl.src = url;
         endAudioEl.loop = false;
         endAudioEl.volume = 0.9;
-        endAudioEl.play().catch(function(){});
+        endAudioEl.play().catch(function () { });
     }
 
     function showResultPopup(prize) {
         // Nếu show_popup bị tắt thì không hiện popup
-        if ( wheelSettings.ui && wheelSettings.ui.show_popup === false ) {
+        if (wheelSettings.ui && wheelSettings.ui.show_popup === false) {
             return;
         }
 
         // Cập nhật tiêu đề popup theo settings
-        var label = ( wheelSettings.ui && wheelSettings.ui.popup_label )
+        var label = (wheelSettings.ui && wheelSettings.ui.popup_label)
             ? wheelSettings.ui.popup_label
             : 'Bạn đã quay vào ô';
-        $('#modal-result-popup-label').text( label );
+        $('#modal-result-popup-label').text(label);
 
         $('#modal-result-title').text(prize.title || '');
         $('#modal-result-desc').text(prize.description || '');
         $('#modal-result').show().attr('aria-hidden', 'false');
 
         // Auto-close sau 5 giây nếu checkbox auto_remove được bật
-        if ( autoRemoveTimer ) {
-            clearTimeout( autoRemoveTimer );
+        if (autoRemoveTimer) {
+            clearTimeout(autoRemoveTimer);
             autoRemoveTimer = null;
         }
-        if ( $('#auto_remove').is(':checked') ) {
-            autoRemoveTimer = setTimeout( function() {
+        if ($('#auto_remove').is(':checked')) {
+            autoRemoveTimer = setTimeout(function () {
                 closeResultPopup();   // auto-close → giữ kết quả, đóng popup
                 autoRemoveTimer = null;
-            }, 5000 );
+            }, 5000);
         }
     }
 
     // Đóng popup — luôn GIỮ kết quả (đã append rồi)
     function closeResultPopup() {
-        if ( autoRemoveTimer ) {
-            clearTimeout( autoRemoveTimer );
+        if (autoRemoveTimer) {
+            clearTimeout(autoRemoveTimer);
             autoRemoveTimer = null;
         }
         $('#modal-result').hide().attr('aria-hidden', 'true');
@@ -894,41 +944,41 @@ jQuery(document).ready(function($) {
 
     function handleSpinSuccess(prize) {
         var index = getPrizeIndex(prize);
-        if ( index === -1 ) {
+        if (index === -1) {
             index = 0;
         }
-        animateSpin(index, function() {
+        animateSpin(index, function () {
             // 1. Append kết quả vào bảng ngay
             var $entry = $('<div/>', { 'class': 'wheel-result-item' })
-                .append( $('<strong/>').text( prize.title || '' ) )
-                .append( $('<div/>').text( prize.description || '' ) );
-            $('#wheel_result').append( $entry );
+                .append($('<strong/>').text(prize.title || ''))
+                .append($('<div/>').text(prize.description || ''));
+            $('#wheel_result').append($entry);
             lastResultEntry = $entry;
             updateResultCount();
             $('#tab-result').trigger('click');
 
             // 2. Nếu show_popup tắt → không hiện popup, dừng tại đây
-            if ( wheelSettings.ui && wheelSettings.ui.show_popup === false ) {
+            if (wheelSettings.ui && wheelSettings.ui.show_popup === false) {
                 return;
             }
 
             // Hiện/ẩn nút "Xóa ô này":
             // Mặc định luôn hiện, trừ khi user tắt option show_remove_button
-            var showRemove = ! wheelSettings.ui || wheelSettings.ui.show_remove_button !== false;
-            $('#btn-remove-result-item').toggle( showRemove );
+            var showRemove = !wheelSettings.ui || wheelSettings.ui.show_remove_button !== false;
+            $('#btn-remove-result-item').toggle(showRemove);
 
             // 4. Hiện popup
-            showResultPopup( prize );
+            showResultPopup(prize);
         });
     }
 
     wheelSettings = normalizeSettings(parseJson(rawSettings));
 
     // Load settings đã lưu từ localStorage và merge vào wheelSettings + áp lên UI
-    var savedSettings = parseJson( localStorage.getItem( getSettingsStorageKey() ), null );
-    if ( savedSettings ) {
-        mergeUserSettings( savedSettings );
-        applySettingsToUI( savedSettings );
+    var savedSettings = parseJson(localStorage.getItem(getSettingsStorageKey()), null);
+    if (savedSettings) {
+        mergeUserSettings(savedSettings);
+        applySettingsToUI(savedSettings);
     }
 
     wheelPrizes = loadPrizes();
@@ -936,9 +986,9 @@ jQuery(document).ready(function($) {
 
     // Khởi tạo hội màu sắc
     renderSectorColorPills();
-    if ( savedSettings && savedSettings.sector_colors ) {
-        wheelPrizes.forEach(function(prize, index) {
-            prize.color = savedSettings.sector_colors[ index % savedSettings.sector_colors.length ];
+    if (savedSettings && savedSettings.sector_colors) {
+        wheelPrizes.forEach(function (prize, index) {
+            prize.color = savedSettings.sector_colors[index % savedSettings.sector_colors.length];
         });
         savePrizes();
         renderPrizeList();
@@ -947,41 +997,41 @@ jQuery(document).ready(function($) {
     renderWheel();
     startIdleAnimation();
 
-    $('#tab-entries').on('click', function() {
+    $('#tab-entries').on('click', function () {
         $('#tab-entries').addClass('active');
         $('#tab-result').removeClass('active');
         $('#tab-content-entries').addClass('show active');
         $('#tab-content-result').removeClass('show active');
     });
 
-    $('#tab-result').on('click', function() {
+    $('#tab-result').on('click', function () {
         $('#tab-result').addClass('active');
         $('#tab-entries').removeClass('active');
         $('#tab-content-result').addClass('show active');
         $('#tab-content-entries').removeClass('show active');
     });
 
-    $('#spin').on('click', function() {
-        if ( spinning || pendingRequest ) {
+    $('#spin').on('click', function () {
+        if (spinning || pendingRequest) {
             return;
         }
 
-        if ( ! wheelId ) {
-            if ( ! wheelPrizes.length ) {
-                alert( wp_spin_wheel_params.text_error );
+        if (!wheelId) {
+            if (!wheelPrizes.length) {
+                alert(wp_spin_wheel_params.text_error);
                 return;
             }
 
-            var prizeIndex = Math.floor( Math.random() * wheelPrizes.length );
-            var prize = wheelPrizes[ prizeIndex ] || { title: 'Thưởng' };
-            handleSpinSuccess( prize );
+            var prizeIndex = Math.floor(Math.random() * wheelPrizes.length);
+            var prize = wheelPrizes[prizeIndex] || { title: 'Thưởng' };
+            handleSpinSuccess(prize);
             return;
         }
 
         var form = {};
-        container.find('.spin-wheel-form input').each(function() {
+        container.find('.spin-wheel-form input').each(function () {
             var name = $(this).attr('name');
-            if ( name ) {
+            if (name) {
                 form[name] = $(this).val();
             }
         });
@@ -999,64 +1049,64 @@ jQuery(document).ready(function($) {
                 'X-WP-Nonce': (wp_spin_wheel_params && wp_spin_wheel_params.nonce) ? wp_spin_wheel_params.nonce : ''
             },
             body: JSON.stringify({ form: form })
-        }).then(function(res) {
+        }).then(function (res) {
             pendingRequest = false;
-            if ( ! res.ok ) {
-                return res.json().then(function(err) { throw err; }).catch(function() { throw { message: wp_spin_wheel_params.text_error }; });
+            if (!res.ok) {
+                return res.json().then(function (err) { throw err; }).catch(function () { throw { message: wp_spin_wheel_params.text_error }; });
             }
             return res.json();
-        }).then(function(data) {
-            if ( data && data.prize ) {
+        }).then(function (data) {
+            if (data && data.prize) {
                 handleSpinSuccess(data.prize);
-            } else if ( data && data.message ) {
-                alert( data.message || wp_spin_wheel_params.text_error );
+            } else if (data && data.message) {
+                alert(data.message || wp_spin_wheel_params.text_error);
             } else {
-                alert( wp_spin_wheel_params.text_error );
+                alert(wp_spin_wheel_params.text_error);
             }
-        }).catch(function(err) {
+        }).catch(function (err) {
             var msg = (err && err.message) ? err.message : (err && err.data && err.data.message) ? err.data.message : wp_spin_wheel_params.text_error;
-            alert( msg );
+            alert(msg);
             pendingRequest = false;
         });
     });
 
-    $('#edit-content').on('click', function(e) {
+    $('#edit-content').on('click', function (e) {
         e.preventDefault();
         openTitleDescriptionEditor();
     });
 
-    $('#saveTitleDesc').on('click', function(e) {
+    $('#saveTitleDesc').on('click', function (e) {
         e.preventDefault();
         saveTitleDesc();
     });
 
-    $('#modal-edit-close, #modal-edit-cancel').on('click', function(e) {
+    $('#modal-edit-close, #modal-edit-cancel').on('click', function (e) {
         e.preventDefault();
         closeTitleDescriptionEditor();
     });
 
-    $('#modal-edit').on('click', function(e) {
-        if ( $(e.target).is('#modal-edit') ) {
+    $('#modal-edit').on('click', function (e) {
+        if ($(e.target).is('#modal-edit')) {
             closeTitleDescriptionEditor();
         }
     });
 
     // "Đóng lại" hoặc nút X → giữ kết quả, đóng popup
-    $('#modal-result-close, #modal-result-close-btn').on('click', function(e) {
+    $('#modal-result-close, #modal-result-close-btn').on('click', function (e) {
         e.preventDefault();
         closeResultPopup();
     });
 
     // Click backdrop → đóng, giữ kết quả
-    $('#modal-result').on('click', function(e) {
-        if ( $(e.target).is('#modal-result') ) {
+    $('#modal-result').on('click', function (e) {
+        if ($(e.target).is('#modal-result')) {
             closeResultPopup();
         }
     });
 
     // "Xóa ô này" → xóa entry vừa append, đóng popup
-    $(document).on('click', '#btn-remove-result-item', function() {
-        if ( lastResultEntry ) {
+    $(document).on('click', '#btn-remove-result-item', function () {
+        if (lastResultEntry) {
             lastResultEntry.remove();
             lastResultEntry = null;
             updateResultCount();
@@ -1064,69 +1114,69 @@ jQuery(document).ready(function($) {
         closeResultPopup();
     });
 
-    $(document).on('keydown', function(e) {
-        if ( e.key === 'Escape' ) {
+    $(document).on('keydown', function (e) {
+        if (e.key === 'Escape') {
             closeTitleDescriptionEditor();
             closeResultPopup();
         }
     });
 
-    $('#btn-clear-result').on('click', function() {
+    $('#btn-clear-result').on('click', function () {
         $('#wheel_result').empty();
         updateResultCount();
     });
 
-    $('#btn-sort-wheel-az').on('click', function() {
+    $('#btn-sort-wheel-az').on('click', function () {
         sortPrizes(true);
         $('#btn-sort-wheel-az').addClass('d-none');
         $('#btn-sort-wheel-za').removeClass('d-none');
     });
 
-    $('#btn-sort-wheel-za').on('click', function() {
+    $('#btn-sort-wheel-za').on('click', function () {
         sortPrizes(false);
         $('#btn-sort-wheel-za').addClass('d-none');
         $('#btn-sort-wheel-az').removeClass('d-none');
     });
 
-    $('#btn-clear-entry').on('click', function() {
+    $('#btn-clear-entry').on('click', function () {
         clearPrizes();
     });
 
-    $('#btn-add-prize').on('click', function() {
+    $('#btn-add-prize').on('click', function () {
         var title = $('#new_prize_title').val();
         var color = $('#new_prize_color').val();
         addPrize(title, color);
         $('#new_prize_title').val('');
     });
 
-    $('#sector_list').on('click', '.btn-remove-prize', function() {
-        var index = parseInt( $(this).data('index'), 10 );
+    $('#sector_list').on('click', '.btn-remove-prize', function () {
+        var index = parseInt($(this).data('index'), 10);
         removePrize(index);
     });
 
-    $('#btn-restore-defaults').on('click', function() {
+    $('#btn-restore-defaults').on('click', function () {
         restoreDefaultPrizes();
         $('#btn-sort-wheel-za').addClass('d-none');
         $('#btn-sort-wheel-az').removeClass('d-none');
     });
 
-    $('#btn-shuffle-wheel').on('click', function() {
+    $('#btn-shuffle-wheel').on('click', function () {
         var items = $('#sector_list .wheel-prize-item').toArray();
-        items.sort(function() { return 0.5 - Math.random(); });
+        items.sort(function () { return 0.5 - Math.random(); });
         $('#sector_list').empty().append(items);
 
         var newOrder = [];
-        items.forEach(function(item) {
+        items.forEach(function (item) {
             var prizeId = $(item).data('id');
-            var prize = wheelPrizes.find(function(entry) {
+            var prize = wheelPrizes.find(function (entry) {
                 return entry.id === prizeId;
             });
-            if ( prize ) {
+            if (prize) {
                 newOrder.push(prize);
             }
         });
 
-        if ( newOrder.length ) {
+        if (newOrder.length) {
             wheelPrizes = newOrder;
             savePrizes();
             renderPrizeList();
@@ -1135,110 +1185,141 @@ jQuery(document).ready(function($) {
     });
 
     // ── popup_label: cập nhật span tiêu đề real-time khi user gõ ──
-    $('#popup_label').on('input', function() {
-        var val = $.trim( $(this).val() ) || 'Bạn đã quay vào ô';
-        if ( ! wheelSettings.ui ) wheelSettings.ui = {};
+    $('#popup_label').on('input', function () {
+        var val = $.trim($(this).val()) || 'Bạn đã quay vào ô';
+        if (!wheelSettings.ui) wheelSettings.ui = {};
         wheelSettings.ui.popup_label = val;
-        $('#modal-result-popup-label').text( val );
+        $('#modal-result-popup-label').text(val);
     });
 
     // ── Nút "Chủ đề" — mở modalSettings và switch sang tab Giao diện ──
-    $('#btn-open-theme').on('click', function() {
+    $('#btn-open-theme').on('click', function () {
         // Trigger Bootstrap modal
         var $modal = $('#modalSettings');
         $modal.modal ? $modal.modal('show') : $modal.show();
 
         // Switch sang tab "Giao diện"
         var $tab = $('#appearance-tab');
-        if ( $tab.length ) {
+        if ($tab.length) {
             $tab.tab ? $tab.tab('show') : $tab.trigger('click');
         }
     });
 
     // ── Lưu settings từ modal ──
-    $('#btn_wheel_setting').on('click', function() {
+    $('#btn_wheel_setting').on('click', function () {
         saveWheelSettings();
     });
 
     // ── Nút "Chủ đề" → mở modalSettings và nhảy sang tab Giao diện ──
-    $('#btn-open-theme').on('click', function() {
+    $('#btn-open-theme').on('click', function () {
         // Kích hoạt tab appearance trước khi modal hiện
         var $tab = $('#appearance-tab');
-        if ( $tab.length ) {
+        if ($tab.length) {
             $tab.tab('show');
         }
     });
 
     // Cũng bắt sự kiện khi modal vừa hiện để đảm bảo tab đúng
-    $('#modalSettings').on('show.bs.modal', function(e) {
+    $('#modalSettings').on('show.bs.modal', function (e) {
         var relatedBtn = e.relatedTarget;
-        if ( relatedBtn && $(relatedBtn).data('tab') ) {
+        if (relatedBtn && $(relatedBtn).data('tab')) {
             var tabId = $(relatedBtn).data('tab');
-            $( '#' + tabId ).tab('show');
+            $('#' + tabId).tab('show');
         }
     });
 
     // ── Reset về mặc định ──
-    $('#btn-reset-wheel').on('click', function() {
-        if ( confirm('Reset tất cả cài đặt về mặc định?') ) {
+    $('#btn-reset-wheel').on('click', function () {
+        if (confirm('Reset tất cả cài đặt về mặc định?')) {
             resetWheelSettings();
         }
     });
 
-    // ── Áp dụng một chủ đề: chọn màu từ data-content vào hội màu ──
-    $('#myDropdown').on('click', '.dropdown-item', function(e) {
+    // ── Áp dụng một chủ đề: chọn màu từ data-content vào hội màu, viền và kim cương ──
+    $('#myDropdown').on('click', '.dropdown-item', function (e) {
         e.preventDefault();
         var content = $(this).attr('data-content') || '';
-        if ( ! content ) return;
-        var themeColors = content.split(',').map(function(c) { return $.trim(c); }).filter(function(c) { return c !== ''; });
-        if ( ! themeColors.length ) return;
+        if (content) {
+            var themeColors = content.split(',').map(function (c) { return $.trim(c); }).filter(function (c) { return c !== ''; });
+            if (themeColors.length) {
+                // Bỏ check tất cả checkbox màu trước
+                $('input[name="chkcolor"]').prop('checked', false);
+                // Checks riêng từng màu
+                themeColors.forEach(function (color, index) {
+                    var slot = index + 1;
+                    if (slot > SECTOR_COLOR_SLOTS) return;
+                    $('#chkcolor-' + slot).prop('checked', true);
+                    $('#color-' + slot).val(color);
+                });
+            }
+        }
 
-        // Bỏ check tất cả checkbox màu trước
-        $('input[name="chkcolor"]').prop('checked', false);
-        // Checks riêng từng màu
-        themeColors.forEach(function(color, index) {
-            var slot = index + 1;
-            if ( slot > SECTOR_COLOR_SLOTS ) return;
-            $('#chkcolor-' + slot).prop('checked', true);
-            $('#color-' + slot).val(color);
-        });
+        // Áp dụng data-border từ theme nếu có (màu viền, màu kim cương)
+        var borderData = $(this).attr('data-border') || '';
+        if (borderData) {
+            var borderParts = borderData.split(',').map(function (c) { return $.trim(c); });
+            if (borderParts[0]) {
+                $('#border_color').val(borderParts[0]);
+                if (!wheelSettings.wheel) wheelSettings.wheel = {};
+                wheelSettings.wheel.border_color = borderParts[0];
+            }
+            if (borderParts[1]) {
+                $('#diamond_color').val(borderParts[1]);
+                if (!wheelSettings.wheel) wheelSettings.wheel = {};
+                wheelSettings.wheel.diamond_color = borderParts[1];
+            }
+        }
+
+        // Áp dụng data-spin_img nếu có
+        var spinImg = $(this).attr('data-spin_img') || '';
+        if (spinImg) {
+            $('#btn-spin-img').val(spinImg);
+            $('#switch_spin_bg_type').prop('checked', true).trigger('change');
+            if (!wheelSettings.button) wheelSettings.button = {};
+            wheelSettings.button.bg_type = 'image';
+            wheelSettings.button.background_image = spinImg;
+            updateSpinImgPreview(spinImg);
+            renderWheel();
+        }
+
         // Sync hội màu
         syncSectorColors();
+        drawWheelCanvas(currentRotation);
         // Lưu vào localStorage ngay
-        localStorage.setItem( getSettingsStorageKey(), JSON.stringify( collectSettings() ) );
+        localStorage.setItem(getSettingsStorageKey(), JSON.stringify(collectSettings()));
     });
 
     // ── Hội màu sắc: checkbox thay đổi ──
-    $(document).on('change', 'input[name="chkcolor"]', function() {
+    $(document).on('change', 'input[name="chkcolor"]', function () {
         renderSectorColorPills();
         syncSectorColors();
     });
 
     // ── Hội màu sắc: đổi giá trị màu ──
-    $(document).on('input', '.sw-sector-color-input, [id^="color-"]', function() {
+    $(document).on('input', '.sw-sector-color-input, [id^="color-"]', function () {
         renderSectorColorPills();
         syncSectorColors();
     });
 
     // ── Hội màu sắc: click pill để đổi màu ──
-    $(document).on('click', '.sw-sector-color-pill', function(e) {
-        if ( $(e.target).hasClass('sw-remove-color') ) return;
-        var index = parseInt( $(this).data('slot'), 10 );
+    $(document).on('click', '.sw-sector-color-pill', function (e) {
+        if ($(e.target).hasClass('sw-remove-color')) return;
+        var index = parseInt($(this).data('slot'), 10);
         var $input = $('#color-' + index);
-        if ( $input.length ) {
+        if ($input.length) {
             $input.trigger('click');
         }
     });
 
     // ── Hội màu sắc: click × để xóa màu khỏi hội ──
-    $(document).on('click', '.sw-remove-color', function(e) {
+    $(document).on('click', '.sw-remove-color', function (e) {
         e.stopPropagation();
         var $pill = $(this).closest('.sw-sector-color-pill');
-        var slot = parseInt( $pill.attr('data-slot'), 10 );
+        var slot = parseInt($pill.attr('data-slot'), 10);
         var $chk = $('#chkcolor-' + slot);
         var $input = $('#color-' + slot);
-        if ( $chk.length ) $chk.prop('checked', false);
-        if ( $input.length ) $input.val('');
+        if ($chk.length) $chk.prop('checked', false);
+        if ($input.length) $input.val('');
         renderSectorColorPills();
         syncSectorColors();
     });
@@ -1246,36 +1327,36 @@ jQuery(document).ready(function($) {
     // Shuffle mảng màu để mỗi lần fill ra màu khác nhau
     function shuffleColors() {
         var colors = DEFAULT_SECTOR_COLORS.slice();
-        for ( var i = colors.length - 1; i > 0; i-- ) {
-            var j = Math.floor( Math.random() * (i + 1) );
+        for (var i = colors.length - 1; i > 0; i--) {
+            var j = Math.floor(Math.random() * (i + 1));
             var tmp = colors[i]; colors[i] = colors[j]; colors[j] = tmp;
         }
         return colors;
     }
 
     // ── Hàm fill prizes từ data-content (dùng chung) ──
-    function fillPrizesFromContent( content ) {
-        if ( ! content ) return;
-        var titles = content.split('||').map(function(t) { return $.trim(t); }).filter(function(t) { return t !== ''; });
-        if ( ! titles.length ) return;
+    function fillPrizesFromContent(content) {
+        if (!content) return;
+        var titles = content.split('||').map(function (t) { return $.trim(t); }).filter(function (t) { return t !== ''; });
+        if (!titles.length) return;
         var colors = shuffleColors();
-        wheelPrizes = titles.map(function(title, index) {
-            return normalizePrize({ title: title, color: colors[ index % colors.length ] }, index);
+        wheelPrizes = titles.map(function (title, index) {
+            return normalizePrize({ title: title, color: colors[index % colors.length] }, index);
         });
         savePrizes();
         renderPrizeList();
         renderWheel();
     }
 
-    function fillPrizesFromRange( from, to ) {
+    function fillPrizesFromRange(from, to) {
         from = parseInt(from, 10) || 1;
-        to   = parseInt(to, 10)   || 10;
-        if ( from > to ) { var tmp = from; from = to; to = tmp; }
+        to = parseInt(to, 10) || 10;
+        if (from > to) { var tmp = from; from = to; to = tmp; }
         var titles = [];
-        for ( var i = from; i <= to; i++ ) titles.push(String(i));
+        for (var i = from; i <= to; i++) titles.push(String(i));
         var colors = shuffleColors();
-        wheelPrizes = titles.map(function(title, index) {
-            return normalizePrize({ title: title, color: colors[ index % colors.length ] }, index);
+        wheelPrizes = titles.map(function (title, index) {
+            return normalizePrize({ title: title, color: colors[index % colors.length] }, index);
         });
         savePrizes();
         renderPrizeList();
@@ -1283,37 +1364,37 @@ jQuery(document).ready(function($) {
     }
 
     // ── Click nút chủ đề text ──
-    $(document).on('click', '.btn-fill', function() {
+    $(document).on('click', '.btn-fill', function () {
         var content = $(this).data('content');
-        if ( ! content ) return;
-        fillPrizesFromContent( content );
+        if (!content) return;
+        fillPrizesFromContent(content);
         // Đánh dấu nút đang active
         $('.btn-fill, .btn-fill-number').removeClass('active');
         $(this).addClass('active');
     });
 
     // ── Click nút chủ đề số ──
-    $(document).on('click', '.btn-fill-number', function() {
+    $(document).on('click', '.btn-fill-number', function () {
         var from = $(this).data('from');
-        var to   = $(this).data('to');
-        fillPrizesFromRange( from, to );
+        var to = $(this).data('to');
+        fillPrizesFromRange(from, to);
         $('.btn-fill, .btn-fill-number').removeClass('active');
         $(this).addClass('active');
     });
 
     // ── Mặc định: nếu wheelPrizes rỗng và không có localStorage → load nút đầu tiên ──
-    if ( ! wheelPrizes.length ) {
+    if (!wheelPrizes.length) {
         var $firstBtn = $('.btn-fill').first();
-        if ( $firstBtn.length ) {
-            fillPrizesFromContent( $firstBtn.data('content') );
+        if ($firstBtn.length) {
+            fillPrizesFromContent($firstBtn.data('content'));
             $firstBtn.addClass('active');
         }
     }
 
     // ── Toggle hiển thị ô nhập popup label khi bật/tắt show_popup ──
-    $('#show_popup').on('change', function() {
+    $('#show_popup').on('change', function () {
         var $extra = $('#show_popup').closest('.form-check').next('.mb-3');
-        $extra.toggle( $(this).is(':checked') );
+        $extra.toggle($(this).is(':checked'));
     }).trigger('change');
 
     // ── Particles effect ──────────────────────────────────────────────────────
@@ -1323,7 +1404,7 @@ jQuery(document).ready(function($) {
         default: {
             particles: {
                 number: { value: 60, density: { enable: true, value_area: 800 } },
-                color: { value: ['#ff6b6b','#feca57','#48dbfb','#ff9ff3','#54a0ff','#5f27cd'] },
+                color: { value: ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff', '#5f27cd'] },
                 shape: { type: 'circle' },
                 opacity: { value: 0.6, random: true, anim: { enable: true, speed: 0.5, opacity_min: 0.1 } },
                 size: { value: 4, random: true },
@@ -1357,7 +1438,7 @@ jQuery(document).ready(function($) {
         bubble: {
             particles: {
                 number: { value: 40, density: { enable: true, value_area: 800 } },
-                color: { value: ['#a8edea','#fed6e3','#96fbc4','#f9f7d9','#ffecd2'] },
+                color: { value: ['#a8edea', '#fed6e3', '#96fbc4', '#f9f7d9', '#ffecd2'] },
                 shape: { type: 'circle', stroke: { width: 2, color: '#ffffff' } },
                 opacity: { value: 0.4, random: true, anim: { enable: true, speed: 1, opacity_min: 0.1, sync: false } },
                 size: { value: 18, random: true, anim: { enable: true, speed: 3, size_min: 4, sync: false } },
@@ -1374,11 +1455,11 @@ jQuery(document).ready(function($) {
         heart: {
             particles: {
                 number: { value: 30, density: { enable: true, value_area: 800 } },
-                color: { value: ['#ff6b6b','#ff4757','#ff6b81','#ff4500','#ffa502'] },
+                color: { value: ['#ff6b6b', '#ff4757', '#ff6b81', '#ff4500', '#ffa502'] },
                 shape: {
                     type: 'char',
                     stroke: { width: 0 },
-                    character: { value: ['❤','💕','💖','💗'], font: 'Verdana', style: '', weight: '400' }
+                    character: { value: ['❤', '💕', '💖', '💗'], font: 'Verdana', style: '', weight: '400' }
                 },
                 opacity: { value: 0.8, random: true, anim: { enable: true, speed: 0.5, opacity_min: 0.2 } },
                 size: { value: 14, random: true },
@@ -1394,44 +1475,44 @@ jQuery(document).ready(function($) {
     };
 
     function initParticles() {
-        if ( typeof window.particlesJS === 'undefined' ) return;
+        if (typeof window.particlesJS === 'undefined') return;
 
         var enabled = $('#show_particle').is(':checked');
-        var type    = $('#particle_type').val() || 'default';
-        var el      = document.getElementById('particles-js');
-        if ( ! el ) return;
+        var type = $('#particle_type').val() || 'default';
+        var el = document.getElementById('particles-js');
+        if (!el) return;
 
         // Dừng instance cũ nếu có
-        if ( window.pJSDom && window.pJSDom.length ) {
-            try { window.pJSDom[window.pJSDom.length - 1].pJS.fn.vendors.destroypJS(); } catch(e){}
+        if (window.pJSDom && window.pJSDom.length) {
+            try { window.pJSDom[window.pJSDom.length - 1].pJS.fn.vendors.destroypJS(); } catch (e) { }
             window.pJSDom = [];
         }
 
         // Xoá canvas cũ để tránh stacking
         el.innerHTML = '';
 
-        if ( ! enabled ) return;
+        if (!enabled) return;
 
-        var config = PARTICLE_CONFIGS[ type ] || PARTICLE_CONFIGS['default'];
-        window.particlesJS( 'particles-js', config );
+        var config = PARTICLE_CONFIGS[type] || PARTICLE_CONFIGS['default'];
+        window.particlesJS('particles-js', config);
     }
 
     // Khởi tạo khi trang load (delay nhỏ chờ particles.js sẵn)
-    setTimeout( initParticles, 300 );
+    setTimeout(initParticles, 300);
 
     // Live update khi user thay đổi checkbox hoặc select
-    $( '#show_particle, #particle_type' ).on( 'change', function() {
+    $('#show_particle, #particle_type').on('change', function () {
         initParticles();
     });
 
     // ── End Particles ─────────────────────────────────────────────────────────
     // Nếu popup đang mở mà user thay đổi checkbox → cập nhật ngay.
-    $('#show_remove_button').on('change', function() {
-        if ( $('#modal-result').is(':visible') ) {
-            $('#btn-remove-result-item').toggle( $(this).is(':checked') );
+    $('#show_remove_button').on('change', function () {
+        if ($('#modal-result').is(':visible')) {
+            $('#btn-remove-result-item').toggle($(this).is(':checked'));
         }
         // Lưu vào wheelSettings ngay để lần quay tiếp áp dụng đúng
-        if ( ! wheelSettings.ui ) wheelSettings.ui = {};
+        if (!wheelSettings.ui) wheelSettings.ui = {};
         wheelSettings.ui.show_remove_button = $(this).is(':checked');
     });
 
@@ -1439,107 +1520,107 @@ jQuery(document).ready(function($) {
     // data-type="btn"  → đặt làm ảnh nút quay
     // data-type="bgr"  → đặt làm ảnh nền #wheel-wrapper
     // data-type="grd"  → đặt làm gradient nền #wheel-wrapper (đọc từ .sw-gradient-preview cùng hàng)
-    $(document).on('click', '.sw-media-apply', function() {
+    $(document).on('click', '.sw-media-apply', function () {
         var type = $(this).data('type');
-        var url  = $(this).data('url') || '';
+        var url = $(this).data('url') || '';
 
-        if ( type === 'btn' ) {
+        if (type === 'btn') {
             // --- Nút quay: ảnh từ thư viện → dùng chung applySpinImage() ---
-            $('#btn-spin-img').val( url );   // đồng bộ URL field
-            applySpinImage( url );
+            $('#btn-spin-img').val(url);   // đồng bộ URL field
+            applySpinImage(url);
 
-        } else if ( type === 'bgr' ) {
+        } else if (type === 'bgr') {
             // --- Nền: ảnh URL ---
-            if ( ! wheelSettings.background ) wheelSettings.background = {};
-            wheelSettings.background.image    = url;
+            if (!wheelSettings.background) wheelSettings.background = {};
+            wheelSettings.background.image = url;
             wheelSettings.background.gradient = '';   // xóa gradient nếu có
-            wheelSettings.background.color    = '';
+            wheelSettings.background.color = '';
 
             // Đồng bộ UI trong modal
-            $('#custom-bg-img').val( url );
-            if ( $('#bg-gradient').length ) $('#bg-gradient').val('');
+            $('#custom-bg-img').val(url);
+            if ($('#bg-gradient').length) $('#bg-gradient').val('');
 
-        } else if ( type === 'grd' ) {
+        } else if (type === 'grd') {
             // --- Nền: gradient — đọc từ data-gradient attribute trên .sw-gradient-preview cùng hàng ---
             var gradientValue = $(this).closest('tr').find('.sw-gradient-preview').data('gradient') || '';
-            if ( ! gradientValue ) return;
+            if (!gradientValue) return;
 
-            if ( ! wheelSettings.background ) wheelSettings.background = {};
+            if (!wheelSettings.background) wheelSettings.background = {};
             wheelSettings.background.gradient = gradientValue;
-            wheelSettings.background.image    = '';   // xóa ảnh URL nếu có
+            wheelSettings.background.image = '';   // xóa ảnh URL nếu có
 
             // Đồng bộ UI trong modal
             $('#custom-bg-img').val('');
-            if ( $('#bg-gradient').length ) $('#bg-gradient').val( gradientValue );
+            if ($('#bg-gradient').length) $('#bg-gradient').val(gradientValue);
         }
 
         // Lưu vào localStorage và re-render ngay, không cần bấm "Lưu lại"
-        localStorage.setItem( getSettingsStorageKey(), JSON.stringify( collectSettings() ) );
+        localStorage.setItem(getSettingsStorageKey(), JSON.stringify(collectSettings()));
         renderWheel();
 
         // Feedback: đổi nút thành "\u2713" rồi trả về
         var $btn = $(this);
         var origText = $btn.text();
         $btn.text('\u2713').addClass('btn-success').removeClass('btn-secondary');
-        setTimeout(function() {
+        setTimeout(function () {
             $btn.text(origText).removeClass('btn-success').addClass('btn-secondary');
         }, 1200);
     });
 
     // ── Body: Áp dụng màu nền + màu chữ ──
-    $('#btn-apply-body-color').on('click', function() {
-        var bg    = $('#custom-bg-color').val() || '#ffffff';
-        var color = $('#custom-color').val()    || '#000000';
-        if ( ! wheelSettings.background ) wheelSettings.background = {};
-        wheelSettings.background.color    = bg;
-        wheelSettings.background.image    = '';
+    $('#btn-apply-body-color').on('click', function () {
+        var bg = $('#custom-bg-color').val() || '#ffffff';
+        var color = $('#custom-color').val() || '#000000';
+        if (!wheelSettings.background) wheelSettings.background = {};
+        wheelSettings.background.color = bg;
+        wheelSettings.background.image = '';
         wheelSettings.background.gradient = '';
         $('#wheel-wrapper').css({ color: color });
         renderWheel();
-        localStorage.setItem( getSettingsStorageKey(), JSON.stringify( collectSettings() ) );
-        feedbackBtn( $(this), 'Đã áp dụng \u2713' );
+        localStorage.setItem(getSettingsStorageKey(), JSON.stringify(collectSettings()));
+        feedbackBtn($(this), 'Đã áp dụng \u2713');
     });
 
     // ── Body: Upload ảnh nền ──
-    $('#upload_bgr').on('change', function() {
+    $('#upload_bgr').on('change', function () {
         var file = this.files && this.files[0];
-        if ( ! file ) return;
-        var maxMB = parseFloat( $(this).data('maxsize') ) || 5;
-        if ( file.size > maxMB * 1024 * 1024 ) {
+        if (!file) return;
+        var maxMB = parseFloat($(this).data('maxsize')) || 5;
+        if (file.size > maxMB * 1024 * 1024) {
             $('#bgr-upload-info').text('Quá ' + maxMB + 'MB!').addClass('text-danger');
             return;
         }
         $('#bgr-upload-info').text('Đang xử lý...').removeClass('text-danger');
         var reader = new FileReader();
-        reader.onload = function(e) {
-            applyBodyImage( e.target.result, 'Ảnh từ máy của bạn' );
-            $('#bgr-upload-info').text( file.name );
+        reader.onload = function (e) {
+            applyBodyImage(e.target.result, 'Ảnh từ máy của bạn');
+            $('#bgr-upload-info').text(file.name);
             document.getElementById('upload_bgr').value = '';
         };
-        reader.readAsDataURL( file );
+        reader.readAsDataURL(file);
     });
 
     // ── Body: Áp dụng URL ảnh nền ──
-    $('#btn-apply-body-img').on('click', function() {
-        var url = $.trim( $('#custom-bg-img').val() );
-        if ( ! url ) return;
-        applyBodyImage( url, url.replace(/^https?:\/\/[^/]+/, '').substring(0, 40) + '...' );
+    $('#btn-apply-body-img').on('click', function () {
+        var url = $.trim($('#custom-bg-img').val());
+        if (!url) return;
+        applyBodyImage(url, url.replace(/^https?:\/\/[^/]+/, '').substring(0, 40) + '...');
     });
 
     // ── Body: Xoá ảnh nền ──
-    $('#btn-clear-body-img').on('click', function() {
+    $('#btn-clear-body-img').on('click', function () {
         $('#custom-bg-img').val('');
         applyBodyImage('', '');
         $('#bgr-upload-info').text('JPG/PNG/WebP ≤ 5MB').removeClass('text-danger');
     });
 
     // Helper: apply ảnh vào background #wheel-wrapper
-    function applyBodyImage( src, label ) {
-        if ( ! wheelSettings.background ) wheelSettings.background = {};
-        wheelSettings.background.image    = src;
+    function applyBodyImage(src, label) {
+        if (!wheelSettings.background) wheelSettings.background = {};
+        wheelSettings.background.image = src;
         wheelSettings.background.gradient = '';
-        wheelSettings.background.color    = '';
-        if ( src ) {
+        wheelSettings.background.color = '';
+        if (src) {
             $('#bgr-preview').attr('src', src);
             $('#bgr-preview-wrap').show();
         } else {
@@ -1547,14 +1628,14 @@ jQuery(document).ready(function($) {
             $('#bgr-preview').attr('src', '');
         }
         renderWheel();
-        localStorage.setItem( getSettingsStorageKey(), JSON.stringify( collectSettings() ) );
+        localStorage.setItem(getSettingsStorageKey(), JSON.stringify(collectSettings()));
     }
 
     // ── Body: Swatches gradient nhanh ──
-    $(document).on('click', '.sw-gradient-swatch', function() {
+    $(document).on('click', '.sw-gradient-swatch', function () {
         var gradient = $(this).data('gradient') || '';
-        if ( ! gradient ) return;
-        $('#bg-gradient').val( gradient );
+        if (!gradient) return;
+        $('#bg-gradient').val(gradient);
         $('#gradient-preview-box').css('background', gradient);
         // Đánh dấu swatch đang chọn
         $('.sw-gradient-swatch').css('outline', '');
@@ -1562,37 +1643,37 @@ jQuery(document).ready(function($) {
     });
 
     // ── Body: Preview live khi gõ gradient textarea ──
-    $('#bg-gradient').on('input', function() {
-        var val = $.trim( $(this).val() );
-        if ( val ) $('#gradient-preview-box').css('background', val);
+    $('#bg-gradient').on('input', function () {
+        var val = $.trim($(this).val());
+        if (val) $('#gradient-preview-box').css('background', val);
     });
 
     // ── Body: Áp dụng gradient ──
-    $('#btn-apply-body-gradient').on('click', function() {
-        var gradient = $.trim( $('#bg-gradient').val() );
-        if ( ! gradient ) return;
-        if ( ! wheelSettings.background ) wheelSettings.background = {};
+    $('#btn-apply-body-gradient').on('click', function () {
+        var gradient = $.trim($('#bg-gradient').val());
+        if (!gradient) return;
+        if (!wheelSettings.background) wheelSettings.background = {};
         wheelSettings.background.gradient = gradient;
-        wheelSettings.background.image    = '';
-        wheelSettings.background.color    = '';
+        wheelSettings.background.image = '';
+        wheelSettings.background.color = '';
         renderWheel();
-        localStorage.setItem( getSettingsStorageKey(), JSON.stringify( collectSettings() ) );
-        feedbackBtn( $(this), 'Đã áp dụng \u2713' );
+        localStorage.setItem(getSettingsStorageKey(), JSON.stringify(collectSettings()));
+        feedbackBtn($(this), 'Đã áp dụng \u2713');
     });
 
     // Utility: feedback ngắn trên button
-    function feedbackBtn( $btn, msg ) {
+    function feedbackBtn($btn, msg) {
         var orig = $btn.text();
-        $btn.text( msg ).addClass('btn-success').removeClass('btn-primary btn-outline-secondary');
-        setTimeout(function(){
-            $btn.text( orig ).removeClass('btn-success').addClass('btn-primary');
+        $btn.text(msg).addClass('btn-success').removeClass('btn-primary btn-outline-secondary');
+        setTimeout(function () {
+            $btn.text(orig).removeClass('btn-success').addClass('btn-primary');
         }, 1400);
     }
 
     // ── Switch nút quay: toggle giữa bg color và bg image ──
-    $('#switch_spin_bg_type').on('change', function() {
+    $('#switch_spin_bg_type').on('change', function () {
         var isImage = $(this).is(':checked');
-        if ( isImage ) {
+        if (isImage) {
             $('#form_spin_bg_color').addClass('d-none');
             $('#form_spin_bg_image').removeClass('d-none');
         } else {
@@ -1602,96 +1683,123 @@ jQuery(document).ready(function($) {
     });
 
     // ── Preview ảnh khi user nhập URL — chỉ khi user thực sự gõ, không trigger từ JS ──
-    $('#btn-spin-img').on('input', function() {
-        var url = $.trim( $(this).val() );
-        updateSpinImgPreview( url );
+    $('#btn-spin-img').on('input', function () {
+        var url = $.trim($(this).val());
+        updateSpinImgPreview(url);
     });
 
     // ── Nút "Áp dụng text" nút quay ──
-    $('#btn-apply-spin-label').on('click', function() {
-        var text = $.trim( $('#btn-spin-label').val() );
-        if ( ! wheelSettings.button ) wheelSettings.button = {};
+    $('#btn-apply-spin-label').on('click', function () {
+        var text = $.trim($('#btn-spin-label').val());
+        if (!wheelSettings.button) wheelSettings.button = {};
         wheelSettings.button.text = text;
         renderWheel();
-        localStorage.setItem( getSettingsStorageKey(), JSON.stringify( collectSettings() ) );
+        localStorage.setItem(getSettingsStorageKey(), JSON.stringify(collectSettings()));
         var $b = $(this);
         $b.text('\u2713').addClass('btn-success').removeClass('btn-outline-secondary');
-        setTimeout(function(){ $b.text('Áp dụng').removeClass('btn-success').addClass('btn-outline-secondary'); }, 1200);
+        setTimeout(function () { $b.text('Áp dụng').removeClass('btn-success').addClass('btn-outline-secondary'); }, 1200);
     });
 
     // Enter trong input text cũng apply
-    $('#btn-spin-label').on('keydown', function(e) {
-        if ( e.key === 'Enter' ) { e.preventDefault(); $('#btn-apply-spin-label').trigger('click'); }
+    $('#btn-spin-label').on('keydown', function (e) {
+        if (e.key === 'Enter') { e.preventDefault(); $('#btn-apply-spin-label').trigger('click'); }
     });
 
     // ── Nút "Áp dụng" URL ảnh nút quay ──
-    $('#btn-apply-spin-img').on('click', function() {
-        var url = $.trim( $('#btn-spin-img').val() );
-        applySpinImage( url );
+    $('#btn-apply-spin-img').on('click', function () {
+        var url = $.trim($('#btn-spin-img').val());
+        applySpinImage(url);
     });
 
     // ── Upload ảnh nút quay từ máy ──
-    $('#upload_spin_bg').on('change', function() {
+    $('#upload_spin_bg').on('change', function () {
         var file = this.files && this.files[0];
-        if ( ! file ) return;
+        if (!file) return;
 
-        var maxMB = parseFloat( $(this).data('maxsize') ) || 2;
-        if ( file.size > maxMB * 1024 * 1024 ) {
+        var maxMB = parseFloat($(this).data('maxsize')) || 2;
+        if (file.size > maxMB * 1024 * 1024) {
             $('#spin-upload-info').text('Ảnh quá lớn! Tối đa ' + maxMB + 'MB').addClass('text-danger');
             return;
         }
         $('#spin-upload-info').text('Đang xử lý...').removeClass('text-danger');
 
         var reader = new FileReader();
-        reader.onload = function(e) {
+        reader.onload = function (e) {
             var dataUrl = e.target.result;
-            $('#spin-upload-info').text( file.name );
+            $('#spin-upload-info').text(file.name);
             $('#btn-spin-img').val('');   // clear URL field vì đang dùng upload
-            applySpinImage( dataUrl );
+            applySpinImage(dataUrl);
             // reset input SAU khi đọc xong để không cancel FileReader
             document.getElementById('upload_spin_bg').value = '';
         };
-        reader.onerror = function() {
+        reader.onerror = function () {
             $('#spin-upload-info').text('Lỗi đọc file!').addClass('text-danger');
         };
-        reader.readAsDataURL( file );
+        reader.readAsDataURL(file);
     });
 
     // ── Xoá ảnh nút quay ──
-    $('#btn-clear-spin-img').on('click', function() {
+    $('#btn-clear-spin-img').on('click', function () {
         $('#btn-spin-img').val('');
         applySpinImage('');
         $('#spin-upload-info').text('JPG/PNG/WebP, tối đa 2MB').removeClass('text-danger');
     });
 
     // Helper trung tâm: apply ảnh vào nút quay từ mọi nguồn (upload/URL/thư viện)
-    function applySpinImage( src ) {
-        if ( ! wheelSettings.button ) wheelSettings.button = {};
+    function applySpinImage(src) {
+        if (!wheelSettings.button) wheelSettings.button = {};
         wheelSettings.button.background_image = src;
 
-        if ( src ) {
+        if (src) {
             // Có ảnh: ẩn text
-            wheelSettings.button.text       = '';
+            wheelSettings.button.text = '';
             wheelSettings.button.text_color = 'transparent';
             // Hiện preview
             $('#spin-img-preview').attr('src', src);
             $('#spin-img-preview-wrap').show();
             // Label: upload = data: prefix, thư viện/URL = domain
-            if ( src.indexOf('data:') === 0 ) {
+            if (src.indexOf('data:') === 0) {
                 $('#spin-img-preview-label').text('Ảnh từ máy của bạn');
             } else {
-                $('#spin-img-preview-label').text( src.replace(/^https?:\/\/[^/]+/, '').substring(0, 40) + '...' );
+                $('#spin-img-preview-label').text(src.replace(/^https?:\/\/[^/]+/, '').substring(0, 40) + '...');
             }
         } else {
             // Xoá ảnh: trả text về
-            wheelSettings.button.text       = $.trim( $('#btn-spin-label').val() ) || 'Quay';
+            wheelSettings.button.text = $.trim($('#btn-spin-label').val()) || 'Quay';
             wheelSettings.button.text_color = '#ffffff';
             $('#spin-img-preview-wrap').hide();
             $('#spin-img-preview').attr('src', '');
         }
 
-        renderWheel();
-        localStorage.setItem( getSettingsStorageKey(), JSON.stringify( collectSettings() ) );
-    }
+                renderWheel();
+                localStorage.setItem(getSettingsStorageKey(), JSON.stringify(collectSettings()));
+            }
 
-});
+            // ── Viền kim cương: Đổi màu viền canvas ──
+            $('#border_color').on('input change', function () {
+                var color = $(this).val();
+                if (!wheelSettings.wheel) wheelSettings.wheel = {};
+                wheelSettings.wheel.border_color = color;
+                drawWheelCanvas(currentRotation);
+                localStorage.setItem(getSettingsStorageKey(), JSON.stringify(collectSettings()));
+            });
+
+            // ── Viền kim cương: Đổi màu kim cương / nút trên viền ──
+            $('#diamond_color').on('input change', function () {
+                var color = $(this).val();
+                if (!wheelSettings.wheel) wheelSettings.wheel = {};
+                wheelSettings.wheel.diamond_color = color;
+                drawWheelCanvas(currentRotation);
+                localStorage.setItem(getSettingsStorageKey(), JSON.stringify(collectSettings()));
+            });
+
+            // ── Viền kim cương: Bật / Tắt viền ──
+            $('#show_border').on('change', function () {
+                var isChecked = $(this).is(':checked');
+                $('#custom_border_color').toggle(isChecked);
+                if (!wheelSettings.wheel) wheelSettings.wheel = {};
+                wheelSettings.wheel.show_border = isChecked;
+                drawWheelCanvas(currentRotation);
+                localStorage.setItem(getSettingsStorageKey(), JSON.stringify(collectSettings()));
+            });
+        });

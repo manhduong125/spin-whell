@@ -2,6 +2,14 @@
     margin-bottom: 0 !important;
 }
 
+.button, button, input[type=button], input[type=reset], input[type=submit] {
+    margin-right: 0 !important;
+}
+
+legend {
+    border: none !important;
+}
+
 #wheelOfFortune {
     display: block;
     width: -webkit-fit-content;

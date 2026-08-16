@@ -101,7 +101,7 @@ class WP_Spin_Wheel_Helper {
             'spin_limit'   => 0,
             'spin_limit_type' => 'none',
             'form_fields'  => array(),
-            'wheel'        => array( 'size' => 500, 'border' => 8, 'border_color' => '#ffffff', 'shadow' => true ),
+            'wheel'        => array( 'size' => 500, 'border' => 8, 'border_color' => '#ff4d00', 'shadow' => true ),
             'button'       => array( 'text' => __( 'QUAY', 'wp-spin-wheel' ), 'color' => '#ff0000', 'text_color' => '#ffffff', 'radius' => 50, 'background_image' => '' ),
             'pointer'      => array( 'image' => '', 'size' => 80 ),
             'animation'    => array( 'duration' => 6, 'confetti' => true ),
