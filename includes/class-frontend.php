@@ -17,11 +17,12 @@ class WP_Spin_Wheel_Frontend {
         wp_enqueue_script( 'wp-spin-wheel-particles', WP_SPIN_WHEEL_URL . 'assets/js/particles.min.js', array(), '2.0.0', true );
 
         wp_localize_script( 'wp-spin-wheel-wheel', 'wp_spin_wheel_params', array(
-            'rest_url'   => esc_url_raw( rest_url( 'spin-wheel/v1/' ) ),
-            'nonce'      => wp_create_nonce( 'wp_rest' ),
-            'text_win'   => __( 'Bạn đã trúng', 'wp-spin-wheel' ),
-            'text_error' => __( 'Đã có lỗi xảy ra.', 'wp-spin-wheel' ),
-            'plugin_url' => WP_SPIN_WHEEL_URL,
+            'rest_url'        => esc_url_raw( rest_url( 'spin-wheel/v1/' ) ),
+            'nonce'           => wp_create_nonce( 'wp_rest' ),
+            'text_win'        => __( 'Bạn đã trúng', 'wp-spin-wheel' ),
+            'text_error'      => __( 'Đã có lỗi xảy ra.', 'wp-spin-wheel' ),
+            'plugin_url'      => WP_SPIN_WHEEL_URL,
+            'themes_json_url' => WP_SPIN_WHEEL_URL . 'assets/data/themes.json',
         ) );
     }
 }

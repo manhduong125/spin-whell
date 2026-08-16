@@ -406,6 +406,82 @@ jQuery(document).ready(function ($) {
         });
     }
 
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function escapeAttr(str) {
+        if (!str) return '';
+        return String(str).replace(/"/g, '&quot;');
+    }
+
+    function loadAndRenderThemeDropdown() {
+        var $dropdown = $('#myDropdown .dropdown-menu');
+        if (!$dropdown.length) return;
+
+        var themesUrl = (typeof wp_spin_wheel_params !== 'undefined' && wp_spin_wheel_params.themes_json_url)
+            ? wp_spin_wheel_params.themes_json_url
+            : ((typeof wp_spin_wheel_params !== 'undefined' && wp_spin_wheel_params.plugin_url)
+                ? wp_spin_wheel_params.plugin_url + 'assets/data/themes.json'
+                : '/wp-content/plugins/spin-whell/assets/data/themes.json');
+
+        $.getJSON(themesUrl, function (data) {
+            if (data && data.categories) {
+                renderThemeDropdown(data.categories);
+            }
+        }).fail(function (err) {
+            console.error('Không thể tải file themes.json:', err);
+        });
+    }
+
+    function renderThemeDropdown(categories) {
+        var $dropdown = $('#myDropdown .dropdown-menu');
+        if (!$dropdown.length || !categories || !categories.length) return;
+
+        var html = '';
+        categories.forEach(function (cat) {
+            html += '<div class="item-header border-top border-bottom pt-3 pb-2 m-2">' + escapeHtml(cat.name) + '</div>';
+            (cat.items || []).forEach(function (item) {
+                var colors = item.colors || [];
+                var contentAttr = colors.join(',');
+                var borderAttr = (item.border || []).join(',');
+                var spinLabel = item.spin_label || '';
+                var spinImg = item.spin_img || '';
+                var isStroke = item.is_stroke || 'no';
+                var bgImg = item.bg_img || '';
+                var bgGradient = item.bg_gradient || '';
+                var title = item.title || '';
+                var tcsw = item.tcsw || '';
+
+                var svgIcons = '';
+                colors.forEach(function (color) {
+                    svgIcons += '<svg width="12" height="12" style="margin-left: 5px;">' +
+                        '<rect width="12" height="12" style="fill:' + color + '; stroke-width: 1; stroke: rgb(0, 0, 0);"></rect>' +
+                        '</svg>';
+                });
+
+                html += '<div class="dropdown-item ms-1"' +
+                    ' data-content="' + escapeAttr(contentAttr) + '"' +
+                    ' data-border="' + escapeAttr(borderAttr) + '"' +
+                    ' data-spin_label="' + escapeAttr(spinLabel) + '"' +
+                    ' data-spin_img="' + escapeAttr(spinImg) + '"' +
+                    ' data-is_stroke="' + escapeAttr(isStroke) + '"' +
+                    ' data-bg_img="' + escapeAttr(bgImg) + '"' +
+                    ' data-bg_gradient="' + escapeAttr(bgGradient) + '"' +
+                    ' data-title="' + escapeAttr(title) + '"' +
+                    ' data-tcsw="' + escapeAttr(tcsw) + '">' +
+                    '<div class="d-flex justify-content-between item">' +
+                    '<div class="item-title">' + escapeHtml(title) + '</div>' +
+                    '<div class="item-icon">' + svgIcons + '</div>' +
+                    '</div>' +
+                    '</div>';
+            });
+        });
+
+        $dropdown.html(html);
+    }
+
     function normalizePrize(prize, index) {
         prize = prize || {};
         return {
@@ -986,6 +1062,7 @@ jQuery(document).ready(function ($) {
 
     // Khởi tạo hội màu sắc
     renderSectorColorPills();
+    loadAndRenderThemeDropdown();
     if (savedSettings && savedSettings.sector_colors) {
         wheelPrizes.forEach(function (prize, index) {
             prize.color = savedSettings.sector_colors[index % savedSettings.sector_colors.length];
@@ -1210,21 +1287,43 @@ jQuery(document).ready(function ($) {
         saveWheelSettings();
     });
 
-    // ── Nút "Chủ đề" → mở modalSettings và nhảy sang tab Giao diện ──
-    $('#btn-open-theme').on('click', function () {
-        // Kích hoạt tab appearance trước khi modal hiện
-        var $tab = $('#appearance-tab');
-        if ($tab.length) {
-            $tab.tab('show');
+    // ── Xử lý chuyển tab trong modal cài đặt (#myTab) ──
+    $(document).on('click', '#myTab .nav-link', function (e) {
+        e.preventDefault();
+        var $btn = $(this);
+        var target = $btn.attr('data-bs-target') || $btn.attr('href');
+        if (!target) return;
+
+        $('#myTab .nav-link').removeClass('active').attr('aria-selected', 'false');
+        $btn.addClass('active').attr('aria-selected', 'true');
+
+        $('#myTabContent > .tab-pane').removeClass('show active');
+        $(target).addClass('show active');
+
+        if (target === '#media-tab-pane' && typeof window.swRenderMediaActiveTab === 'function') {
+            window.swRenderMediaActiveTab();
         }
     });
 
+    // ── Nút "Chủ đề" → mở modalSettings và nhảy sang tab Giao diện ──
+    $('#btn-open-theme').on('click', function () {
+        var $modal = $('#modalSettings');
+        if ($modal.length) {
+            if ($modal.modal) {
+                $modal.modal('show');
+            } else {
+                $modal.show();
+            }
+        }
+        $('#appearance-tab').trigger('click');
+    });
+
     // Cũng bắt sự kiện khi modal vừa hiện để đảm bảo tab đúng
-    $('#modalSettings').on('show.bs.modal', function (e) {
-        var relatedBtn = e.relatedTarget;
+    $('#modalSettings').on('show.bs.modal shown.bs.modal', function (e) {
+        var relatedBtn = e ? e.relatedTarget : null;
         if (relatedBtn && $(relatedBtn).data('tab')) {
             var tabId = $(relatedBtn).data('tab');
-            $('#' + tabId).tab('show');
+            $('#' + tabId).trigger('click');
         }
     });
 

@@ -1,0 +1,1038 @@
+{
+    "categories": [
+        {
+            "name": "Mặc định",
+            "items": [
+                {
+                    "title": "Mặc định",
+                    "colors": [
+                        "#D6392E",
+                        "#3369E8",
+                        "#4F9A29",
+                        "#EEB331"
+                    ],
+                    "border": [
+                        "#FF4D00",
+                        "#F6FA00"
+                    ],
+                    "spin_label": "Quay",
+                    "spin_img": "",
+                    "is_stroke": "no",
+                    "bg_img": "",
+                    "bg_gradient": "conic-gradient(from 90deg, rgb(223, 48, 0) 0deg, rgb(223, 48, 0) 27.692deg, rgb(254, 96, 0) 27.692deg, rgb(254, 96, 0) 55.385deg, rgb(255, 145, 37) 55.385deg, rgb(255, 145, 37) 83.077deg, rgb(251, 187, 95) 83.077deg, rgb(251, 187, 95) 110.769deg, rgb(218, 217, 154) 110.769deg, rgb(218, 217, 154) 138.462deg, rgb(169, 230, 202) 138.462deg, rgb(169, 230, 202) 166.154deg, rgb(114, 224, 232) 166.154deg, rgb(114, 224, 232) 193.846deg, rgb(62, 201, 236) 193.846deg, rgb(62, 201, 236) 221.538deg, rgb(20, 163, 214) 221.538deg, rgb(20, 163, 214) 249.231deg, rgb(0, 116, 171) 249.231deg, rgb(0, 116, 171) 276.923deg, rgb(0, 67, 115) 276.923deg, rgb(0, 67, 115) 304.615deg, rgb(18, 22, 55) 304.615deg, rgb(18, 22, 55) 332.308deg, rgb(58, 0, 5) 332.308deg, rgb(58, 0, 5) 360deg)",
+                    "tcsw": "#000000"
+                }
+            ]
+        },
+        {
+            "name": "Mạng xã hội",
+            "items": [
+                {
+                    "title": "Instagram 1",
+                    "colors": [
+                        "#002296",
+                        "#82008F",
+                        "#C0007A",
+                        "#EA0C5F",
+                        "#FF5341",
+                        "#FF8820"
+                    ],
+                    "border": [
+                        "#1419AD",
+                        "#FFFFFF"
+                    ],
+                    "spin_label": "",
+                    "spin_img": "https://vongquaymayman.co/wp-content/themes/twentytwentythree-child/assets/buttons/instagram.jpg",
+                    "is_stroke": "no",
+                    "bg_img": "",
+                    "bg_gradient": "",
+                    "tcsw": ""
+                },
+                {
+                    "title": "Instagram 2",
+                    "colors": [
+                        "#82008F",
+                        "#C0007A",
+                        "#EA0C5F",
+                        "#FF5341",
+                        "#FF8820",
+                        "#F6BA00"
+                    ],
+                    "border": [
+                        "#FF4D00",
+                        "#F6FA00"
+                    ],
+                    "spin_label": "",
+                    "spin_img": "https://vongquaymayman.co/wp-content/themes/twentytwentythree-child/assets/buttons/instagram.jpg",
+                    "is_stroke": "no",
+                    "bg_img": "",
+                    "bg_gradient": "",
+                    "tcsw": ""
+                },
+                {
+                    "title": "Google",
+                    "colors": [
+                        "#4285f4",
+                        "#0F9D58",
+                        "#F4B400",
+                        "#DB4437"
+                    ],
+                    "border": [
+                        "#FF4D00",
+                        "#F6FA00"
+                    ],
+                    "spin_label": "Quay",
+                    "spin_img": "",
+                    "is_stroke": "no",
+                    "bg_img": "",
+                    "bg_gradient": "",
+                    "tcsw": ""
+                },
+                {
+                    "title": "Facebook",
+                    "colors": [
+                        "#1e85ff",
+                        "#56a4ff",
+                        "#95c5ff",
+                        "#cce3ff",
+                        "#eff7ff"
+                    ],
+                    "border": [
+                        "#1e85ff",
+                        "#FFFFFF"
+                    ],
+                    "spin_label": "Quay",
+                    "spin_img": "",
+                    "is_stroke": "no",
+                    "bg_img": "",
+                    "bg_gradient": "",
+                    "tcsw": "#1e85ff"
+                },
+                {
+                    "title": "Tinder 1",
+                    "colors": [
+                        "#fe3e61",
+                        "#ff6aa3",
+                        "#ff98e0",
+                        "#ffc5ff"
+                    ],
+                    "border": [
+                        "#fe3e61",
+                        "#FFFFFF"
+                    ],
+                    "spin_label": "Quay",
+                    "spin_img": "",
+                    "is_stroke": "no",
+                    "bg_img": "",
+                    "bg_gradient": "",
+                    "tcsw": ""
+                },
+                {
+                    "title": "Tinder 2",
+                    "colors": [
+                        "#fe3e61",
+                        "#d7418a",
+                        "#9e509c",
+                        "#635796",
+                        "#38537b",
+                        "#2f4858"
+                    ],
+                    "border": [
+                        "#9e509c",
+                        "#FFFFFF"
+                    ],
+                    "spin_label": "Quay",
+                    "spin_img": "",
+                    "is_stroke": "no",
+                    "bg_img": "",
+                    "bg_gradient": "",
+                    "tcsw": ""
+                }
+            ]
+        },
+        {
+            "name": "Học sinh",
+            "items": [
+                {
+                    "title": "Baby cute",
+                    "colors": [
+                        "#FFFFFF",
+                        "#A9D9E2",
+                        "#FDB1D4"
+                    ],
+                    "border": [
+                        "#A9D9E2",
+                        "#FFFFFF"
+                    ],
+                    "spin_label": "Quay",
+                    "spin_img": "",
+                    "is_stroke": "no",
+                    "bg_img": "",
+                    "bg_gradient": "",
+                    "tcsw": "#FDB1D4"
+                },
+                {
+                    "title": "Eva",
+                    "colors": [
+                        "#E57782",
+                        "#FFFFFF"
+                    ],
+                    "border": [
+                        "#dc6571",
+                        "#F2E08A"
+                    ],
+                    "spin_label": "Quay",
+                    "spin_img": "",
+                    "is_stroke": "no",
+                    "bg_img": "",
+                    "bg_gradient": "linear-gradient(45deg, rgb(252, 142, 197) 0%, rgb(255, 139, 206) 14.286%, rgb(255, 143, 212) 28.571%, rgb(255, 154, 215) 42.857%, rgb(255, 170, 215) 57.143%, rgb(255, 189, 211) 71.429%, rgb(255, 208, 204) 85.714%, rgb(255, 224, 195) 100%)",
+                    "tcsw": "#E57782"
+                },
+                {
+                    "title": "Xanh",
+                    "colors": [
+                        "#008DDA",
+                        "#41C9E2",
+                        "#ACE2E1",
+                        "#F7EEDD"
+                    ],
+                    "border": [
+                        "#008DDA",
+                        "#FFFFFF"
+                    ],
+                    "spin_label": "Quay",
+                    "spin_img": "",
+                    "is_stroke": "no",
+                    "bg_img": "",
+                    "bg_gradient": "",
+                    "tcsw": ""
+                },
+                {
+                    "title": "Xanh vàng",
+                    "colors": [
+                        "#007F73",
+                        "#4CCD99",
+                        "#FFC700",
+                        "#FFF455"
+                    ],
+                    "border": [
+                        "#007F73",
+                        "#FFFFFF"
+                    ],
+                    "spin_label": "Quay",
+                    "spin_img": "",
+                    "is_stroke": "no",
+                    "bg_img": "",
+                    "bg_gradient": "",
+                    "tcsw": ""
+                },
+                {
+                    "title": "Vàng",
+                    "colors": [
+                        "#FDA403",
+                        "#E8751A",
+                        "#898121",
+                        "#E5C287"
+                    ],
+                    "border": [
+                        "#FDA403",
+                        "#FFFFFF"
+                    ],
+                    "spin_label": "Quay",
+                    "spin_img": "",
+                    "is_stroke": "no",
+                    "bg_img": "",
+                    "bg_gradient": "",
+                    "tcsw": ""
+                },
+                {
+                    "title": "Xanh hồng",
+                    "colors": [
+                        "#59D5E0",
+                        "#F5DD61",
+                        "#FAA300",
+                        "#F4538A"
+                    ],
+                    "border": [
+                        "#59D5E0",
+                        "#FFFFFF"
+                    ],
+                    "spin_label": "Quay",
+                    "spin_img": "",
+                    "is_stroke": "no",
+                    "bg_img": "",
+                    "bg_gradient": "",
+                    "tcsw": ""
+                },
+                {
+                    "title": "HS.Nữ",
+                    "colors": [
+                        "#6420AA",
+                        "#FF3EA5",
+                        "#FF7ED4",
+                        "#FFB5DA"
+                    ],
+                    "border": [
+                        "#FF3EA5",
+                        "#FFFFFF"
+                    ],
+                    "spin_label": "Quay",
+                    "spin_img": "",
+                    "is_stroke": "no",
+                    "bg_img": "",
+                    "bg_gradient": "",
+                    "tcsw": ""
+                },
+                {
+                    "title": "HS.Nam",
+                    "colors": [
+                        "#191D88",
+                        "#1450A3",
+                        "#337CCF",
+                        "#FFC436"
+                    ],
+                    "border": [
+                        "#191D88",
+                        "#FFFFFF"
+                    ],
+                    "spin_label": "Quay",
+                    "spin_img": "",
+                    "is_stroke": "no",
+                    "bg_img": "",
+                    "bg_gradient": "",
+                    "tcsw": ""
+                },
+                {
+                    "title": "Bầu trời xanh",
+                    "colors": [
+                        "#008DDA",
+                        "#41C9E2",
+                        "#ACE2E1",
+                        "#F7EEDD"
+                    ],
+                    "border": [
+                        "#41C9E2",
+                        "#FFFFFF"
+                    ],
+                    "spin_label": "Quay",
+                    "spin_img": "",
+                    "is_stroke": "no",
+                    "bg_img": "",
+                    "bg_gradient": "",
+                    "tcsw": ""
+                }
+            ]
+        },
+        {
+            "name": "Phụ nữ",
+            "items": [
+                {
+                    "title": "Đang yêu",
+                    "colors": [
+                        "#F31559",
+                        "#FF52A2",
+                        "#FFB07F",
+                        "#FFECAF"
+                    ],
+                    "border": [
+                        "#F31559",
+                        "#FFFFFF"
+                    ],
+                    "spin_label": "Quay",
+                    "spin_img": "",
+                    "is_stroke": "no",
+                    "bg_img": "",
+                    "bg_gradient": "",
+                    "tcsw": ""
+                },
+                {
+                    "title": "Lãng mạn",
+                    "colors": [
+                        "#FF407D",
+                        "#FFCAD4",
+                        "#40679E",
+                        "#1B3C73"
+                    ],
+                    "border": [
+                        "#FF407D",
+                        "#FFFFFF"
+                    ],
+                    "spin_label": "Quay",
+                    "spin_img": "",
+                    "is_stroke": "no",
+                    "bg_img": "",
+                    "bg_gradient": "",
+                    "tcsw": ""
+                },
+                {
+                    "title": "Hạnh phúc",
+                    "colors": [
+                        "#0802A3",
+                        "#FF4B91",
+                        "#FF7676",
+                        "#FFCD4B"
+                    ],
+                    "border": [
+                        "#FF4D00",
+                        "#F6FA00"
+                    ],
+                    "spin_label": "Quay",
+                    "spin_img": "",
+                    "is_stroke": "no",
+                    "bg_img": "",
+                    "bg_gradient": "",
+                    "tcsw": ""
+                },
+                {
+                    "title": "Hồng xinh",
+                    "colors": [
+                        "#E84B9C",
+                        "#EC7E9E",
+                        "#EC9EFE",
+                        "#F1B1D6",
+                        "#CBB2FE"
+                    ],
+                    "border": [
+                        "#E84B9C",
+                        "#FFFFFF"
+                    ],
+                    "spin_label": "Quay",
+                    "spin_img": "",
+                    "is_stroke": "no",
+                    "bg_img": "",
+                    "bg_gradient": "",
+                    "tcsw": ""
+                },
+                {
+                    "title": "Cá tính",
+                    "colors": [
+                        "#711DB0",
+                        "#C21292",
+                        "#EF4040",
+                        "#FFA732"
+                    ],
+                    "border": [
+                        "#FF4D00",
+                        "#F6FA00"
+                    ],
+                    "spin_label": "Quay",
+                    "spin_img": "",
+                    "is_stroke": "no",
+                    "bg_img": "",
+                    "bg_gradient": "",
+                    "tcsw": ""
+                },
+                {
+                    "title": "Diana",
+                    "colors": [
+                        "#E84BA0",
+                        "#FEFCFF"
+                    ],
+                    "border": [
+                        "#E84BA0",
+                        "#FFFFFF"
+                    ],
+                    "spin_label": "Quay",
+                    "spin_img": "",
+                    "is_stroke": "no",
+                    "bg_img": "",
+                    "bg_gradient": "",
+                    "tcsw": "#E84BA0"
+                },
+                {
+                    "title": "Kotex",
+                    "colors": [
+                        "#833189",
+                        "#E4488F",
+                        "#FFFFFF"
+                    ],
+                    "border": [
+                        "#833189",
+                        "#FFFFFF"
+                    ],
+                    "spin_label": "Quay",
+                    "spin_img": "",
+                    "is_stroke": "no",
+                    "bg_img": "",
+                    "bg_gradient": "",
+                    "tcsw": "#E4488F"
+                },
+                {
+                    "title": "Durex",
+                    "colors": [
+                        "#E94578",
+                        "#1248BF",
+                        "#F3A533"
+                    ],
+                    "border": [
+                        "#FF4D00",
+                        "#F6FA00"
+                    ],
+                    "spin_label": "Quay",
+                    "spin_img": "",
+                    "is_stroke": "no",
+                    "bg_img": "",
+                    "bg_gradient": "",
+                    "tcsw": ""
+                }
+            ]
+        },
+        {
+            "name": "Chủ đề",
+            "items": [
+                {
+                    "title": "Halloween",
+                    "colors": [
+                        "#3E1C34",
+                        "#602748",
+                        "#B04622",
+                        "#F7921D"
+                    ],
+                    "border": [
+                        "#3E1C34",
+                        "#FFFFFF"
+                    ],
+                    "spin_label": "",
+                    "spin_img": "https://vongquaymayman.co/wp-content/themes/twentytwentythree-child/assets/buttons/halloween-2.png",
+                    "is_stroke": "no",
+                    "bg_img": "https://vongquaymayman.co/wp-content/themes/twentytwentythree-child/assets/background/halloween.jpg",
+                    "bg_gradient": "",
+                    "tcsw": ""
+                },
+                {
+                    "title": "Buổi tối",
+                    "colors": [
+                        "#27374D",
+                        "#526D82",
+                        "#9DB2BF",
+                        "#DDE6ED"
+                    ],
+                    "border": [
+                        "#27374D",
+                        "#FFFFFF"
+                    ],
+                    "spin_label": "Quay",
+                    "spin_img": "",
+                    "is_stroke": "no",
+                    "bg_img": "",
+                    "bg_gradient": "",
+                    "tcsw": ""
+                },
+                {
+                    "title": "Hoàng hôn",
+                    "colors": [
+                        "#FF9843",
+                        "#FFDD95",
+                        "#86A7FC",
+                        "#3468C0"
+                    ],
+                    "border": [
+                        "#FF9843",
+                        "#FFFFFF"
+                    ],
+                    "spin_label": "Quay",
+                    "spin_img": "",
+                    "is_stroke": "no",
+                    "bg_img": "",
+                    "bg_gradient": "",
+                    "tcsw": ""
+                },
+                {
+                    "title": "Màu trái cây",
+                    "colors": [
+                        "#e9692c",
+                        "#ed9121",
+                        "#ffc324",
+                        "#fff000",
+                        "#66b447",
+                        "#8ee53f"
+                    ],
+                    "border": [
+                        "#e9692c",
+                        "#FFFFFF"
+                    ],
+                    "spin_label": "Quay",
+                    "spin_img": "",
+                    "is_stroke": "no",
+                    "bg_img": "",
+                    "bg_gradient": "",
+                    "tcsw": ""
+                },
+                {
+                    "title": "Cầu vòng",
+                    "colors": [
+                        "#5e02e9",
+                        "#3c70ef",
+                        "#30d800",
+                        "#e7e200",
+                        "#fd8b00",
+                        "#f20800"
+                    ],
+                    "border": [
+                        "#FF4D00",
+                        "#F6FA00"
+                    ],
+                    "spin_label": "Quay",
+                    "spin_img": "",
+                    "is_stroke": "no",
+                    "bg_img": "",
+                    "bg_gradient": "",
+                    "tcsw": ""
+                },
+                {
+                    "title": "Vàng ⇢ hồng",
+                    "colors": [
+                        "#FFF3C7",
+                        "#FEC7B4",
+                        "#FC819E",
+                        "#F7418F"
+                    ],
+                    "border": [
+                        "#FC819E",
+                        "#FFFFFF"
+                    ],
+                    "spin_label": "Quay",
+                    "spin_img": "",
+                    "is_stroke": "no",
+                    "bg_img": "",
+                    "bg_gradient": "",
+                    "tcsw": ""
+                },
+                {
+                    "title": "Hồng ⇢ tím",
+                    "colors": [
+                        "#FFE6E6",
+                        "#E1AFD1",
+                        "#AD88C6",
+                        "#7469B6"
+                    ],
+                    "border": [
+                        "#E1AFD1",
+                        "#FFFFFF"
+                    ],
+                    "spin_label": "Quay",
+                    "spin_img": "",
+                    "is_stroke": "no",
+                    "bg_img": "",
+                    "bg_gradient": "",
+                    "tcsw": ""
+                },
+                {
+                    "title": "Retro",
+                    "colors": [
+                        "#59D5E0",
+                        "#F5DD61",
+                        "#FAA300",
+                        "#F4538A"
+                    ],
+                    "border": [
+                        "#59D5E0",
+                        "#FFFFFF"
+                    ],
+                    "spin_label": "Quay",
+                    "spin_img": "",
+                    "is_stroke": "no",
+                    "bg_img": "",
+                    "bg_gradient": "",
+                    "tcsw": ""
+                },
+                {
+                    "title": "Neon",
+                    "colors": [
+                        "#000000",
+                        "#F72798",
+                        "#F57D1F",
+                        "#EBF400"
+                    ],
+                    "border": [
+                        "#FF4D00",
+                        "#F6FA00"
+                    ],
+                    "spin_label": "Quay",
+                    "spin_img": "",
+                    "is_stroke": "no",
+                    "bg_img": "",
+                    "bg_gradient": "",
+                    "tcsw": ""
+                },
+                {
+                    "title": "Cafe",
+                    "colors": [
+                        "#944E63",
+                        "#B47B84",
+                        "#CAA6A6",
+                        "#FFE7E7"
+                    ],
+                    "border": [
+                        "#944E63",
+                        "#FFFFFF"
+                    ],
+                    "spin_label": "Quay",
+                    "spin_img": "",
+                    "is_stroke": "no",
+                    "bg_img": "",
+                    "bg_gradient": "",
+                    "tcsw": ""
+                },
+                {
+                    "title": "Giáng sinh 1",
+                    "colors": [
+                        "#F2EE9D",
+                        "#7A9D54",
+                        "#557A46",
+                        "#8C3333"
+                    ],
+                    "border": [
+                        "#7A9D54",
+                        "#FFFFFF"
+                    ],
+                    "spin_label": "Quay",
+                    "spin_img": "https://vongquaymayman.co/wp-content/themes/twentytwentythree-child/assets/buttons/christmas-4.png",
+                    "is_stroke": "no",
+                    "bg_img": "https://vongquaymayman.co/wp-content/themes/twentytwentythree-child/assets/background/christmas-2.jpg",
+                    "bg_gradient": "",
+                    "tcsw": ""
+                },
+                {
+                    "title": "Giáng sinh 2",
+                    "colors": [
+                        "#c71917",
+                        "#ffffff"
+                    ],
+                    "border": [
+                        "#c50a07",
+                        "#FFFFFF"
+                    ],
+                    "spin_label": "Quay",
+                    "spin_img": "https://vongquaymayman.co/wp-content/themes/twentytwentythree-child/assets/buttons/christmas-5.png",
+                    "is_stroke": "no",
+                    "bg_img": "https://vongquaymayman.co/wp-content/themes/twentytwentythree-child/assets/background/christmas.jpg",
+                    "bg_gradient": "",
+                    "tcsw": "#c71917"
+                }
+            ]
+        },
+        {
+            "name": "Theo mùa",
+            "items": [
+                {
+                    "title": "Mùa xuân",
+                    "colors": [
+                        "#FFC5C5",
+                        "#FFEBD8",
+                        "#C7DCA7",
+                        "#89B9AD"
+                    ],
+                    "border": [
+                        "#C7DCA7",
+                        "#FFFFFF"
+                    ],
+                    "spin_label": "Quay",
+                    "spin_img": "",
+                    "is_stroke": "no",
+                    "bg_img": "",
+                    "bg_gradient": "",
+                    "tcsw": ""
+                },
+                {
+                    "title": "Mùa hạ",
+                    "colors": [
+                        "#FF9843",
+                        "#FFDD95",
+                        "#86A7FC",
+                        "#3468C0"
+                    ],
+                    "border": [
+                        "#FF9843",
+                        "#FFFFFF"
+                    ],
+                    "spin_label": "Quay",
+                    "spin_img": "",
+                    "is_stroke": "no",
+                    "bg_img": "",
+                    "bg_gradient": "",
+                    "tcsw": ""
+                },
+                {
+                    "title": "Mùa hạ xanh",
+                    "colors": [
+                        "#FFF67E",
+                        "#BFEA7C",
+                        "#9BCF53",
+                        "#416D19"
+                    ],
+                    "border": [
+                        "#9BCF53",
+                        "#FFFFFF"
+                    ],
+                    "spin_label": "Quay",
+                    "spin_img": "",
+                    "is_stroke": "no",
+                    "bg_img": "",
+                    "bg_gradient": "",
+                    "tcsw": ""
+                },
+                {
+                    "title": "Mùa thu vàng",
+                    "colors": [
+                        "#dc7c00",
+                        "#ff9705",
+                        "#feb20a",
+                        "#ffcb00",
+                        "#fedf05"
+                    ],
+                    "border": [
+                        "#ff9705",
+                        "#FFFFFF"
+                    ],
+                    "spin_label": "Quay",
+                    "spin_img": "",
+                    "is_stroke": "no",
+                    "bg_img": "",
+                    "bg_gradient": "",
+                    "tcsw": ""
+                },
+                {
+                    "title": "Mùa thu xanh",
+                    "colors": [
+                        "#99A98F",
+                        "#C1D0B5",
+                        "#D6E8DB",
+                        "#FFF8DE"
+                    ],
+                    "border": [
+                        "#99A98F",
+                        "#FFFFFF"
+                    ],
+                    "spin_label": "Quay",
+                    "spin_img": "",
+                    "is_stroke": "no",
+                    "bg_img": "",
+                    "bg_gradient": "",
+                    "tcsw": ""
+                },
+                {
+                    "title": "Mùa đông",
+                    "colors": [
+                        "#2377a4",
+                        "#50a3c6",
+                        "#79c0d7",
+                        "#f8f8f8",
+                        "#dddfdf",
+                        "#c2c2c2"
+                    ],
+                    "border": [
+                        "#50a3c6",
+                        "#FFFFFF"
+                    ],
+                    "spin_label": "Quay",
+                    "spin_img": "",
+                    "is_stroke": "no",
+                    "bg_img": "",
+                    "bg_gradient": "",
+                    "tcsw": "#79c0d7"
+                }
+            ]
+        },
+        {
+            "name": "Màu cờ",
+            "items": [
+                {
+                    "title": "Việt Nam",
+                    "colors": [
+                        "#DD241F",
+                        "#FBF500"
+                    ],
+                    "border": [
+                        "#dd241f",
+                        "#f6fa00"
+                    ],
+                    "spin_label": "",
+                    "spin_img": "https://vongquaymayman.co/wp-content/themes/twentytwentythree-child/assets/buttons/vnflag.jpg",
+                    "is_stroke": "no",
+                    "bg_img": "",
+                    "bg_gradient": "",
+                    "tcsw": ""
+                },
+                {
+                    "title": "Vinfast",
+                    "colors": [
+                        "#1464f4",
+                        "#1c2e51"
+                    ],
+                    "border": [
+                        "#1464f4",
+                        "#FFFFFF"
+                    ],
+                    "spin_label": "",
+                    "spin_img": "https://vongquaymayman.co/wp-content/themes/twentytwentythree-child/assets/buttons/vinfast.jpg",
+                    "is_stroke": "no",
+                    "bg_img": "",
+                    "bg_gradient": "",
+                    "tcsw": ""
+                },
+                {
+                    "title": "Hoa Kỳ",
+                    "colors": [
+                        "#b22234",
+                        "#3c3b6e",
+                        "#FFFFFF"
+                    ],
+                    "border": [
+                        "#b22234",
+                        "#ffffff"
+                    ],
+                    "spin_label": "",
+                    "spin_img": "https://vongquaymayman.co/wp-content/themes/twentytwentythree-child/assets/buttons/america.jpg",
+                    "is_stroke": "no",
+                    "bg_img": "",
+                    "bg_gradient": "",
+                    "tcsw": "#3c3b6e"
+                },
+                {
+                    "title": "Nhật Bản",
+                    "colors": [
+                        "#e40001",
+                        "#ffffff"
+                    ],
+                    "border": [
+                        "#e40001",
+                        "#ffffff"
+                    ],
+                    "spin_label": "スピン",
+                    "spin_img": "https://vongquaymayman.co/wp-content/themes/twentytwentythree-child/assets/buttons/japan.jpg",
+                    "is_stroke": "no",
+                    "bg_img": "",
+                    "bg_gradient": "",
+                    "tcsw": "#e40001"
+                },
+                {
+                    "title": "Hàn Quốc",
+                    "colors": [
+                        "#ce2f3b",
+                        "#0149a0",
+                        "#010101"
+                    ],
+                    "border": [
+                        "#0149a0",
+                        "#ffffff"
+                    ],
+                    "spin_label": "",
+                    "spin_img": "https://vongquaymayman.co/wp-content/themes/twentytwentythree-child/assets/buttons/korea.jpg",
+                    "is_stroke": "no",
+                    "bg_img": "",
+                    "bg_gradient": "",
+                    "tcsw": ""
+                },
+                {
+                    "title": "Đức",
+                    "colors": [
+                        "#231F20",
+                        "#E93F33",
+                        "#F9CD61"
+                    ],
+                    "border": [
+                        "#FF4D00",
+                        "#F6FA00"
+                    ],
+                    "spin_label": "Quay",
+                    "spin_img": "",
+                    "is_stroke": "no",
+                    "bg_img": "",
+                    "bg_gradient": "",
+                    "tcsw": ""
+                },
+                {
+                    "title": "Ý",
+                    "colors": [
+                        "#55A752",
+                        "#ffffff",
+                        "#E93F33"
+                    ],
+                    "border": [
+                        "#FF4D00",
+                        "#F6FA00"
+                    ],
+                    "spin_label": "Quay",
+                    "spin_img": "",
+                    "is_stroke": "no",
+                    "bg_img": "",
+                    "bg_gradient": "",
+                    "tcsw": "#55A752"
+                },
+                {
+                    "title": "Úc",
+                    "colors": [
+                        "#E63E37",
+                        "#074890",
+                        "#ffffff"
+                    ],
+                    "border": [
+                        "#FF4D00",
+                        "#F6FA00"
+                    ],
+                    "spin_label": "Quay",
+                    "spin_img": "",
+                    "is_stroke": "no",
+                    "bg_img": "",
+                    "bg_gradient": "",
+                    "tcsw": "#074890"
+                },
+                {
+                    "title": "Ukraine",
+                    "colors": [
+                        "#0056B8",
+                        "#FCD833"
+                    ],
+                    "border": [
+                        "#0056B8",
+                        "#FFFFFF"
+                    ],
+                    "spin_label": "Quay",
+                    "spin_img": "",
+                    "is_stroke": "no",
+                    "bg_img": "",
+                    "bg_gradient": "",
+                    "tcsw": ""
+                },
+                {
+                    "title": "Palestine",
+                    "colors": [
+                        "#E93F33",
+                        "#000000",
+                        "#ffffff",
+                        "#4D9839"
+                    ],
+                    "border": [
+                        "#FF4D00",
+                        "#F6FA00"
+                    ],
+                    "spin_label": "Quay",
+                    "spin_img": "",
+                    "is_stroke": "no",
+                    "bg_img": "",
+                    "bg_gradient": "",
+                    "tcsw": ""
+                },
+                {
+                    "title": "Nga",
+                    "colors": [
+                        "#ffffff",
+                        "#1010ff",
+                        "#ff0e0e"
+                    ],
+                    "border": [
+                        "#1010ff",
+                        "#FFFFFF"
+                    ],
+                    "spin_label": "",
+                    "spin_img": "https://vongquaymayman.co/wp-content/themes/twentytwentythree-child/assets/buttons/russia.jpg",
+                    "is_stroke": "no",
+                    "bg_img": "",
+                    "bg_gradient": "",
+                    "tcsw": "#1010ff"
+                }
+            ]
+        }
+    ]
+}

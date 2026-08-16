@@ -158,11 +158,95 @@ legend {
     z-index: 1;
 }
 
-.nav-tabs button {
-    margin: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+/* ══════════════════════════════════════════════════════════
+   MODAL SETTINGS TABS (#myTab) - MODERN UI
+   ══════════════════════════════════════════════════════════ */
+#myTab.nav-tabs {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    padding: 4px !important;
+    margin: 0 0 16px 0 !important;
+    list-style: none !important;
+    background: #f1f5f9 !important;
+    border: 1px solid #e2e8f0 !important;
+    border-radius: 12px !important;
+    gap: 4px !important;
+}
+
+#myTab.nav-tabs .nav-item {
+    flex: 1 1 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    list-style: none !important;
+}
+
+#myTab.nav-tabs .nav-link {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+    width: 100% !important;
+    height: 100% !important;
+    padding: 10px 14px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    line-height: 1.3 !important;
+    color: #64748b !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 8px !important;
+    text-transform: none !important;
+    letter-spacing: normal !important;
+    box-shadow: none !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease-in-out !important;
+    user-select: none !important;
+    white-space: nowrap !important;
+}
+
+#myTab.nav-tabs .nav-link svg,
+#myTab.nav-tabs .nav-link i,
+#myTab.nav-tabs .nav-link span[data-feather] {
+    width: 16px !important;
+    height: 16px !important;
+    flex-shrink: 0 !important;
+    stroke: currentColor !important;
+    stroke-width: 2 !important;
+    display: inline-block !important;
+    vertical-align: middle !important;
+}
+
+#myTab.nav-tabs .nav-link:hover:not(.active) {
+    color: #1e293b !important;
+    background: rgba(255, 255, 255, 0.7) !important;
+}
+
+#myTab.nav-tabs .nav-link.active {
+    color: #0f172a !important;
+    background: #ffffff !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06) !important;
+    font-weight: 700 !important;
+}
+
+#myTab.nav-tabs .nav-link.active svg {
+    stroke: #ff4d00 !important;
+}
+
+@media (max-width: 576px) {
+    #myTab.nav-tabs {
+        padding: 3px !important;
+        gap: 2px !important;
+    }
+    #myTab.nav-tabs .nav-link {
+        padding: 8px 6px !important;
+        font-size: 13px !important;
+        gap: 4px !important;
+    }
+    #myTab.nav-tabs .nav-link svg {
+        width: 14px !important;
+        height: 14px !important;
+    }
 }
 
 .wp-spin-wheel-wrapper .prize-title , .wheel-result-item {
@@ -196,6 +280,12 @@ legend {
 
 .spin-heading {
     font-size: 36px;
+}
+
+#form_theme_color .dropdown-menu {
+    max-height: 400px;
+    overflow: hidden;
+    overflow-y: scroll;
 }
 
 @media screen and (max-width: 991px) {
