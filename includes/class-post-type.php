@@ -9,6 +9,7 @@ class WP_Spin_Wheel_Post_Type
     {
         add_action('init', array($this, 'register_post_type'));
         add_filter('template_include', array($this, 'load_single_template'));
+        add_filter('wp_insert_post_data', array($this, 'custom_spin_wheel_slug'), 10, 2);
     }
 
     public function register_post_type()
@@ -54,5 +55,44 @@ class WP_Spin_Wheel_Post_Type
             }
         }
         return $template;
+    }
+
+    public function custom_spin_wheel_slug($data, $postarr)
+    {
+        if (isset($data['post_type']) && 'spin_wheel' === $data['post_type']) {
+            $post_id = isset($postarr['ID']) ? absint($postarr['ID']) : 0;
+            if (empty($data['post_name']) || ! preg_match('/^vq[A-Z0-9]{8}$/', $data['post_name'])) {
+                $data['post_name'] = self::generate_unique_vq_slug($post_id);
+            }
+        }
+        return $data;
+    }
+
+    public static function generate_random_code($length = 8)
+    {
+        $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        $code  = '';
+        $max   = strlen($chars) - 1;
+        for ($i = 0; $i < $length; $i++) {
+            $code .= $chars[random_int(0, $max)];
+        }
+        return $code;
+    }
+
+    public static function generate_unique_vq_slug($post_id = 0)
+    {
+        global $wpdb;
+        $attempts = 0;
+        do {
+            $slug   = 'vq' . self::generate_random_code(8);
+            $exists = $wpdb->get_var($wpdb->prepare(
+                "SELECT ID FROM {$wpdb->posts} WHERE post_name = %s AND ID != %d LIMIT 1",
+                $slug,
+                $post_id
+            ));
+            $attempts++;
+        } while ($exists && $attempts < 100);
+
+        return $slug;
     }
 }

@@ -86,6 +86,50 @@ class WP_Spin_Wheel_Helper {
         return array();
     }
 
+    /**
+     * Lấy danh sách audio từ thư mục assets/audio tương ứng.
+     * Tên hiển thị lấy từ file audio-name-{type}.txt, khớp theo thứ tự dòng với audio-link-{type}.txt.
+     *
+     * @param string $type 'start' | 'end'
+     * @return array
+     */
+    public static function get_audio_library( $type ) {
+        $type     = ( 'end' === $type ) ? 'end' : 'start';
+        $dir_name = 'audio-' . $type;
+        $dir_path = WP_SPIN_WHEEL_PATH . 'assets/audio/' . $dir_name;
+        $dir_url  = WP_SPIN_WHEEL_URL . 'assets/audio/' . $dir_name;
+
+        $link_file = $dir_path . '/audio-link-' . $type . '.txt';
+        $name_file = $dir_path . '/audio-name-' . $type . '.txt';
+
+        $links = array();
+        if ( is_readable( $link_file ) {
+            $links = array_values( array_filter( array_map( 'trim', (array) file( $link_file );
+        }
+
+        $names = array();
+        if ( is_readable( $name_file ) {
+            $names = array_values( array_filter( array_map( 'trim', (array) file( $name_file );
+        }
+
+        $items = array();
+        foreach ( $links as $i => $link ) {
+            $file = basename( $link );
+            if ( ! is_file( $dir_path . '/' . $file ) {
+                continue; // File chưa được tải về thư mục.
+            }
+
+            $fallback = pathinfo( $file, PATHINFO_FILENAME );
+            $items[]  = array(
+                'id'     => $fallback,
+                'name'   => isset( $names[ $i ] ) && '' !== $names[ $i ] ? $names[ $i ] : $fallback,
+                'config' => array( 'file' => $dir_url . '/' . $file ),
+            );
+        }
+
+        return $items;
+    }
+
     public static function get_wheel_settings( $post_id ) {
         $overrides = self::get_wheel_overrides( $post_id );
         $global_settings = self::get_global_settings();
