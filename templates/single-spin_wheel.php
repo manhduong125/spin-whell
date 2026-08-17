@@ -39,7 +39,7 @@ do_action( 'flatsome_after_header' );
         while ( have_posts() ) :
             the_post();
             $wheel_id = get_the_ID();
-            include WP_SPIN_WHEEL_PATH . 'templates/wheel-default.php';
+            include WP_SPIN_WHEEL_PATH . 'templates/wheel-user.php';
         endwhile;
         ?>
     </div>

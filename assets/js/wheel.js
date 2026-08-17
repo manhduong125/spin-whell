@@ -2099,7 +2099,7 @@ jQuery(document).ready(function ($) {
                         '<div class="small text-muted"></div>' +
                         '</td>' +
                         '<td class="text-center"><span class="badge bg-secondary rounded-pill">' + (w.prizes_count || 0) + ' giải</span></td>' +
-                        '<td class="text-center small text-muted">' + escapeHtml(w.created_at || '') + '</td>' +
+                        '<td class="text-center small text-muted">' + escapeHtml((w.created_at || '').split(' ')[0]) + '</td>' +
                         '<td class="text-end">' +
                         '<div class="btn-group btn-group-sm">' +
                         (!isCurrent ? '<button type="button" class="btn btn-outline-primary btn-switch-user-wheel" data-id="' + w.id + '">Dùng</button>' : '') +
@@ -2230,13 +2230,13 @@ jQuery(document).ready(function ($) {
         }
     });
 
-    // Tạo mới vòng quay
-    $('#btn-create-new-user-wheel').on('click', function () {
+    // Tạo mới vòng quay (dùng chung cho nút trong modal và nút trên dropdown)
+    function createNewUserWheel() {
         var title = prompt('Nhập tên cho vòng quay mới:', 'Vòng quay ' + new Date().toLocaleDateString('vi-VN'));
         if (title === null) return;
         title = $.trim(title) || 'Vòng quay mới';
 
-        var $btn = $(this);
+        var $btn = $('#btn-create-new-user-wheel');
         $btn.prop('disabled', true);
 
         $.ajax({
@@ -2274,7 +2274,11 @@ jQuery(document).ready(function ($) {
                 $btn.prop('disabled', false);
             }
         });
-    });
+    }
+
+    $('#btn-create-new-user-wheel').on('click', createNewUserWheel);
+    // Nút "Tạo vòng quay mới" trên dropdown của template wheel-user.php
+    $(document).on('click', '.btn-create-new-user-wheel-top', createNewUserWheel);
 
     // Nhân bản vòng quay
     $(document).on('click', '.btn-dup-user-wheel', function () {
