@@ -10,6 +10,13 @@ legend {
     border: none !important;
 }
 
+.badge {
+    width: auto !important;
+    height: auto !important;
+    display: inline-block !important;
+
+}
+
 #wheelOfFortune {
     display: block;
     width: -webkit-fit-content;
@@ -132,7 +139,7 @@ legend {
 
 .home .wp-spin-wheel-wrapper {
     position: relative;
-    height: calc(100vh - 65px); 
+    height: calc(100vh - 65px);
 }
 
 .wp-spin-wheel-wrapper {
