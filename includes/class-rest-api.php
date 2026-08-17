@@ -121,6 +121,57 @@ class WP_Spin_Wheel_REST_API {
                 'permission_callback' => function() { return is_user_logged_in(); },
             ),
         ) );
+
+        // Lịch sử quay (Spin History) - lấy danh sách, phân trang, lọc theo wheel/email/ngày
+        register_rest_route( 'spin-wheel/v1', '/history', array(
+            array(
+                'methods'             => 'GET',
+                'callback'            => array( $this, 'get_history' ),
+                'permission_callback' => '__return_true',
+            ),
+            array(
+                'methods'             => 'DELETE',
+                'callback'            => array( $this, 'clear_history' ),
+                'permission_callback' => function() {
+                    return current_user_can( 'manage_options' ) || is_user_logged_in();
+                },
+            ),
+        ) );
+
+        register_rest_route( 'spin-wheel/v1', '/wheels/(?P<id>\d+)/history', array(
+            'methods'             => 'GET',
+            'callback'            => array( $this, 'get_wheel_history' ),
+            'permission_callback' => '__return_true',
+        ) );
+
+        register_rest_route( 'spin-wheel/v1', '/history/(?P<id>\d+)', array(
+            'methods'             => 'DELETE',
+            'callback'            => array( $this, 'delete_history_item' ),
+            'permission_callback' => function() {
+                return current_user_can( 'manage_options' ) || is_user_logged_in();
+            },
+        ) );
+
+        // Danh sách người trúng gần đây cho widget / shortcode / popup
+        register_rest_route( 'spin-wheel/v1', '/recent-winners', array(
+            'methods'             => 'GET',
+            'callback'            => array( $this, 'get_recent_winners' ),
+            'permission_callback' => '__return_true',
+        ) );
+
+        // Thống kê chi tiết của vòng quay (views, creator, total_spins, max_spins)
+        register_rest_route( 'spin-wheel/v1', '/wheels/(?P<id>\d+)/stats', array(
+            'methods'             => 'GET',
+            'callback'            => array( $this, 'get_wheel_stats_route' ),
+            'permission_callback' => '__return_true',
+        ) );
+
+        // Tăng lượt xem vòng quay
+        register_rest_route( 'spin-wheel/v1', '/wheels/(?P<id>\d+)/view', array(
+            'methods'             => 'POST',
+            'callback'            => array( $this, 'increment_wheel_views_route' ),
+            'permission_callback' => '__return_true',
+        ) );
     }
 
     public function get_wheel( $request ) {
@@ -474,6 +525,125 @@ class WP_Spin_Wheel_REST_API {
             return rest_ensure_response( array( 'saved' => true ) );
         }
         return new WP_Error( 'invalid', __( 'Invalid options payload.', 'wp-spin-wheel' ), array( 'status' => 400 ) );
+    }
+
+    public function get_history( $request ) {
+        $history = new WP_Spin_Wheel_History();
+
+        $wheel_id  = $request->get_param( 'wheel_id' ) ?: $request->get_param( 'id' );
+        $email     = $request->get_param( 'email' );
+        $name      = $request->get_param( 'name' );
+        $phone     = $request->get_param( 'phone' );
+        $search    = $request->get_param( 'search' ) ?: $request->get_param( 's' );
+        $from_date = $request->get_param( 'from_date' ) ?: $request->get_param( 'from' );
+        $to_date   = $request->get_param( 'to_date' ) ?: $request->get_param( 'to' );
+        $page      = absint( $request->get_param( 'page' ) ?: 1 );
+        $per_page  = absint( $request->get_param( 'per_page' ) ?: ( $request->get_param( 'limit' ) ?: 20 ) );
+        $orderby   = sanitize_text_field( $request->get_param( 'orderby' ) ?: 'id' );
+        $order     = sanitize_text_field( $request->get_param( 'order' ) ?: 'DESC' );
+
+        $args = array(
+            'wheel_id'  => $wheel_id ? absint( $wheel_id ) : 0,
+            'email'     => $email ? sanitize_email( $email ) : '',
+            'name'      => $name ? sanitize_text_field( $name ) : '',
+            'phone'     => $phone ? sanitize_text_field( $phone ) : '',
+            'search'    => $search ? sanitize_text_field( $search ) : '',
+            'from_date' => $from_date ? sanitize_text_field( $from_date ) : '',
+            'to_date'   => $to_date ? sanitize_text_field( $to_date ) : '',
+            'page'      => $page,
+            'per_page'  => $per_page,
+            'orderby'   => $orderby,
+            'order'     => $order,
+        );
+
+        // Nếu người dùng đăng nhập không phải admin và muốn xem lịch sử của chính mình
+        if ( is_user_logged_in() && ! current_user_can( 'manage_options' ) && empty( $wheel_id ) && empty( $email ) ) {
+            $current_user = wp_get_current_user();
+            $args['email'] = $current_user->user_email;
+        }
+
+        $result = $history->get_history( $args );
+        return rest_ensure_response( $result );
+    }
+
+    public function get_wheel_history( $request ) {
+        $wheel_id = absint( $request['id'] );
+        $request->set_param( 'wheel_id', $wheel_id );
+        return $this->get_history( $request );
+    }
+
+    public function delete_history_item( $request ) {
+        $id = absint( $request['id'] );
+        if ( ! $id ) {
+            return new WP_Error( 'invalid_id', __( 'ID không hợp lệ.', 'wp-spin-wheel' ), array( 'status' => 400 ) );
+        }
+
+        $history = new WP_Spin_Wheel_History();
+        $deleted = $history->delete_entry( $id );
+
+        if ( ! $deleted ) {
+            return new WP_Error( 'delete_failed', __( 'Không thể xóa bản ghi lịch sử.', 'wp-spin-wheel' ), array( 'status' => 500 ) );
+        }
+
+        return rest_ensure_response( array(
+            'success' => true,
+            'message' => __( 'Đã xóa bản ghi lịch sử thành công.', 'wp-spin-wheel' ),
+        ) );
+    }
+
+    public function clear_history( $request ) {
+        $wheel_id = absint( $request->get_param( 'wheel_id' ) ?: 0 );
+        $history  = new WP_Spin_Wheel_History();
+        $cleared  = $history->clear_history( $wheel_id );
+
+        if ( ! $cleared ) {
+            return new WP_Error( 'clear_failed', __( 'Không thể xóa sạch lịch sử.', 'wp-spin-wheel' ), array( 'status' => 500 ) );
+        }
+
+        return rest_ensure_response( array(
+            'success' => true,
+            'message' => $wheel_id ? __( 'Đã xóa toàn bộ lịch sử của vòng quay này.', 'wp-spin-wheel' ) : __( 'Đã xóa toàn bộ lịch sử quay thưởng.', 'wp-spin-wheel' ),
+        ) );
+    }
+
+    public function get_recent_winners( $request ) {
+        $limit    = absint( $request->get_param( 'limit' ) ?: 10 );
+        $wheel_id = absint( $request->get_param( 'wheel_id' ) ?: 0 );
+
+        $history = new WP_Spin_Wheel_History();
+        $winners = $history->get_recent_winners( $limit, $wheel_id );
+
+        return rest_ensure_response( array(
+            'success' => true,
+            'items'   => $winners,
+        ) );
+    }
+
+    public function get_wheel_stats_route( $request ) {
+        $wheel_id = absint( $request['id'] );
+        if ( ! $wheel_id ) {
+            return new WP_Error( 'invalid_wheel', __( 'Vòng quay không hợp lệ.', 'wp-spin-wheel' ), array( 'status' => 400 ) );
+        }
+
+        $history = new WP_Spin_Wheel_History();
+        $stats   = $history->get_wheel_stats( $wheel_id );
+
+        return rest_ensure_response( $stats );
+    }
+
+    public function increment_wheel_views_route( $request ) {
+        $wheel_id = absint( $request['id'] );
+        if ( ! $wheel_id ) {
+            return new WP_Error( 'invalid_wheel', __( 'Vòng quay không hợp lệ.', 'wp-spin-wheel' ), array( 'status' => 400 ) );
+        }
+
+        $history = new WP_Spin_Wheel_History();
+        $views   = $history->increment_views( $wheel_id );
+
+        return rest_ensure_response( array(
+            'success' => true,
+            'views'   => $views,
+        ) );
     }
 
     public function sync_prizes_db( $wheel_id, $prizes ) {

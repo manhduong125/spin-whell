@@ -1107,6 +1107,9 @@ jQuery(document).ready(function ($) {
             $('#wheel_result').append($entry);
             lastResultEntry = $entry;
             updateResultCount();
+            if (typeof updateSessionResultModal === 'function') {
+                updateSessionResultModal(prize.title || '');
+            }
             $('#tab-result').trigger('click');
 
             // 2. Nếu show_popup tắt → không hiện popup, dừng tại đây
