@@ -130,9 +130,14 @@ legend {
     border-top: none
 }
 
+.home .wp-spin-wheel-wrapper {
+    position: relative;
+    height: calc(100vh - 65px); 
+}
+
 .wp-spin-wheel-wrapper {
     position: relative;
-    height: calc(100vh - 90px);
+    height: 100vh;
     display: flex;
     align-items: center;
     background-size: cover;
