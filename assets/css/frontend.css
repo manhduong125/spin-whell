@@ -318,3 +318,32 @@ legend {
         width: 320px !important;
     }
 }
+
+/* ══════════════════════════════════════════════════════════
+   STANDALONE LANDING PAGE (NO HEADER / NO FOOTER)
+   ══════════════════════════════════════════════════════════ */
+body.spin-wheel-standalone-page {
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow-x: hidden !important;
+}
+
+body.spin-wheel-standalone-page #wrapper {
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    min-height: 100vh !important;
+}
+
+body.spin-wheel-standalone-page #main {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    min-height: 100vh !important;
+}
+
+body.spin-wheel-standalone-page .wp-spin-wheel-wrapper {
+    min-height: 100vh !important;
+    height: auto !important;
+}
