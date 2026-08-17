@@ -135,7 +135,7 @@ $player_email   = is_user_logged_in() ? $current_user->user_email : '';
                         <div class="col-md-6">
                             <div class="p-2 border bg-white rounded">
                                 <span class="text-muted d-block small"><?php esc_html_e('Ngày tạo:', 'wp-spin-wheel'); ?></span>
-                                <strong class="sw-stat-created-at text-dark"><?php echo esc_html($wheel_stats['created_at'] ?: __('Chưa cập nhật', 'wp-spin-wheel')); ?></strong>
+                                <strong class="sw-stat-created-at text-dark"><?php echo esc_html( ( $current_wid ? get_the_date( 'd/m/Y', $current_wid ) : ( ! empty( $wheel_stats['created_at'] ) ? explode( ' ', $wheel_stats['created_at'] )[0] : '' ) ) ?: __( 'Chưa cập nhật', 'wp-spin-wheel' ) ); ?></strong>
                             </div>
                         </div>
                     </div>

@@ -421,7 +421,7 @@ class WP_Spin_Wheel_History {
             'creator'        => $creator_name,
             'creator_email'  => $creator_email,
             'max_spins'      => $max_spins_text,
-            'created_at'     => $post ? get_the_date( 'd/m/Y H:i', $post->ID ) : '',
+            'created_at'     => $post ? get_the_date( 'd/m/Y', $post->ID ) : '',
         );
     }
 

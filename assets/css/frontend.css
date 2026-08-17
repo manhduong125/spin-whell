@@ -17,6 +17,10 @@ legend {
 
 }
 
+.modal-dialog-scrollable .modal-body {
+    max-height: 70vh;
+}
+
 #wheelOfFortune {
     display: block;
     width: -webkit-fit-content;
