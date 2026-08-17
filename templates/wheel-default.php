@@ -9,8 +9,8 @@ $_start_sound     = $_global_opts['start_sound'] ?? '';
 $_start_sound_file = $_global_opts['start_sound_file'] ?? '';
 $_end_sound       = $_global_opts['end_sound'] ?? '';
 $_end_sound_file  = $_global_opts['end_sound_file'] ?? '';
-$_audios_start    = WP_Spin_Wheel_Helper::get_setting_items('audios_start');
-$_audios_end      = WP_Spin_Wheel_Helper::get_setting_items('audios_end');
+$_audios_start    = WP_Spin_Wheel_Helper::get_audio_library('start');
+$_audios_end      = WP_Spin_Wheel_Helper::get_audio_library('end');
 
 $default_settings = array(
     'background' => array(

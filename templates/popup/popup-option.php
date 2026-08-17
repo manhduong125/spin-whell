@@ -56,6 +56,7 @@
                                     <?php endif; ?>
                                     <?php if (! empty($_audios_start)) : ?>
                                         <optgroup label="── Thư viện nhạc ──">
+                                            <!-- chỗ này trả ra danh sách tên nhạc và file nhạc -->
                                             <?php foreach ($_audios_start as $_as) :
                                                 $_as_id  = $_as['id'] ?? '';
                                                 $_as_url = $_as['config']['file'] ?? '';
