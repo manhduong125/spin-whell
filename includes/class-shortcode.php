@@ -9,6 +9,11 @@ class WP_Spin_Wheel_Shortcode {
         add_shortcode( 'spin_wheel_recent_winners', array( $this, 'render_recent_winners_shortcode' ) );
         add_shortcode( 'spin_wheel_winners', array( $this, 'render_recent_winners_shortcode' ) );
         add_shortcode( 'spin_wheel_history', array( $this, 'render_recent_winners_shortcode' ) );
+        add_shortcode( 'spin_wheel_user_wheels', array( $this, 'render_user_wheels_shortcode' ) );
+        add_shortcode( 'user_spin_wheels', array( $this, 'render_user_wheels_shortcode' ) );
+        add_shortcode( 'my_spin_wheels', array( $this, 'render_user_wheels_shortcode' ) );
+        add_shortcode( 'spin_wheel_my_wheels', array( $this, 'render_user_wheels_shortcode' ) );
+        add_shortcode( 'spin_wheel_collection', array( $this, 'render_user_wheels_shortcode' ) );
 
         add_action( 'widgets_init', array( $this, 'register_widgets' ) );
     }
@@ -391,6 +396,146 @@ class WP_Spin_Wheel_Shortcode {
         $start = mb_substr( $name, 0, 2, 'UTF-8' );
         $end   = mb_substr( $name, -1, 1, 'UTF-8' );
         return $start . '***' . $end;
+    }
+
+    /**
+     * Render Shortcode hiển thị danh sách các vòng quay do User tạo (theo mẫu setting.html)
+     * [spin_wheel_user_wheels user_id="current" limit="12" columns="4" title="Vòng quay của tôi" show_search="true" show_sort="true"]
+     */
+    public function render_user_wheels_shortcode( $atts, $content = '', $tag = '' ) {
+        $default_user_id = ( 'spin_wheel_collection' === $tag ) ? 'all' : 'current';
+        $default_title   = ( 'spin_wheel_collection' === $tag ) ? __( 'Bộ sưu tập vòng quay công khai', 'wp-spin-wheel' ) : __( 'Vòng quay của tôi', 'wp-spin-wheel' );
+
+        $atts = shortcode_atts( array(
+            'user_id'     => $default_user_id, // 'current', 'all', hoặc ID user cụ thể
+            'limit'       => 12,
+            'columns'     => 4,
+            'title'       => $default_title,
+            'show_search' => 'true',
+            'show_sort'   => 'true',
+            'orderby'     => 'date', // 'date', 'views', 'title'
+            'order'       => 'DESC',
+        ), $atts, $tag ?: 'spin_wheel_user_wheels' );
+
+        $limit        = max( 1, min( 60, absint( $atts['limit'] ) ) );
+        $columns      = in_array( (int) $atts['columns'], array( 1, 2, 3, 4, 6 ), true ) ? (int) $atts['columns'] : 4;
+        $title        = sanitize_text_field( $atts['title'] );
+        $show_search  = filter_var( $atts['show_search'], FILTER_VALIDATE_BOOLEAN );
+        $show_sort    = filter_var( $atts['show_sort'], FILTER_VALIDATE_BOOLEAN );
+        $orderby      = sanitize_key( $_GET['sw_order_by'] ?? $atts['orderby'] );
+        $keyword      = sanitize_text_field( $_GET['sw_keyword'] ?? '' );
+        $current_page = max( 1, absint( $_GET['sw_page'] ?? 1 ) );
+
+        $query_author = null;
+        if ( 'current' === $atts['user_id'] ) {
+            if ( ! is_user_logged_in() ) {
+                ob_start();
+                ?>
+                <div class="container-fluid py-4 text-center">
+                    <div class="alert alert-info py-4 rounded-3 border">
+                        <h5 class="fw-bold mb-2"><?php esc_html_e( 'Vui lòng đăng nhập', 'wp-spin-wheel' ); ?></h5>
+                        <p class="mb-3 text-muted"><?php esc_html_e( 'Bạn cần đăng nhập tài khoản để xem và quản lý danh sách các vòng quay may mắn đã tạo.', 'wp-spin-wheel' ); ?></p>
+                        <a href="<?php echo esc_url( wp_login_url( get_permalink() ) ); ?>" class="btn btn-primary btn-sm px-4 rounded-pill">
+                            <?php esc_html_e( 'Đăng nhập ngay', 'wp-spin-wheel' ); ?>
+                        </a>
+                    </div>
+                </div>
+                <?php
+                return ob_get_clean();
+            }
+            $query_author = get_current_user_id();
+        } elseif ( 'all' !== $atts['user_id'] && is_numeric( $atts['user_id'] ) ) {
+            $query_author = absint( $atts['user_id'] );
+        }
+
+        $query_args = array(
+            'post_type'      => 'spin_wheel',
+            'post_status'    => array( 'publish', 'draft', 'private', 'pending' ),
+            'posts_per_page' => $limit,
+            'paged'          => $current_page,
+        );
+
+        if ( null !== $query_author && $query_author > 0 ) {
+            $query_args['author'] = $query_author;
+        }
+
+        if ( ! empty( $keyword ) ) {
+            $query_args['s'] = $keyword;
+        }
+
+        if ( 'views' === $orderby ) {
+            $query_args['meta_key'] = '_spin_wheel_views';
+            $query_args['orderby']  = 'meta_value_num';
+            $query_args['order']    = 'DESC';
+        } elseif ( 'title' === $orderby ) {
+            $query_args['orderby'] = 'title';
+            $query_args['order']   = 'ASC';
+        } else {
+            $query_args['orderby'] = 'date';
+            $query_args['order']   = 'DESC';
+        }
+
+        $query = new WP_Query( $query_args );
+        $wheels = array();
+
+        if ( $query->have_posts() ) {
+            while ( $query->have_posts() ) {
+                $query->the_post();
+                $post_id     = get_the_ID();
+                $author_id   = get_the_author_meta( 'ID' );
+                $author_name = get_the_author_meta( 'display_name' ) ?: get_the_author_meta( 'user_login' );
+
+                $prizes = WP_Spin_Wheel_Prize::get_prizes( $post_id );
+                if ( empty( $prizes ) ) {
+                    $prizes = array(
+                        array( 'title' => 'Tuấn', 'color' => '#D6392E' ),
+                        array( 'title' => 'Thông', 'color' => '#3369E8' ),
+                        array( 'title' => 'Sơn', 'color' => '#4F9A29' ),
+                        array( 'title' => 'Dũng', 'color' => '#EEB331' ),
+                    );
+                }
+
+                $settings = WP_Spin_Wheel_Helper::get_wheel_overrides( $post_id );
+                $views    = (int) get_post_meta( $post_id, '_spin_wheel_views', true );
+                if ( $views <= 0 ) {
+                    $views = (int) get_post_meta( $post_id, '_spin_wheel_total_spins', true );
+                }
+
+                $border_color  = $settings['wheel']['border_color'] ?? '#ff4d00';
+                $diamond_color = $settings['wheel']['diamond_color'] ?? '#f6fa00';
+                $button_label  = $settings['button']['text'] ?? 'Quay';
+                $button_img    = $settings['button']['background_image'] ?? '';
+                $button_color  = $settings['button']['color'] ?? '#d6392e';
+
+                $wheels[] = array(
+                    'id'            => $post_id,
+                    'title'         => get_the_title() ?: sprintf( __( 'Vòng quay #%d', 'wp-spin-wheel' ), $post_id ),
+                    'permalink'     => get_permalink( $post_id ),
+                    'views'         => $views,
+                    'author_id'     => $author_id,
+                    'author_name'   => $author_name,
+                    'created_date'  => get_the_date( 'd/m/Y H:i', $post_id ),
+                    'time_ago'      => WP_Spin_Wheel_History::human_time_ago( get_the_date( 'Y-m-d H:i:s', $post_id ) ),
+                    'prizes'        => $prizes,
+                    'settings'      => $settings,
+                    'border_color'  => $border_color,
+                    'diamond_color' => $diamond_color,
+                    'button_label'  => $button_label,
+                    'button_img'    => $button_img,
+                    'button_color'  => $button_color,
+                );
+            }
+            wp_reset_postdata();
+        }
+
+        $total_pages = $query->max_num_pages;
+
+        ob_start();
+        $template = WP_SPIN_WHEEL_PATH . 'templates/user-wheels-list.php';
+        if ( file_exists( $template ) ) {
+            include $template;
+        }
+        return ob_get_clean();
     }
 }
 
