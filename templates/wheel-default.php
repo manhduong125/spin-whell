@@ -71,7 +71,8 @@ if (! empty($wheel_id)) {
 }
 ?>
 <div id="particles-js"></div>
-<div class="container-fluid noads wp-spin-wheel-wrapper" id="wheel-wrapper" data-wheel-id="<?php echo esc_attr($wheel_id); ?>"
+<div class="container-fluid noads wp-spin-wheel-wrapper" id="wheel-wrapper"
+    data-wheel-id="<?php echo esc_attr($wheel_id); ?>"
     data-wheel-settings="<?php echo esc_attr(wp_json_encode($default_settings)); ?>"
     data-wheel-prizes="<?php echo esc_attr(wp_json_encode($default_prizes)); ?>">
     <div class="row" id="row-wheel">
@@ -99,10 +100,36 @@ if (! empty($wheel_id)) {
                     <div id="spin"><?php esc_html_e('Quay', 'wp-spin-wheel'); ?></div>
                 </div>
             </div>
-            <div class="mt-2">
-                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal"
+            <div class="mt-2 mobile-show">
+                <button type="button" class="btn btn-default btn-sm" data-bs-toggle="modal"
+                    data-bs-target="#modalTemplate" aria-label="Chủ đề">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        style="vertical-align:middle;">
+                        <circle cx="13.5" cy="6.5" r="1.5"></circle>
+                        <circle cx="17.5" cy="10.5" r="1.5"></circle>
+                        <circle cx="8.5" cy="7.5" r="1.5"></circle>
+                        <circle cx="6.5" cy="12.5" r="1.5"></circle>
+                        <path
+                            d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z">
+                        </path>
+                    </svg>
+                </button>
+                <button type="button" class="btn btn-default btn-sm" data-bs-toggle="modal"
+                    data-bs-target="#modalShare" aria-label="Chủ đề">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        class="feather feather-share-2">
+                        <circle cx="18" cy="5" r="3"></circle>
+                        <circle cx="6" cy="12" r="3"></circle>
+                        <circle cx="18" cy="19" r="3"></circle>
+                        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                    </svg>
+                </button>
+                <button type="button" class="btn btn-default btn-sm" data-bs-toggle="modal"
                     data-bs-target="#modalSettings" aria-label="Cài đặt vòng quay">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                         style="vertical-align:middle;">
                         <circle cx="12" cy="12" r="3"></circle>
@@ -116,37 +143,10 @@ if (! empty($wheel_id)) {
                             1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65
                             1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
                     </svg>
-                    Cài đặt
                 </button>
-                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal"
-                    data-bs-target="#modalTemplate" aria-label="Chủ đề">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                        style="vertical-align:middle;">
-                        <circle cx="13.5" cy="6.5" r="1.5"></circle>
-                        <circle cx="17.5" cy="10.5" r="1.5"></circle>
-                        <circle cx="8.5" cy="7.5" r="1.5"></circle>
-                        <circle cx="6.5" cy="12.5" r="1.5"></circle>
-                        <path
-                            d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2z">
-                        </path>
-                    </svg>
-                    Chủ đề
-                </button>
-                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal"
-                    data-bs-target="#modalShare" aria-label="Chủ đề">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-share-2">
-                        <circle cx="18" cy="5" r="3"></circle>
-                        <circle cx="6" cy="12" r="3"></circle>
-                        <circle cx="18" cy="19" r="3"></circle>
-                        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-                        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
-                    </svg>
-                    Share
-                </button>
-                <button type="button" class="btn btn-outline-secondary btn-sm" id="btn-user-wheels" data-bs-toggle="modal"
-                    data-bs-target="#modalUserWheels" aria-label="Danh sách vòng quay">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                <button type="button" class="btn btn-default btn-sm" id="btn-user-wheels"
+                    data-bs-toggle="modal" data-bs-target="#modalUserWheels" aria-label="Danh sách vòng quay">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                         style="vertical-align:middle;">
                         <line x1="8" y1="6" x2="21" y2="6"></line>
@@ -156,7 +156,6 @@ if (! empty($wheel_id)) {
                         <line x1="3" y1="12" x2="3.01" y2="12"></line>
                         <line x1="3" y1="18" x2="3.01" y2="18"></line>
                     </svg>
-                    Vòng quay của tôi
                 </button>
             </div>
         </div>
@@ -219,7 +218,7 @@ if (! empty($wheel_id)) {
                             <div id="sector_list" class="form-control section-list rounded-0" readonly
                                 placeholder="<?php esc_attr_e('Danh sách phần thưởng', 'wp-spin-wheel'); ?>">
                                 <?php foreach ($default_prizes as $prize) : ?>
-                                    <div><?php echo esc_html($prize['title']); ?></div>
+                                <div><?php echo esc_html($prize['title']); ?></div>
                                 <?php endforeach; ?>
                             </div>
                         </div>
@@ -251,107 +250,107 @@ require_once WP_SPIN_WHEEL_PATH . 'templates/popup/popup-share.php';
 ?>
 
 <script>
-    (function($) {
-        /* ── Audio preview cho select nhạc bắt đầu / kết thúc ── */
-        var $player = null;
-        var playingBtn = null;
+(function($) {
+    /* ── Audio preview cho select nhạc bắt đầu / kết thúc ── */
+    var $player = null;
+    var playingBtn = null;
 
-        function getPlayer() {
-            if (!$player || !$player.length) $player = $('#sw-audio-preview');
-            return $player;
+    function getPlayer() {
+        if (!$player || !$player.length) $player = $('#sw-audio-preview');
+        return $player;
+    }
+
+    // Dừng player và reset icon nút đang phát
+    function stopPreview() {
+        var p = getPlayer();
+        if (p.length) {
+            p[0].pause();
+            p[0].currentTime = 0;
+            p.attr('src', '');
         }
-
-        // Dừng player và reset icon nút đang phát
-        function stopPreview() {
-            var p = getPlayer();
-            if (p.length) {
-                p[0].pause();
-                p[0].currentTime = 0;
-                p.attr('src', '');
-            }
-            if (playingBtn) {
-                $(playingBtn).find('[data-feather]').attr('data-feather', 'play');
-                if (typeof feather !== 'undefined') feather.replace();
-                playingBtn = null;
-            }
-        }
-
-        // Phát URL — click lần 2 vào cùng nút thì dừng
-        function playUrl(url, btn) {
-            if (!url) return;
-            if (playingBtn === btn) {
-                stopPreview();
-                return;
-            }
-            stopPreview();
-            var p = getPlayer();
-            p.attr('src', url);
-            p[0].play().catch(function() {});
-            $(btn).find('[data-feather]').attr('data-feather', 'square');
+        if (playingBtn) {
+            $(playingBtn).find('[data-feather]').attr('data-feather', 'play');
             if (typeof feather !== 'undefined') feather.replace();
-            playingBtn = btn;
-            p[0].onended = function() {
-                $(btn).find('[data-feather]').attr('data-feather', 'play');
-                if (typeof feather !== 'undefined') feather.replace();
-                playingBtn = null;
-            };
+            playingBtn = null;
         }
+    }
 
-        // Lấy URL từ option đang chọn trong select
-        function getUrlFromSelect($select, audios) {
-            var val = $select.val();
-            if (!val || val === '0') return null; // Tắt tiếng → không phát
-
-            if (val === 'random') {
-                // Ngẫu nhiên → pick 1 bài trong thư viện
-                var list = (audios || []).filter(function(a) {
-                    return !!a.url;
-                });
-                if (!list.length) return null;
-                return list[Math.floor(Math.random() * list.length)].url;
-            }
-
-            // Option thư viện nhạc có data-url
-            return $select.find('option:selected').data('url') || null;
-        }
-
-        // Nút play của select (class .sw-btn-preview, data-target = id của <select>)
-        $(document).on('click', '.sw-btn-preview', function() {
-            var btn = this;
-            var audios = $(btn).data('audios') || [];
-            var $sel = $('#' + $(btn).data('target'));
-            var url = getUrlFromSelect($sel, audios);
-            if (!url) {
-                stopPreview();
-                return;
-            }
-            playUrl(url, btn);
-        });
-
-        // Nút play nhactik.com — bắt đầu
-        $(document).on('click', '#btn-start-sound-play-file', function() {
-            var fileId = $.trim($('#start_sound_file').val());
-            if (!fileId) {
-                stopPreview();
-                return;
-            }
-            playUrl('https://nhactik.com/play/' + fileId + '.mp3', this);
-        });
-
-        // Nút play nhactik.com — kết thúc
-        $(document).on('click', '#btn-end-sound-play-file', function() {
-            var fileId = $.trim($('#end_sound_file').val());
-            if (!fileId) {
-                stopPreview();
-                return;
-            }
-            playUrl('https://nhactik.com/play/' + fileId + '.mp3', this);
-        });
-
-        // Dừng nhạc khi đóng modal settings
-        $(document).on('hide.bs.modal', '#modalSettings', function() {
+    // Phát URL — click lần 2 vào cùng nút thì dừng
+    function playUrl(url, btn) {
+        if (!url) return;
+        if (playingBtn === btn) {
             stopPreview();
-        });
+            return;
+        }
+        stopPreview();
+        var p = getPlayer();
+        p.attr('src', url);
+        p[0].play().catch(function() {});
+        $(btn).find('[data-feather]').attr('data-feather', 'square');
+        if (typeof feather !== 'undefined') feather.replace();
+        playingBtn = btn;
+        p[0].onended = function() {
+            $(btn).find('[data-feather]').attr('data-feather', 'play');
+            if (typeof feather !== 'undefined') feather.replace();
+            playingBtn = null;
+        };
+    }
 
-    })(jQuery);
+    // Lấy URL từ option đang chọn trong select
+    function getUrlFromSelect($select, audios) {
+        var val = $select.val();
+        if (!val || val === '0') return null; // Tắt tiếng → không phát
+
+        if (val === 'random') {
+            // Ngẫu nhiên → pick 1 bài trong thư viện
+            var list = (audios || []).filter(function(a) {
+                return !!a.url;
+            });
+            if (!list.length) return null;
+            return list[Math.floor(Math.random() * list.length)].url;
+        }
+
+        // Option thư viện nhạc có data-url
+        return $select.find('option:selected').data('url') || null;
+    }
+
+    // Nút play của select (class .sw-btn-preview, data-target = id của <select>)
+    $(document).on('click', '.sw-btn-preview', function() {
+        var btn = this;
+        var audios = $(btn).data('audios') || [];
+        var $sel = $('#' + $(btn).data('target'));
+        var url = getUrlFromSelect($sel, audios);
+        if (!url) {
+            stopPreview();
+            return;
+        }
+        playUrl(url, btn);
+    });
+
+    // Nút play nhactik.com — bắt đầu
+    $(document).on('click', '#btn-start-sound-play-file', function() {
+        var fileId = $.trim($('#start_sound_file').val());
+        if (!fileId) {
+            stopPreview();
+            return;
+        }
+        playUrl('https://nhactik.com/play/' + fileId + '.mp3', this);
+    });
+
+    // Nút play nhactik.com — kết thúc
+    $(document).on('click', '#btn-end-sound-play-file', function() {
+        var fileId = $.trim($('#end_sound_file').val());
+        if (!fileId) {
+            stopPreview();
+            return;
+        }
+        playUrl('https://nhactik.com/play/' + fileId + '.mp3', this);
+    });
+
+    // Dừng nhạc khi đóng modal settings
+    $(document).on('hide.bs.modal', '#modalSettings', function() {
+        stopPreview();
+    });
+
+})(jQuery);
 </script>
