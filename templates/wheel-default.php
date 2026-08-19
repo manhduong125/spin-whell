@@ -162,7 +162,7 @@ if (! empty($wheel_id)) {
                     </svg>
                 </button>
                 <button type="button" class="btn btn-default btn-sm" id="btn-user-wheels"
-                    data-bs-toggle="modal" data-bs-target="#modalUserWheels" aria-label="Danh sách vòng quay">
+                    data-bs-toggle="modal" data-bs-target="<?php echo is_user_logged_in() ? '#modalUserWheels' : '#modalNoneUser'; ?>" aria-label="Danh sách vòng quay" title="Danh sách vòng quay">
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                         style="vertical-align:middle;">
@@ -174,6 +174,26 @@ if (! empty($wheel_id)) {
                         <line x1="3" y1="18" x2="3.01" y2="18"></line>
                     </svg>
                 </button>
+                <button type="button" class="btn btn-default btn-sm" id="btn-user-info"
+                    data-bs-toggle="modal" data-bs-target="<?php echo is_user_logged_in() ? '#modalUserInfo' : '#modalNoneUser'; ?>" aria-label="<?php echo esc_attr(is_user_logged_in() ? 'Hồ sơ tài khoản' : 'Đăng nhập'); ?>" title="<?php echo esc_attr(is_user_logged_in() ? 'Hồ sơ' : 'Đăng nhập'); ?>">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                        style="vertical-align:middle;">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </button>
+                <?php if (is_user_logged_in()) : ?>
+                    <a href="<?php echo esc_url(wp_logout_url(home_url('/'))); ?>" class="btn btn-default btn-sm" aria-label="Đăng xuất" title="Đăng xuất">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                            style="vertical-align:middle;">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                            <polyline points="16 17 21 12 16 7"></polyline>
+                            <line x1="21" y1="12" x2="9" y2="12"></line>
+                        </svg>
+                    </a>
+                <?php endif; ?>
             </div>
         </div>
         <div class="col-xl-3" id="wheel-right">
@@ -235,7 +255,7 @@ if (! empty($wheel_id)) {
                             <div id="sector_list" class="form-control section-list rounded-0" readonly
                                 placeholder="<?php esc_attr_e('Danh sách phần thưởng', 'wp-spin-wheel'); ?>">
                                 <?php foreach ($default_prizes as $prize) : ?>
-                                <div><?php echo esc_html($prize['title']); ?></div>
+                                    <div><?php echo esc_html($prize['title']); ?></div>
                                 <?php endforeach; ?>
                             </div>
                         </div>
@@ -264,110 +284,112 @@ require_once WP_SPIN_WHEEL_PATH . 'templates/popup/popup-result.php';
 require_once WP_SPIN_WHEEL_PATH . 'templates/popup/popup-option.php';
 require_once WP_SPIN_WHEEL_PATH . 'templates/popup/popup-json.php';
 require_once WP_SPIN_WHEEL_PATH . 'templates/popup/popup-share.php';
+require_once WP_SPIN_WHEEL_PATH . 'templates/popup/popup-user-info.php';
+require_once WP_SPIN_WHEEL_PATH . 'templates/popup/popup-none-user.php';
 ?>
 
 <script>
-(function($) {
-    /* ── Audio preview cho select nhạc bắt đầu / kết thúc ── */
-    var $player = null;
-    var playingBtn = null;
+    (function($) {
+        /* ── Audio preview cho select nhạc bắt đầu / kết thúc ── */
+        var $player = null;
+        var playingBtn = null;
 
-    function getPlayer() {
-        if (!$player || !$player.length) $player = $('#sw-audio-preview');
-        return $player;
-    }
-
-    // Dừng player và reset icon nút đang phát
-    function stopPreview() {
-        var p = getPlayer();
-        if (p.length) {
-            p[0].pause();
-            p[0].currentTime = 0;
-            p.attr('src', '');
+        function getPlayer() {
+            if (!$player || !$player.length) $player = $('#sw-audio-preview');
+            return $player;
         }
-        if (playingBtn) {
-            $(playingBtn).find('[data-feather]').attr('data-feather', 'play');
+
+        // Dừng player và reset icon nút đang phát
+        function stopPreview() {
+            var p = getPlayer();
+            if (p.length) {
+                p[0].pause();
+                p[0].currentTime = 0;
+                p.attr('src', '');
+            }
+            if (playingBtn) {
+                $(playingBtn).find('[data-feather]').attr('data-feather', 'play');
+                if (typeof feather !== 'undefined') feather.replace();
+                playingBtn = null;
+            }
+        }
+
+        // Phát URL — click lần 2 vào cùng nút thì dừng
+        function playUrl(url, btn) {
+            if (!url) return;
+            if (playingBtn === btn) {
+                stopPreview();
+                return;
+            }
+            stopPreview();
+            var p = getPlayer();
+            p.attr('src', url);
+            p[0].play().catch(function() {});
+            $(btn).find('[data-feather]').attr('data-feather', 'square');
             if (typeof feather !== 'undefined') feather.replace();
-            playingBtn = null;
+            playingBtn = btn;
+            p[0].onended = function() {
+                $(btn).find('[data-feather]').attr('data-feather', 'play');
+                if (typeof feather !== 'undefined') feather.replace();
+                playingBtn = null;
+            };
         }
-    }
 
-    // Phát URL — click lần 2 vào cùng nút thì dừng
-    function playUrl(url, btn) {
-        if (!url) return;
-        if (playingBtn === btn) {
+        // Lấy URL từ option đang chọn trong select
+        function getUrlFromSelect($select, audios) {
+            var val = $select.val();
+            if (!val || val === '0') return null; // Tắt tiếng → không phát
+
+            if (val === 'random') {
+                // Ngẫu nhiên → pick 1 bài trong thư viện
+                var list = (audios || []).filter(function(a) {
+                    return !!a.url;
+                });
+                if (!list.length) return null;
+                return list[Math.floor(Math.random() * list.length)].url;
+            }
+
+            // Option thư viện nhạc có data-url
+            return $select.find('option:selected').data('url') || null;
+        }
+
+        // Nút play của select (class .sw-btn-preview, data-target = id của <select>)
+        $(document).on('click', '.sw-btn-preview', function() {
+            var btn = this;
+            var audios = $(btn).data('audios') || [];
+            var $sel = $('#' + $(btn).data('target'));
+            var url = getUrlFromSelect($sel, audios);
+            if (!url) {
+                stopPreview();
+                return;
+            }
+            playUrl(url, btn);
+        });
+
+        // Nút play nhactik.com — bắt đầu
+        $(document).on('click', '#btn-start-sound-play-file', function() {
+            var fileId = $.trim($('#start_sound_file').val());
+            if (!fileId) {
+                stopPreview();
+                return;
+            }
+            playUrl('https://nhactik.com/play/' + fileId + '.mp3', this);
+        });
+
+        // Nút play nhactik.com — kết thúc
+        $(document).on('click', '#btn-end-sound-play-file', function() {
+            var fileId = $.trim($('#end_sound_file').val());
+            if (!fileId) {
+                stopPreview();
+                return;
+            }
+            playUrl('https://nhactik.com/play/' + fileId + '.mp3', this);
+        });
+
+        // Dừng nhạc khi đóng modal settings
+        $(document).on('hide.bs.modal', '#modalSettings', function() {
             stopPreview();
-            return;
-        }
-        stopPreview();
-        var p = getPlayer();
-        p.attr('src', url);
-        p[0].play().catch(function() {});
-        $(btn).find('[data-feather]').attr('data-feather', 'square');
-        if (typeof feather !== 'undefined') feather.replace();
-        playingBtn = btn;
-        p[0].onended = function() {
-            $(btn).find('[data-feather]').attr('data-feather', 'play');
-            if (typeof feather !== 'undefined') feather.replace();
-            playingBtn = null;
-        };
-    }
+        });
 
-    // Lấy URL từ option đang chọn trong select
-    function getUrlFromSelect($select, audios) {
-        var val = $select.val();
-        if (!val || val === '0') return null; // Tắt tiếng → không phát
-
-        if (val === 'random') {
-            // Ngẫu nhiên → pick 1 bài trong thư viện
-            var list = (audios || []).filter(function(a) {
-                return !!a.url;
-            });
-            if (!list.length) return null;
-            return list[Math.floor(Math.random() * list.length)].url;
-        }
-
-        // Option thư viện nhạc có data-url
-        return $select.find('option:selected').data('url') || null;
-    }
-
-    // Nút play của select (class .sw-btn-preview, data-target = id của <select>)
-    $(document).on('click', '.sw-btn-preview', function() {
-        var btn = this;
-        var audios = $(btn).data('audios') || [];
-        var $sel = $('#' + $(btn).data('target'));
-        var url = getUrlFromSelect($sel, audios);
-        if (!url) {
-            stopPreview();
-            return;
-        }
-        playUrl(url, btn);
-    });
-
-    // Nút play nhactik.com — bắt đầu
-    $(document).on('click', '#btn-start-sound-play-file', function() {
-        var fileId = $.trim($('#start_sound_file').val());
-        if (!fileId) {
-            stopPreview();
-            return;
-        }
-        playUrl('https://nhactik.com/play/' + fileId + '.mp3', this);
-    });
-
-    // Nút play nhactik.com — kết thúc
-    $(document).on('click', '#btn-end-sound-play-file', function() {
-        var fileId = $.trim($('#end_sound_file').val());
-        if (!fileId) {
-            stopPreview();
-            return;
-        }
-        playUrl('https://nhactik.com/play/' + fileId + '.mp3', this);
-    });
-
-    // Dừng nhạc khi đóng modal settings
-    $(document).on('hide.bs.modal', '#modalSettings', function() {
-        stopPreview();
-    });
-
-})(jQuery);
+    })(jQuery);
 </script>

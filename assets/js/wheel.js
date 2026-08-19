@@ -2498,4 +2498,45 @@ jQuery(document).ready(function ($) {
             }
         });
     });
+
+    // Cập nhật hồ sơ người dùng (#modalUserInfo)
+    $(document).on('click', '#btn-update-profile', function () {
+        var $btn = $(this);
+        var displayname = $.trim($('#displayname').val());
+        var email = $.trim($('#useremail').val());
+        var password = $('#userpassword').val();
+
+        if (typeof wp_spin_wheel_params === 'undefined' || !wp_spin_wheel_params.is_logged_in) {
+            alert('Vui lòng đăng nhập để cập nhật hồ sơ.');
+            return;
+        }
+
+        $btn.prop('disabled', true).text('Đang lưu...');
+
+        $.ajax({
+            url: wp_spin_wheel_params.rest_url + 'user/profile',
+            method: 'POST',
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader('X-WP-Nonce', wp_spin_wheel_params.nonce);
+            },
+            contentType: 'application/json',
+            data: JSON.stringify({
+                display_name: displayname,
+                email: email,
+                password: password
+            }),
+            success: function (res) {
+                $btn.text('✓ Đã cập nhật').addClass('btn-success').removeClass('btn-primary');
+                $('#userpassword').val('');
+                setTimeout(function () {
+                    $btn.text('Cập nhật hồ sơ').removeClass('btn-success').addClass('btn-primary').prop('disabled', false);
+                }, 1800);
+            },
+            error: function (xhr) {
+                var msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Lỗi cập nhật hồ sơ.';
+                alert(msg);
+                $btn.text('Cập nhật hồ sơ').prop('disabled', false);
+            }
+        });
+    });
 });

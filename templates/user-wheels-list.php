@@ -16,9 +16,9 @@ $unique_id = 'sw-wheels-' . wp_rand( 1000, 9999 );
     <!-- Header & Search Toolbar -->
     <div class="sw-user-wheels-header mb-4">
         <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
-            <h2 class="h3 mb-0 text-dark fw-bold"><?php echo esc_html( $title ); ?></h2>
+            <h2 class="h2 mb-2 text-dark fw-bold"><?php echo esc_html( $title ); ?></h2>
             <?php if ( is_user_logged_in() ) : ?>
-                <a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm">
+                <a href="<?php echo esc_url( home_url( '/' ) ); ?>" class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm mb-2">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:4px;">
                         <line x1="12" y1="5" x2="12" y2="19"></line>
                         <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -29,9 +29,9 @@ $unique_id = 'sw-wheels-' . wp_rand( 1000, 9999 );
         </div>
 
         <?php if ( $show_search || $show_sort ) : ?>
-            <div class="row g-2 align-items-center bg-light p-3 rounded-3 border mb-3">
+            <div class="align-items-center bg-light p-3 rounded-3 border mb-3">
                 <?php if ( $show_search ) : ?>
-                    <div class="col-md-6 col-lg-5">
+                    <div class="input-group mb-3">
                         <div class="input-group input-group-sm">
                             <input type="text" class="form-control sw-search-kw" placeholder="<?php esc_attr_e( 'Nhập từ khoá tìm kiếm vòng quay...', 'wp-spin-wheel' ); ?>" value="<?php echo esc_attr( $keyword ); ?>">
                             <button class="btn btn-primary sw-btn-do-search" type="button">
@@ -46,19 +46,19 @@ $unique_id = 'sw-wheels-' . wp_rand( 1000, 9999 );
                 <?php endif; ?>
 
                 <?php if ( $show_sort ) : ?>
-                    <div class="col-md-6 col-lg-7 d-flex align-items-center justify-content-md-end flex-wrap gap-3">
-                        <span class="small fw-semibold text-secondary"><?php esc_html_e( 'Sắp xếp:', 'wp-spin-wheel' ); ?></span>
+                    <div class="d-flex mb-3">
+                        <span class="small fw-semibold text-secondary"><?php esc_html_e( 'Sắp xếp: ', 'wp-spin-wheel' ); ?>&nbsp;</span>
                         <div class="form-check form-check-inline m-0">
                             <input class="form-check-input sw-sort-radio" type="radio" name="sw_sort_<?php echo esc_attr( $unique_id ); ?>" id="sw_sort_date_<?php echo esc_attr( $unique_id ); ?>" value="date" <?php checked( $orderby, 'date' ); ?>>
-                            <label class="form-check-label small" for="sw_sort_date_<?php echo esc_attr( $unique_id ); ?>"><?php esc_html_e( 'Mới nhất', 'wp-spin-wheel' ); ?></label>
+                            <label class="form-check-label small" for="sw_sort_date_<?php echo esc_attr( $unique_id ); ?>"><?php esc_html_e( 'Mới nhất', 'wp-spin-wheel' ); ?>&nbsp;</label>
                         </div>
                         <div class="form-check form-check-inline m-0">
                             <input class="form-check-input sw-sort-radio" type="radio" name="sw_sort_<?php echo esc_attr( $unique_id ); ?>" id="sw_sort_views_<?php echo esc_attr( $unique_id ); ?>" value="views" <?php checked( $orderby, 'views' ); ?>>
-                            <label class="form-check-label small" for="sw_sort_views_<?php echo esc_attr( $unique_id ); ?>"><?php esc_html_e( 'Xem nhiều', 'wp-spin-wheel' ); ?></label>
+                            <label class="form-check-label small" for="sw_sort_views_<?php echo esc_attr( $unique_id ); ?>"><?php esc_html_e( 'Xem nhiều', 'wp-spin-wheel' ); ?>&nbsp;</label>
                         </div>
                         <div class="form-check form-check-inline m-0">
                             <input class="form-check-input sw-sort-radio" type="radio" name="sw_sort_<?php echo esc_attr( $unique_id ); ?>" id="sw_sort_title_<?php echo esc_attr( $unique_id ); ?>" value="title" <?php checked( $orderby, 'title' ); ?>>
-                            <label class="form-check-label small" for="sw_sort_title_<?php echo esc_attr( $unique_id ); ?>"><?php esc_html_e( 'Tên A-Z', 'wp-spin-wheel' ); ?></label>
+                            <label class="form-check-label small" for="sw_sort_title_<?php echo esc_attr( $unique_id ); ?>"><?php esc_html_e( 'Tên A-Z', 'wp-spin-wheel' ); ?>&nbsp;</label>
                         </div>
                     </div>
                 <?php endif; ?>

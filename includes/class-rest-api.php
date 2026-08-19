@@ -122,6 +122,15 @@ class WP_Spin_Wheel_REST_API {
             ),
         ) );
 
+        // Cập nhật thông tin profile của user
+        register_rest_route( 'spin-wheel/v1', '/user/profile', array(
+            array(
+                'methods'             => 'POST',
+                'callback'            => array( $this, 'update_user_profile' ),
+                'permission_callback' => function() { return is_user_logged_in(); },
+            ),
+        ) );
+
         // Lịch sử quay (Spin History) - lấy danh sách, phân trang, lọc theo wheel/email/ngày
         register_rest_route( 'spin-wheel/v1', '/history', array(
             array(
@@ -678,5 +687,37 @@ class WP_Spin_Wheel_REST_API {
             'image'       => esc_url_raw( $prize['image'] ?? '' ),
             'icon'        => esc_url_raw( $prize['icon'] ?? '' ),
         );
+    }
+
+    public function update_user_profile( $request ) {
+        $user_id = get_current_user_id();
+        if ( ! $user_id ) {
+            return new WP_Error( 'not_logged_in', __( 'Bạn chưa đăng nhập.', 'wp-spin-wheel' ), array( 'status' => 401 ) );
+        }
+
+        $display_name = sanitize_text_field( $request->get_param( 'display_name' ) );
+        $email        = sanitize_email( $request->get_param( 'email' ) );
+        $password     = $request->get_param( 'password' );
+
+        $userdata = array( 'ID' => $user_id );
+        if ( ! empty( $display_name ) ) {
+            $userdata['display_name'] = $display_name;
+        }
+        if ( ! empty( $email ) ) {
+            $userdata['user_email'] = $email;
+        }
+        if ( ! empty( $password ) ) {
+            $userdata['user_pass'] = $password;
+        }
+
+        $res = wp_update_user( $userdata );
+        if ( is_wp_error( $res ) ) {
+            return new WP_Error( 'update_failed', $res->get_error_message(), array( 'status' => 400 ) );
+        }
+
+        return rest_ensure_response( array(
+            'success' => true,
+            'message' => __( 'Cập nhật thông tin thành công.', 'wp-spin-wheel' ),
+        ) );
     }
 }
