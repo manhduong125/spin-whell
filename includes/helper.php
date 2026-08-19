@@ -15,6 +15,26 @@ class WP_Spin_Wheel_Helper
         return get_post_meta($post_id, $meta_key, $single);
     }
 
+    public static function resolve_asset_url($url)
+    {
+        if (empty($url)) {
+            return '';
+        }
+        $url = trim((string) $url);
+        // Nếu đã là full URL hợp lệ hoặc data URI
+        if (preg_match('/^(https?:|\/\/|data:)/i', $url)) {
+            $url = preg_replace('/^https?:\/\/:\/?/', '/', $url);
+            $url = preg_replace('/^:\/?\/?/', '/', $url);
+            if (preg_match('/^(https?:|\/\/|data:)/i', $url)) {
+                return $url;
+            }
+        }
+        $clean = ltrim($url, '/');
+        // Bỏ prefix wp-content/plugins/spin-whell/ nếu có
+        $clean = preg_replace('/^wp-content\/plugins\/spin-whell\//', '', $clean);
+        return WP_SPIN_WHEEL_URL . ltrim($clean, '/');
+    }
+
     public static function get_wheel_overrides($post_id)
     {
         $overrides = self::get_post_meta($post_id, '_spin_wheel_overrides', true);
@@ -33,6 +53,14 @@ class WP_Spin_Wheel_Helper
             if (is_array($legacy_design)) {
                 $overrides = $legacy_design;
             }
+        }
+
+        // Tự động chuẩn hóa URL ảnh nền và ảnh nút quay
+        if (! empty($overrides['background']['image'])) {
+            $overrides['background']['image'] = self::resolve_asset_url($overrides['background']['image']);
+        }
+        if (! empty($overrides['button']['background_image'])) {
+            $overrides['button']['background_image'] = self::resolve_asset_url($overrides['button']['background_image']);
         }
 
         return $overrides;
@@ -109,10 +137,10 @@ class WP_Spin_Wheel_Helper
         $dir_url  = WP_SPIN_WHEEL_URL . 'assets/audio/' . $dir_name;
 
         $name_file = $dir_path . '/audio-name-' . $type . '.txt';
+        $link_file = WP_SPIN_WHEEL_PATH . 'assets/audio/audio-link-' . $type . '.txt';
 
         // Đọc danh sách tên audio
         $names = array();
-
         if (is_readable($name_file)) {
             $names = array_values(
                 array_filter(
@@ -121,31 +149,54 @@ class WP_Spin_Wheel_Helper
             );
         }
 
+        // Đọc danh sách link audio fallback
+        $links = array();
+        if (is_readable($link_file)) {
+            $links = array_values(
+                array_filter(
+                    array_map('trim', (array) file($link_file))
+                )
+            );
+        }
+
         $items = array();
 
+        // 1. Kiểm tra file mp3 cục bộ trong thư mục assets/audio/audio-{type}/
         if (is_dir($dir_path)) {
             $files = glob(
                 $dir_path . '/*.{mp3,ogg,wav,m4a,aac}',
                 GLOB_BRACE
             );
 
-            if (! is_array($files)) {
-                $files = array();
+            if (! empty($files)) {
+                sort($files);
+                foreach ($files as $i => $file_path) {
+                    $file     = basename($file_path);
+                    $fallback = pathinfo($file, PATHINFO_FILENAME);
+
+                    $items[] = array(
+                        'id'     => $fallback,
+                        'name'   => isset($names[$i]) && '' !== $names[$i]
+                            ? $names[$i]
+                            : $fallback,
+                        'config' => array(
+                            'file' => $dir_url . '/' . $file,
+                        ),
+                    );
+                }
             }
+        }
 
-            sort($files);
-
-            foreach ($files as $i => $file_path) {
-                $file     = basename($file_path);
-                $fallback = pathinfo($file, PATHINFO_FILENAME);
-
-                $items[] = array(
-                    'id'     => $fallback,
-                    'name'   => isset($names[$i]) && '' !== $names[$i]
-                        ? $names[$i]
-                        : $fallback,
+        // 2. Nếu chưa có file cục bộ -> dùng danh sách từ file link/name
+        if (empty($items) && ! empty($links)) {
+            foreach ($links as $i => $link_url) {
+                $file_name = pathinfo(parse_url($link_url, PHP_URL_PATH), PATHINFO_FILENAME);
+                $lbl       = isset($names[$i]) && '' !== $names[$i] ? $names[$i] : $file_name;
+                $items[]   = array(
+                    'id'     => $file_name ?: ('audio_' . ($i + 1)),
+                    'name'   => $lbl,
                     'config' => array(
-                        'file' => $dir_url . '/' . $file,
+                        'file' => $link_url,
                     ),
                 );
             }
