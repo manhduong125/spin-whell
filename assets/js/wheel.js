@@ -694,23 +694,24 @@ jQuery(document).ready(function ($) {
         return 'wp_spin_wheel_prizes_wheel_' + activeId + '_user_' + userId;
     }
     function loadPrizes() {
-        var prizes = [];
-        // Trường hợp 2: Nếu user đăng nhập và có dữ liệu từ server
-        if (typeof wp_spin_wheel_params !== 'undefined' && wp_spin_wheel_params.is_logged_in && wp_spin_wheel_params.user_wheel_data && Array.isArray(wp_spin_wheel_params.user_wheel_data.prizes) && wp_spin_wheel_params.user_wheel_data.prizes.length) {
-            prizes = wp_spin_wheel_params.user_wheel_data.prizes;
-        } else {
-            // Trường hợp 1: Tải từ localStorage
-            var stored = parseJson(localStorage.getItem(getStorageKey()), null);
-            if (Array.isArray(stored) && stored.length) {
-                prizes = stored;
-            } else {
-                prizes = getDefaultPrizes();
-            }
+        // Ưu tiên 1: Lấy danh sách giải thưởng của chính vòng quay hiện tại từ data attribute (từ DB)
+        var fromAttr = parseJson(rawPrizes, []);
+        if (Array.isArray(fromAttr) && fromAttr.length > 0) {
+            return fromAttr.map(normalizePrize);
         }
-        if (!prizes || !prizes.length) {
-            prizes = getDefaultPrizes();
+
+        // Ưu tiên 2: Lấy từ localStorage theo đúng wheelId nếu có lưu
+        var stored = parseJson(localStorage.getItem(getStorageKey()), null);
+        if (Array.isArray(stored) && stored.length > 0) {
+            return stored.map(normalizePrize);
         }
-        return prizes.map(normalizePrize);
+
+        // Ưu tiên 3: Nếu không có wheelId cụ thể và user đã đăng nhập -> Lấy dữ liệu vòng quay user
+        if (!wheelId && typeof wp_spin_wheel_params !== 'undefined' && wp_spin_wheel_params.is_logged_in && wp_spin_wheel_params.user_wheel_data && Array.isArray(wp_spin_wheel_params.user_wheel_data.prizes) && wp_spin_wheel_params.user_wheel_data.prizes.length) {
+            return wp_spin_wheel_params.user_wheel_data.prizes.map(normalizePrize);
+        }
+
+        return getDefaultPrizes();
     }
     function savePrizes() {
         localStorage.setItem(getStorageKey(), JSON.stringify(wheelPrizes));
@@ -1259,8 +1260,11 @@ jQuery(document).ready(function ($) {
 
     wheelSettings = normalizeSettings(parseJson(rawSettings));
 
-    // Trường hợp 2: Nếu user đã đăng nhập và có dữ liệu từ server bài viết spin_wheel
-    if (typeof wp_spin_wheel_params !== 'undefined' && wp_spin_wheel_params.is_logged_in && wp_spin_wheel_params.user_wheel_data) {
+    if (wheelId > 0) {
+        // Có wheel_id cụ thể (đang xem vòng quay riêng) -> Dùng đúng settings của vòng quay này từ DB
+        applySettingsToUI(wheelSettings);
+    } else if (typeof wp_spin_wheel_params !== 'undefined' && wp_spin_wheel_params.is_logged_in && wp_spin_wheel_params.user_wheel_data) {
+        // Chưa có wheelId và user đăng nhập -> Nạp vòng quay mặc định của user
         var uwd = wp_spin_wheel_params.user_wheel_data;
         if (uwd.id) {
             wheelId = uwd.id;
@@ -1271,7 +1275,7 @@ jQuery(document).ready(function ($) {
             applySettingsToUI(uwd.settings);
         }
     } else {
-        // Trường hợp 1: User chưa đăng nhập -> Tải từ localStorage
+        // Khách vãng lai chưa đăng nhập -> Tải từ localStorage
         var savedSettings = parseJson(localStorage.getItem(getSettingsStorageKey()), null);
         if (savedSettings) {
             mergeUserSettings(savedSettings);
@@ -1285,7 +1289,7 @@ jQuery(document).ready(function ($) {
     // Khởi tạo hội màu sắc
     renderSectorColorPills();
     loadAndRenderThemeDropdown();
-    if (savedSettings && savedSettings.sector_colors) {
+    if (typeof savedSettings !== 'undefined' && savedSettings && savedSettings.sector_colors) {
         wheelPrizes.forEach(function (prize, index) {
             prize.color = savedSettings.sector_colors[index % savedSettings.sector_colors.length];
         });

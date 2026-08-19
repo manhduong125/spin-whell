@@ -377,16 +377,6 @@ $player_email   = is_user_logged_in() ? $current_user->user_email : '';
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body py-3">
-                <div class="mb-3">
-                    <label
-                        class="form-label fw-bold"><?php esc_html_e('Shortcode WordPress:', 'wp-spin-wheel'); ?></label>
-                    <div class="input-group">
-                        <input type="text" class="form-control" id="sw-embed-shortcode-val"
-                            value="[spin_wheel id=&quot;<?php echo esc_attr($current_wid); ?>&quot;]" readonly>
-                        <button class="btn btn-outline-primary" type="button"
-                            onclick="copyEmbedCode('sw-embed-shortcode-val')"><?php esc_html_e('Sao chép', 'wp-spin-wheel'); ?></button>
-                    </div>
-                </div>
                 <div>
                     <label class="form-label fw-bold"><?php esc_html_e('Mã Iframe HTML:', 'wp-spin-wheel'); ?></label>
                     <div class="input-group">

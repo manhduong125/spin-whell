@@ -92,19 +92,13 @@ if (! empty($wheel_id)) {
     data-wheel-settings="<?php echo esc_attr(wp_json_encode($default_settings)); ?>"
     data-wheel-prizes="<?php echo esc_attr(wp_json_encode($default_prizes)); ?>">
     <div class="row" id="row-wheel">
-        <div class="col-xl-3 toggle-show-hide" id="wheel-left">
-
-        </div>
-        <div class="col-xl-6 text-center mb-3" id="wheel-center">
+        <div class="col-xl-12 text-center mb-3" id="wheel-center">
             <div id="wheel-container">
                 <div id="wheelOfFortune">
                     <canvas id="wheel" width="700" height="700"></canvas>
                     <div id="spin"><?php esc_html_e('Quay', 'wp-spin-wheel'); ?></div>
                 </div>
             </div>
-        </div>
-        <div class="col-xl-3" id="wheel-right">
-
         </div>
     </div>
 </div>
@@ -113,6 +107,7 @@ if (! empty($wheel_id)) {
 require_once WP_SPIN_WHEEL_PATH . 'templates/popup/popup-user.php';
 require_once WP_SPIN_WHEEL_PATH . 'templates/popup/popup-result.php';
 require_once WP_SPIN_WHEEL_PATH . 'templates/popup/popup-info.php';
+require_once WP_SPIN_WHEEL_PATH . 'templates/popup/popup-share.php';
 ?>
 
 <script>
