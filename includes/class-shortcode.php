@@ -14,6 +14,9 @@ class WP_Spin_Wheel_Shortcode {
         add_shortcode( 'my_spin_wheels', array( $this, 'render_user_wheels_shortcode' ) );
         add_shortcode( 'spin_wheel_my_wheels', array( $this, 'render_user_wheels_shortcode' ) );
         add_shortcode( 'spin_wheel_collection', array( $this, 'render_user_wheels_shortcode' ) );
+        add_shortcode( 'spin_wheel_stats', array( $this, 'render_stats_shortcode' ) );
+        add_shortcode( 'vqmm_stats', array( $this, 'render_stats_shortcode' ) );
+        add_shortcode( 'spin_wheel_statistics', array( $this, 'render_stats_shortcode' ) );
 
         add_action( 'widgets_init', array( $this, 'register_widgets' ) );
     }
@@ -535,6 +538,111 @@ class WP_Spin_Wheel_Shortcode {
         if ( file_exists( $template ) ) {
             include $template;
         }
+        return ob_get_clean();
+    }
+
+    /**
+     * Render Shortcode hiển thị thanh thống kê hệ thống theo mẫu setting.html
+     * [spin_wheel_stats]
+     * [vqmm_stats]
+     */
+    public function render_stats_shortcode( $atts ) {
+        // Đếm thực tế từ WordPress
+        $user_count_data = count_users();
+        $real_users      = (int) ( $user_count_data['total_users'] ?? 0 );
+
+        $post_count_data = wp_count_posts( 'spin_wheel' );
+        $real_public     = (int) ( $post_count_data->publish ?? 0 );
+        $real_private    = (int) ( ( $post_count_data->private ?? 0 ) + ( $post_count_data->draft ?? 0 ) + ( $post_count_data->pending ?? 0 ) );
+        $real_total      = $real_public + $real_private;
+
+        $atts = shortcode_atts( array(
+            'members'        => null,
+            'public_links'   => null,
+            'private_links'  => null,
+            'total_links'    => null,
+            'offset_members' => 0,
+            'offset_public'  => 0,
+            'offset_private' => 0,
+            'offset_total'   => 0,
+            'class'          => '',
+        ), $atts, 'spin_wheel_stats' );
+
+        $members_val = ( null !== $atts['members'] && '' !== $atts['members'] )
+            ? absint( $atts['members'] )
+            : ( $real_users + absint( $atts['offset_members'] ) );
+
+        $public_val = ( null !== $atts['public_links'] && '' !== $atts['public_links'] )
+            ? absint( $atts['public_links'] )
+            : ( $real_public + absint( $atts['offset_public'] ) );
+
+        $private_val = ( null !== $atts['private_links'] && '' !== $atts['private_links'] )
+            ? absint( $atts['private_links'] )
+            : ( $real_private + absint( $atts['offset_private'] ) );
+
+        $total_val = ( null !== $atts['total_links'] && '' !== $atts['total_links'] )
+            ? absint( $atts['total_links'] )
+            : ( $real_total + absint( $atts['offset_total'] ) );
+
+        $extra_class = sanitize_text_field( $atts['class'] );
+
+        ob_start();
+        ?>
+        <div class="row g-0 text-light mb-3 <?php echo esc_attr( $extra_class ); ?>" id="vqmm-stats">
+            <div class="col-6 col-md-3">
+                <div class="bg-primary p-2">
+                    <div class="mb-3 small">
+                        <?php esc_html_e( 'Thành viên', 'wp-spin-wheel' ); ?>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-down"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </div>
+                    <div class="fs-2 fw-bold"><?php echo esc_html( number_format_i18n( $members_val ) ); ?></div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="bg-danger p-2">
+                    <div class="mb-3 small">
+                        <?php esc_html_e( 'Link công khai', 'wp-spin-wheel' ); ?>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-down"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </div>
+                    <div class="fs-2 fw-bold"><?php echo esc_html( number_format_i18n( $public_val ) ); ?></div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="bg-warning p-2 text-dark">
+                    <div class="mb-3 small">
+                        <?php esc_html_e( 'Link riêng tư', 'wp-spin-wheel' ); ?>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-down"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </div>
+                    <div class="fs-2 fw-bold"><?php echo esc_html( number_format_i18n( $private_val ) ); ?></div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="bg-success p-2">
+                    <div class="mb-3 small">
+                        <?php esc_html_e( 'Tổng link', 'wp-spin-wheel' ); ?>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-down"><polyline points="6 9 12 15 18 9"></polyline></svg>
+                    </div>
+                    <div class="fs-2 fw-bold"><?php echo esc_html( number_format_i18n( $total_val ) ); ?></div>
+                </div>
+            </div>
+        </div>
+        <style>
+        #vqmm-stats .bg-primary,
+        #vqmm-stats .bg-danger,
+        #vqmm-stats .bg-warning,
+        #vqmm-stats .bg-success {
+            min-height: 90px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        #vqmm-stats svg {
+            vertical-align: middle;
+            width: 16px;
+            height: 16px;
+        }
+        </style>
+        <?php
         return ob_get_clean();
     }
 }
