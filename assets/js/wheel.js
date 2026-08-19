@@ -599,6 +599,8 @@ jQuery(document).ready(function ($) {
     function resolveAssetUrl(url) {
         if (!url) return '';
         url = $.trim(url);
+        // Làm sạch các URL bị lỗi prefix :// hoặc :/
+        url = url.replace(/^https?:\/\/:\/?/, '/').replace(/^:\/?\/?/, '/');
         // Nếu là data URI hoặc URL đầy đủ (http/https/protocol-relative) -> giữ nguyên
         if (/^(https?:|\/\/|data:)/i.test(url)) {
             return url;
@@ -607,6 +609,8 @@ jQuery(document).ready(function ($) {
             ? wp_spin_wheel_params.plugin_url
             : '/wp-content/plugins/spin-whell/';
         if (!pluginUrl.endsWith('/')) pluginUrl += '/';
+        // Bỏ prefix /wp-content/plugins/spin-whell/ nếu có
+        url = url.replace(/^\/?wp-content\/plugins\/spin-whell\//, '');
         // Bỏ dấu / ở đầu url nếu có (ví dụ "/assets/..." -> "assets/...")
         var cleanPath = url.replace(/^\/+/, '');
         return pluginUrl + cleanPath;
