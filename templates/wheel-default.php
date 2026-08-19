@@ -40,7 +40,24 @@ $default_settings = array(
         'end_sound_file'   => $_end_sound_file,
     ),
 );
-$default_prizes = array();
+$default_prizes = array(
+    array('title' => 'Tuấn', 'color' => '#D6392E'),
+    array('title' => 'Thông', 'color' => '#3369E8'),
+    array('title' => 'Sơn', 'color' => '#4F9A29'),
+    array('title' => 'Dũng', 'color' => '#EEB331'),
+    array('title' => 'Phong', 'color' => '#D6392E'),
+    array('title' => 'Lan', 'color' => '#3369E8'),
+    array('title' => 'Hương', 'color' => '#4F9A29'),
+    array('title' => 'Hoa', 'color' => '#EEB331'),
+    array('title' => 'Mai', 'color' => '#D6392E'),
+    array('title' => 'Ngọc', 'color' => '#3369E8'),
+    array('title' => 'Hà', 'color' => '#4F9A29'),
+    array('title' => 'Thành', 'color' => '#EEB331'),
+    array('title' => 'Trang', 'color' => '#D6392E'),
+    array('title' => 'Giang', 'color' => '#3369E8'),
+    array('title' => 'Tuyền', 'color' => '#4F9A29'),
+    array('title' => 'Linh', 'color' => '#EEB331'),
+);
 $default_title = '';
 $default_description = '';
 
@@ -190,7 +207,7 @@ if (! empty($wheel_id)) {
                                 AZ</button>
                             <button type="button" class="btn btn-outline-secondary btn-sm me-1 d-none"
                                 id="btn-sort-wheel-za">⇣ ZA</button>
-                            <button type="button" class="btn btn-sm btn-outline-secondary"
+                            <button type="button" class="btn btn-sm btn-outline-secondary me-1"
                                 id="btn-restore-defaults"><?php esc_html_e('Khôi phục', 'wp-spin-wheel'); ?></button>
                             <button type="button" class="btn btn-outline-danger btn-sm me-1" id="btn-clear-entry">
                                 <span data-feather="x" style="width:20px;height:20px;"></span>

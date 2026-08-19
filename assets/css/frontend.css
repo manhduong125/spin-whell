@@ -29,6 +29,21 @@ legend {
   color: #fff !important;
 }
 
+.header-nav .menu-item button {
+    font-weight: 500;
+    border: none;
+}
+
+.header-nav .menu-item button:active {
+    border: none;
+    color: #fff;
+    box-shadow: none;
+}
+
+.header-nav .menu-item:focus-visible {
+    box-shadow: none;
+}
+
 .modal-dialog-scrollable .modal-body {
   max-height: 70vh;
 }

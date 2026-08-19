@@ -165,6 +165,8 @@ jQuery(document).ready(function ($) {
                 if (b.text_color) {
                     $('#btn-spin-text-color').val(b.text_color);
                 }
+                $('#btn-spin-img').val('');
+                updateSpinImgPreview('');
             }
         }
         if (s.background) {
@@ -180,10 +182,20 @@ jQuery(document).ready(function ($) {
                 $('#custom-bg-img').val('');
                 $('#bgr-preview-wrap').hide();
                 $('#bgr-preview').attr('src', '');
+            } else {
+                $('#custom-bg-img').val('');
+                $('#bgr-preview-wrap').hide();
+                $('#bgr-preview').attr('src', '');
+                $('#bg-gradient').val(DEFAULT_BG_GRADIENT);
+                $('#gradient-preview-box').css('background', DEFAULT_BG_GRADIENT);
             }
             if (s.background.color) {
                 $('#custom-bg-color').val(s.background.color);
+            } else {
+                $('#custom-bg-color').val('#ffffff');
             }
+            $('#custom-color').val('#000000');
+            $('.sw-gradient-swatch').css('outline', '');
         }
         if (s.wheel) {
             if (s.wheel.border_color && $('#border_color').length) {
@@ -248,18 +260,99 @@ jQuery(document).ready(function ($) {
     // Reset về default
     function resetWheelSettings() {
         localStorage.removeItem(getSettingsStorageKey());
+        localStorage.removeItem(getStorageKey());
+
         // Reset wheelSettings về default từ data attribute
         wheelSettings = normalizeSettings(parseJson(rawSettings));
-        // Reset UI controls về giá trị mặc định
-        applySettingsToUI({
-            animation: { duration: 6, confetti: false },
-            audio: { start_sound: '0', start_sound_file: '', end_sound: '0', end_sound_file: '' },
-            ui: { auto_remove: false, show_popup: false, popup_label: '', show_remove_button: false },
-            button: { text: 'Quay', bg_type: 'color', color: '#ff0000', text_color: '#ffffff', background_image: '' },
-            background: { gradient: DEFAULT_BG_GRADIENT, image: '', color: '' },
-            wheel: { border_color: '#FF4D00', diamond_color: '#F6FA00', show_border: true, border: 14 },
-        });
+
+        // Reset UI controls về giá trị mặc định từ wheelSettings
+        applySettingsToUI(wheelSettings);
+
+        // Reset text và nút quay
+        var defaultBtnText = (wheelSettings.button && wheelSettings.button.text) ? wheelSettings.button.text : 'Quay';
+        $('#btn-spin-label').val(defaultBtnText);
+        $('#btn-spin-img').val('');
+        $('#switch_spin_bg_type').prop('checked', false);
+        $('#form_spin_bg_image').addClass('d-none');
+        $('#form_spin_bg_color').removeClass('d-none');
+        updateSpinImgPreview('');
+
+        // Reset Sector Colors (Hội màu sắc) về 4 màu mặc định
+        var defaultThemeColors = ['#D6392E', '#3369E8', '#4F9A29', '#EEB331'];
+        for (var i = 1; i <= SECTOR_COLOR_SLOTS; i++) {
+            var $chk = $('#chkcolor-' + i);
+            var $color = $('#color-' + i);
+            if (i <= defaultThemeColors.length) {
+                if ($chk.length) $chk.prop('checked', true);
+                if ($color.length) $color.val(defaultThemeColors[i - 1]);
+            } else {
+                if ($chk.length) $chk.prop('checked', false);
+                if ($color.length) $color.val('#ADB2B0');
+            }
+        }
+        renderSectorColorPills();
+
+        // Khôi phục danh sách giải thưởng / JSON về mặc định
+        wheelPrizes = getDefaultPrizes();
+        savePrizes();
+        renderPrizeList();
+
+        // Highlight nút đầu tiên trong modalTemplate
+        $('.btn-fill, .btn-fill-number').removeClass('active');
+        $('.btn-fill').first().addClass('active');
+
+        // Reset Background UI
+        $('#custom-bg-color').val('#ffffff');
+        $('#custom-color').val('#000000');
+        $('#wheel-wrapper').css({ color: '#000000' });
+        $('#custom-bg-img').val('');
+        $('#bgr-preview-wrap').hide();
+        $('#bgr-preview').attr('src', '');
+        $('#bg-gradient').val(DEFAULT_BG_GRADIENT);
+        $('#gradient-preview-box').css('background', DEFAULT_BG_GRADIENT);
+        $('.sw-gradient-swatch').css('outline', '');
+
+        // Reset Viền
+        $('#border_color').val('#FF4D00');
+        $('#diamond_color').val('#F6FA00');
+        $('#show_border').prop('checked', true);
+        $('#custom_border_color').show();
+
+        // Reset Animation / Sound / Popup UI
+        $('#duration').val(wheelSettings.animation ? wheelSettings.animation.duration : 6);
+        $('#show_confetti').prop('checked', wheelSettings.animation ? !!wheelSettings.animation.confetti : true);
+        $('#auto_remove').prop('checked', false);
+        $('#show_popup').prop('checked', true).trigger('change');
+        $('#popup_label').val('Bạn đã quay vào ô');
+        $('#modal-result-popup-label').text('Bạn đã quay vào ô');
+        $('#show_remove_button').prop('checked', true);
+        $('#start_sound').val(wheelSettings.audio ? (wheelSettings.audio.start_sound || '0') : '0');
+        $('#start_sound_file').val('');
+        $('#end_sound').val(wheelSettings.audio ? (wheelSettings.audio.end_sound || '0') : '0');
+        $('#end_sound_file').val('');
+
+        // Reset Particles
+        $('#show_particle').prop('checked', true);
+        $('#particle_type').val('default');
+
+        // Reset Upload info labels
+        $('#spin-upload-info').text('JPG/PNG/WebP, tối đa 2MB').removeClass('text-danger');
+        $('#bgr-upload-info').text('JPG/PNG/WebP ≤ 5MB').removeClass('text-danger');
+
+        // Dừng preview audio nếu đang phát
+        var p = $('#sw-audio-preview');
+        if (p.length) {
+            p[0].pause();
+            p[0].currentTime = 0;
+            p.attr('src', '');
+        }
+
+        // Đồng bộ lên server nếu user đăng nhập
+        syncUserWheelToServer({ settings: wheelSettings, prizes: wheelPrizes });
+
+        // Re-render vòng quay
         renderWheel();
+        drawWheelCanvas(currentRotation);
     }
 
     // Cập nhật preview ảnh nút quay
@@ -399,6 +492,34 @@ jQuery(document).ready(function ($) {
 
     // Bảng 6 màu mặc định cho các ô vòng quay
     var DEFAULT_SECTOR_COLORS = ['#ef4444', '#f59e0b', '#10b981', '#3b82f6', '#8b5cf6', '#ec4899'];
+
+    // JSON danh sách giải thưởng mặc định chuẩn dùng chung cho tất cả
+    var DEFAULT_PRIZES_JSON = [
+        { title: 'Tuấn', color: '#D6392E' },
+        { title: 'Thông', color: '#3369E8' },
+        { title: 'Sơn', color: '#4F9A29' },
+        { title: 'Dũng', color: '#EEB331' },
+        { title: 'Phong', color: '#D6392E' },
+        { title: 'Lan', color: '#3369E8' },
+        { title: 'Hương', color: '#4F9A29' },
+        { title: 'Hoa', color: '#EEB331' },
+        { title: 'Mai', color: '#D6392E' },
+        { title: 'Ngọc', color: '#3369E8' },
+        { title: 'Hà', color: '#4F9A29' },
+        { title: 'Thành', color: '#EEB331' },
+        { title: 'Trang', color: '#D6392E' },
+        { title: 'Giang', color: '#3369E8' },
+        { title: 'Tuyền', color: '#4F9A29' },
+        { title: 'Linh', color: '#EEB331' }
+    ];
+
+    function getDefaultPrizes() {
+        var fromAttr = parseJson(rawPrizes, []);
+        if (Array.isArray(fromAttr) && fromAttr.length > 0) {
+            return fromAttr.map(normalizePrize);
+        }
+        return DEFAULT_PRIZES_JSON.map(normalizePrize);
+    }
 
     // ── Hội màu sắc vòng quay ──
     var SECTOR_COLOR_SLOTS = 6;
@@ -573,7 +694,7 @@ jQuery(document).ready(function ($) {
         return 'wp_spin_wheel_prizes_wheel_' + activeId + '_user_' + userId;
     }
     function loadPrizes() {
-        var prizes = parseJson(rawPrizes, []);
+        var prizes = [];
         // Trường hợp 2: Nếu user đăng nhập và có dữ liệu từ server
         if (typeof wp_spin_wheel_params !== 'undefined' && wp_spin_wheel_params.is_logged_in && wp_spin_wheel_params.user_wheel_data && Array.isArray(wp_spin_wheel_params.user_wheel_data.prizes) && wp_spin_wheel_params.user_wheel_data.prizes.length) {
             prizes = wp_spin_wheel_params.user_wheel_data.prizes;
@@ -582,7 +703,12 @@ jQuery(document).ready(function ($) {
             var stored = parseJson(localStorage.getItem(getStorageKey()), null);
             if (Array.isArray(stored) && stored.length) {
                 prizes = stored;
+            } else {
+                prizes = getDefaultPrizes();
             }
+        }
+        if (!prizes || !prizes.length) {
+            prizes = getDefaultPrizes();
         }
         return prizes.map(normalizePrize);
     }
@@ -690,10 +816,14 @@ jQuery(document).ready(function ($) {
     }
 
     function restoreDefaultPrizes() {
-        wheelPrizes = parseJson(rawPrizes, []).map(normalizePrize);
+        localStorage.removeItem(getStorageKey());
+        wheelPrizes = getDefaultPrizes();
         savePrizes();
         renderPrizeList();
         renderWheel();
+        drawWheelCanvas(currentRotation);
+        $('.btn-fill, .btn-fill-number').removeClass('active');
+        $('.btn-fill').first().addClass('active');
     }
 
     function updateResultCount() {
@@ -1334,9 +1464,17 @@ jQuery(document).ready(function ($) {
     });
 
     $('#btn-restore-defaults').on('click', function () {
-        restoreDefaultPrizes();
-        $('#btn-sort-wheel-za').addClass('d-none');
-        $('#btn-sort-wheel-az').removeClass('d-none');
+        if (confirm('Khôi phục danh sách mục về mặc định?')) {
+            restoreDefaultPrizes();
+            $('#btn-sort-wheel-za').addClass('d-none');
+            $('#btn-sort-wheel-az').removeClass('d-none');
+            var $btn = $(this);
+            var origHtml = $btn.html();
+            $btn.html('✓ Đã khôi phục').addClass('btn-success').removeClass('btn-outline-secondary');
+            setTimeout(function () {
+                $btn.html(origHtml).removeClass('btn-success').addClass('btn-outline-secondary');
+            }, 1500);
+        }
     });
 
     $('#btn-shuffle-wheel').on('click', function () {
@@ -1430,9 +1568,17 @@ jQuery(document).ready(function ($) {
     });
 
     // ── Reset về mặc định ──
-    $('#btn-reset-wheel').on('click', function () {
-        if (confirm('Reset tất cả cài đặt về mặc định?')) {
+    $(document).on('click', '#btn-reset-wheel, #btn-reset-options, .btn-reset-wheel-options', function () {
+        if (confirm('Reset tất cả cài đặt / option về mặc định?')) {
             resetWheelSettings();
+            var $btn = $(this);
+            if ($btn.length && $btn.is('button')) {
+                var origHtml = $btn.html();
+                $btn.html('✓ Đã làm mới').addClass('btn-success').removeClass('btn-outline-secondary btn-outline-warning');
+                setTimeout(function () {
+                    $btn.html(origHtml).removeClass('btn-success').addClass('btn-outline-secondary');
+                }, 1500);
+            }
         }
     });
 
@@ -1606,6 +1752,19 @@ jQuery(document).ready(function ($) {
         fillPrizesFromRange(from, to);
         $('.btn-fill, .btn-fill-number').removeClass('active');
         $(this).addClass('active');
+    });
+
+    // ── Nút reset chủ đề về mặc định trong modalTemplate (popup-json.php) ──
+    $(document).on('click', '#btn-reset-template-default', function () {
+        if (confirm('Khôi phục danh sách chủ đề và giải thưởng về mặc định ban đầu?')) {
+            restoreDefaultPrizes();
+            var $btn = $(this);
+            var origHtml = $btn.html();
+            $btn.html('✓ Đã khôi phục').addClass('btn-success').removeClass('btn-outline-danger');
+            setTimeout(function () {
+                $btn.html(origHtml).removeClass('btn-success').addClass('btn-outline-danger');
+            }, 1500);
+        }
     });
 
     // ── Mặc định: nếu wheelPrizes rỗng và không có localStorage → load nút đầu tiên ──
