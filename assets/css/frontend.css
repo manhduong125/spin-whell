@@ -17,6 +17,10 @@ legend {
 
 }
 
+.alert {
+    color: #fff !important;
+}
+
 .modal-dialog-scrollable .modal-body {
     max-height: 70vh;
 }

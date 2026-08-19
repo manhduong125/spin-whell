@@ -1,4 +1,6 @@
-<?php if ( ! defined( 'ABSPATH' ) ) { exit; } ?>
+<?php if (! defined('ABSPATH')) {
+    exit;
+} ?>
 <!-- option json cho vòng quay -->
 <div class="modal" id="modalTemplate" tabindex="-1" aria-modal="true" aria-hidden="true" role="dialog">
     <div class="modal-dialog modal-dialog-centered">
@@ -75,7 +77,7 @@
                     data-content="😽Cat||🐶Puppy||🐰Bunny||🐹Hamster||🦊Fox||🐻Bear||🐼Panda||🐨Koala||🐯Tiger||🦁Lion||🐮Cow||🐂Ox||🐷Pig||🐸Frog||🐵Monkey||🦍Gorilla||🐺Wolf||🐑Sheep||🐐Goat||🐏Ram||🦌Deer||🐪Camel||🐎Horse||🐊Croccodile||🐢Turtle||🐬Dolphin||🦈Shark||🐋Whale||🦐Shrimp||🦀Crab||🐙Octopus||🦑Squid||🐜Ant||🕷️Spider||🐞Ladybug||🦋Butterfly||🐝Bee||🐌Snail||🐲Dragon||🦉Owl||🐔Chicken||🐓Rooster||🐧Penguin||🦇Bat">
                     Động vật
                 </button>
-                <a href="https://vongquaymayman.co/gallery/" class="btn btn-light btn-sm mb-2 rounded-pill btn-fill"
+                <a href="#" class="btn btn-light btn-sm mb-2 rounded-pill btn-fill"
                     data-content="" id="btn-more">Xem tiếp
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"

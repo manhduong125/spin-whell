@@ -133,6 +133,17 @@ if (! empty($wheel_id)) {
                     </svg>
                     Chủ đề
                 </button>
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal"
+                    data-bs-target="#modalShare" aria-label="Chủ đề">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-share-2">
+                        <circle cx="18" cy="5" r="3"></circle>
+                        <circle cx="6" cy="12" r="3"></circle>
+                        <circle cx="18" cy="19" r="3"></circle>
+                        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                    </svg>
+                    Share
+                </button>
                 <button type="button" class="btn btn-outline-secondary btn-sm" id="btn-user-wheels" data-bs-toggle="modal"
                     data-bs-target="#modalUserWheels" aria-label="Danh sách vòng quay">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
@@ -236,6 +247,7 @@ require_once WP_SPIN_WHEEL_PATH . 'templates/popup/popup-edit-title.php';
 require_once WP_SPIN_WHEEL_PATH . 'templates/popup/popup-result.php';
 require_once WP_SPIN_WHEEL_PATH . 'templates/popup/popup-option.php';
 require_once WP_SPIN_WHEEL_PATH . 'templates/popup/popup-json.php';
+require_once WP_SPIN_WHEEL_PATH . 'templates/popup/popup-share.php';
 ?>
 
 <script>

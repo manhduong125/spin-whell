@@ -21,8 +21,10 @@
             <div class="modal-body py-3">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <span class="text-muted small">Quản lý và chuyển đổi nhanh giữa các vòng quay bạn đã tạo:</span>
-                    <button type="button" class="btn btn-primary btn-sm d-flex align-items-center gap-1" id="btn-create-new-user-wheel">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <button type="button" class="btn btn-primary btn-sm d-flex align-items-center gap-1"
+                        id="btn-create-new-user-wheel">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="12" y1="5" x2="12" y2="19"></line>
                             <line x1="5" y1="12" x2="19" y2="12"></line>
                         </svg>

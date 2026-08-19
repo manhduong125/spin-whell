@@ -1,4 +1,6 @@
-<?php if ( ! defined( 'ABSPATH' ) ) { exit; } ?>
+<?php if (! defined('ABSPATH')) {
+    exit;
+} ?>
 <!-- Popup kết quả quay -->
 <div class="modal" id="modal-result" tabindex="-1" style="display: none;" aria-modal="true" aria-hidden="true"
     role="dialog">

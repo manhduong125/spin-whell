@@ -1,4 +1,6 @@
-<?php if ( ! defined( 'ABSPATH' ) ) { exit; } ?>
+<?php if (! defined('ABSPATH')) {
+    exit;
+} ?>
 <!-- Option cho theme -->
 <div class="modal" id="modalSettings" tabindex="-1">
     <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
