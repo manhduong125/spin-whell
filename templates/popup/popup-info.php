@@ -100,7 +100,7 @@ $player_email   = is_user_logged_in() ? $current_user->user_email : '';
                         class="feather feather-copy">
                         <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                         <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                    </svg> <?php esc_html_e('Tạo bản sao', 'wp-spin-wheel'); ?></a></li>
+                    </svg> <?php esc_html_e('Sao chép vòng quay', 'wp-spin-wheel'); ?></a></li>
             <li><a class="dropdown-item" href="javascript:void(0);" id="menu-btn-embed" data-bs-toggle="modal"
                     data-bs-target="#modalEmbed" data-toggle="modal" data-target="#modalEmbed"><svg
                         xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
@@ -546,7 +546,11 @@ $player_email   = is_user_logged_in() ? $current_user->user_email : '';
 
         jQuery(document).on('click', '#btn-copy-wheel', function(e) {
             e.preventDefault();
-            duplicateCurrentWheel();
+            if (typeof window.copyWheelAction === 'function') {
+                window.copyWheelAction(getCurrentWheelId());
+            } else {
+                duplicateCurrentWheel();
+            }
         });
 
         // Lắng nghe sự kiện đóng modal
@@ -581,34 +585,43 @@ $player_email   = is_user_logged_in() ? $current_user->user_email : '';
 
     // Hàm tạo bản sao vòng quay hiện tại
     function duplicateCurrentWheel() {
-        var wid = getCurrentWheelId();
-        if (!wid || typeof wp_spin_wheel_params === 'undefined') {
-            alert('Không thể tạo bản sao lúc này.');
+        if (typeof window.copyWheelAction === 'function') {
+            window.copyWheelAction(getCurrentWheelId());
             return;
         }
 
-        jQuery.ajax({
-            url: wp_spin_wheel_params.rest_url + 'user/wheels/' + wid + '/duplicate',
-            method: 'POST',
-            beforeSend: function(xhr) {
-                xhr.setRequestHeader('X-WP-Nonce', wp_spin_wheel_params.nonce);
-            },
-            success: function(res) {
-                if (res && res.wheel_id) {
-                    alert('Đã tạo bản sao vòng quay thành công!');
-                    if (res.permalink) {
-                        window.location.href = res.permalink;
-                    } else {
-                        window.location.reload();
-                    }
-                } else {
-                    window.location.reload();
+        var wid = getCurrentWheelId();
+        var homeBase = (typeof wp_spin_wheel_params !== 'undefined' && wp_spin_wheel_params.home_url) ? wp_spin_wheel_params.home_url : '/';
+        var isLoggedIn = (typeof wp_spin_wheel_params !== 'undefined' && !!wp_spin_wheel_params.is_logged_in);
+
+        if (isLoggedIn && typeof wp_spin_wheel_params !== 'undefined') {
+            jQuery.ajax({
+                url: wp_spin_wheel_params.rest_url + 'user/wheels/' + wid + '/duplicate',
+                method: 'POST',
+                beforeSend: function(xhr) {
+                    xhr.setRequestHeader('X-WP-Nonce', wp_spin_wheel_params.nonce);
+                },
+                success: function(res) {
+                    sessionStorage.setItem('wp_spin_wheel_just_copied', '1');
+                    var targetUrl = (res && res.home_url) ? res.home_url : (homeBase + (homeBase.indexOf('?') >= 0 ? '&' : '?') + 'wheel_id=' + ((res && res.wheel_id) ? res.wheel_id : wid));
+                    window.location.href = targetUrl;
+                },
+                error: function() {
+                    alert('Không thể sao chép vòng quay!');
                 }
-            },
-            error: function() {
-                alert('Không thể tạo bản sao vòng quay!');
-            }
-        });
+            });
+        } else {
+            // Khách chưa đăng nhập: lưu vào localStorage và trở về trang chủ
+            try {
+                var title = jQuery.trim(jQuery('#vqmm-title').text() || jQuery('#txt-title').text() || '') || 'Vòng quay may mắn';
+                if (title.indexOf('(Bản sao)') === -1) title += ' (Bản sao)';
+                var desc = jQuery.trim(jQuery('#vqmm-desc').text() || jQuery('#txt-desc').text() || '');
+                localStorage.setItem('wp_spin_wheel_title_guest', title);
+                localStorage.setItem('wp_spin_wheel_desc_guest', desc);
+                sessionStorage.setItem('wp_spin_wheel_just_copied', '1');
+            } catch(err) {}
+            window.location.href = homeBase;
+        }
     }
 
     window.openSwModal = openSwModal;

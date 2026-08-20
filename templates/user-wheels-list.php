@@ -140,7 +140,14 @@ $unique_id = 'sw-wheels-' . wp_rand( 1000, 9999 );
 
                             <!-- Action Buttons -->
                             <div class="mt-auto d-flex justify-content-between align-items-center gap-2 pt-2 border-top">
-                                <button type="button" class="btn btn-outline-primary btn-sm flex-fill sw-btn-copy-wheel" data-url="<?php echo esc_url( $permalink ); ?>" data-shortcode='[spin_wheel id="<?php echo esc_attr( $wid ); ?>"]' title="<?php esc_attr_e( 'Sao chép liên kết vòng quay', 'wp-spin-wheel' ); ?>">
+                                <button type="button" class="btn btn-outline-primary btn-sm flex-fill sw-btn-copy-wheel"
+                                    data-id="<?php echo esc_attr( $wid ); ?>"
+                                    data-title="<?php echo esc_attr( $wtitle ); ?>"
+                                    data-settings="<?php echo esc_attr( wp_json_encode( $settings ) ); ?>"
+                                    data-prizes="<?php echo esc_attr( wp_json_encode( $prizes ) ); ?>"
+                                    data-url="<?php echo esc_url( $permalink ); ?>"
+                                    data-shortcode='[spin_wheel id="<?php echo esc_attr( $wid ); ?>"]'
+                                    title="<?php esc_attr_e( 'Sao chép nội dung vòng quay và cài đặt lại', 'wp-spin-wheel' ); ?>">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:2px;"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
                                     <?php esc_html_e( 'Sao chép', 'wp-spin-wheel' ); ?>
                                 </button>
@@ -318,28 +325,61 @@ $unique_id = 'sw-wheels-' . wp_rand( 1000, 9999 );
         renderMiniWheels();
     }
 
-    // Xử lý sao chép link / shortcode
+    // Xử lý sao chép toàn bộ nội dung vòng quay và trở về trang chủ để cài đặt
     document.addEventListener('click', function(e) {
         var btn = e.target.closest('.sw-btn-copy-wheel');
         if (!btn) return;
-        var url = btn.dataset.url || '';
-        var shortcode = btn.dataset.shortcode || '';
-        var textToCopy = url || shortcode;
-        if (!textToCopy) return;
+        e.preventDefault();
 
-        navigator.clipboard.writeText(textToCopy).then(function() {
-            var origHtml = btn.innerHTML;
-            btn.innerHTML = '✓ Đã sao chép';
-            btn.classList.remove('btn-outline-primary');
-            btn.classList.add('btn-success');
-            setTimeout(function() {
-                btn.innerHTML = origHtml;
-                btn.classList.remove('btn-success');
-                btn.classList.add('btn-outline-primary');
-            }, 1800);
-        }).catch(function() {
-            prompt('Sao chép liên kết:', textToCopy);
-        });
+        var wid = parseInt(btn.dataset.id, 10) || 0;
+        var title = btn.dataset.title || '';
+        var rawSettings = btn.dataset.settings || '{}';
+        var rawPrizes = btn.dataset.prizes || '[]';
+        var settings = {};
+        var prizes = [];
+        try { settings = JSON.parse(rawSettings); } catch(err) {}
+        try { prizes = JSON.parse(rawPrizes); } catch(err) {}
+
+        btn.disabled = true;
+        btn.innerHTML = 'Đang sao chép...';
+
+        if (typeof window.copyWheelAction === 'function') {
+            window.copyWheelAction(wid, {
+                title: title,
+                settings: settings,
+                prizes: prizes
+            });
+        } else {
+            var homeBase = (typeof wp_spin_wheel_params !== 'undefined' && wp_spin_wheel_params.home_url) ? wp_spin_wheel_params.home_url : '/';
+            var isLoggedIn = (typeof wp_spin_wheel_params !== 'undefined' && !!wp_spin_wheel_params.is_logged_in);
+
+            if (isLoggedIn && wid > 0) {
+                jQuery.ajax({
+                    url: wp_spin_wheel_params.rest_url + 'user/wheels/' + wid + '/duplicate',
+                    method: 'POST',
+                    beforeSend: function(xhr) {
+                        xhr.setRequestHeader('X-WP-Nonce', wp_spin_wheel_params.nonce);
+                    },
+                    success: function(res) {
+                        sessionStorage.setItem('wp_spin_wheel_just_copied', '1');
+                        var targetUrl = (res && res.home_url) ? res.home_url : (homeBase + (homeBase.indexOf('?') >= 0 ? '&' : '?') + 'wheel_id=' + ((res && res.wheel_id) ? res.wheel_id : wid));
+                        window.location.href = targetUrl;
+                    },
+                    error: function() {
+                        window.location.href = homeBase;
+                    }
+                });
+            } else {
+                try {
+                    localStorage.setItem('wp_spin_wheel_ui_settings_wheel_0_user_guest', JSON.stringify(settings || {}));
+                    localStorage.setItem('wp_spin_wheel_prizes_wheel_0_user_guest', JSON.stringify(prizes || []));
+                    var copyTitle = title ? (title.indexOf('(Bản sao)') >= 0 ? title : (title + ' (Bản sao)')) : 'Vòng quay (Bản sao)';
+                    localStorage.setItem('wp_spin_wheel_title_guest', copyTitle);
+                    sessionStorage.setItem('wp_spin_wheel_just_copied', '1');
+                } catch(err) {}
+                window.location.href = homeBase;
+            }
+        }
     });
 
     // Xử lý tìm kiếm và phân trang theo URL param

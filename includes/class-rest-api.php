@@ -108,6 +108,14 @@ class WP_Spin_Wheel_REST_API {
                 'permission_callback' => function() { return is_user_logged_in(); },
             ),
         ) );
+
+        register_rest_route( 'spin-wheel/v1', '/user/wheels/copy', array(
+            array(
+                'methods'             => 'POST',
+                'callback'            => array( $this, 'duplicate_user_wheel_route' ),
+                'permission_callback' => function() { return is_user_logged_in(); },
+            ),
+        ) );
         // User options for logged-in users
         register_rest_route( 'spin-wheel/v1', '/users/me/options', array(
             array(
@@ -492,17 +500,21 @@ class WP_Spin_Wheel_REST_API {
 
     public function duplicate_user_wheel_route( $request ) {
         $user_id = get_current_user_id();
-        $wheel_id = absint( $request['id'] );
-        $new_id = WP_Spin_Wheel_Wheel::duplicate_user_wheel( $wheel_id, $user_id );
+        $wheel_id = absint( $request['id'] ?? ( $request->get_param( 'wheel_id' ) ?: 0 ) );
+        $custom_data = $request->get_json_params() ?: $request->get_params();
+
+        $new_id = WP_Spin_Wheel_Wheel::duplicate_user_wheel( $wheel_id, $user_id, $custom_data );
         if ( ! $new_id ) {
-            return new WP_Error( 'duplicate_failed', __( 'Unable to duplicate wheel.', 'wp-spin-wheel' ), array( 'status' => 500 ) );
+            return new WP_Error( 'duplicate_failed', __( 'Không thể sao chép vòng quay.', 'wp-spin-wheel' ), array( 'status' => 500 ) );
         }
 
         return rest_ensure_response( array(
-            'success'  => true,
-            'wheel_id' => $new_id,
-            'title'    => get_the_title( $new_id ),
-            'message'  => __( 'Đã nhân bản vòng quay thành công.', 'wp-spin-wheel' ),
+            'success'   => true,
+            'wheel_id'  => $new_id,
+            'title'     => get_the_title( $new_id ),
+            'permalink' => get_permalink( $new_id ),
+            'home_url'  => home_url( '/?wheel_id=' . $new_id ),
+            'message'   => __( 'Đã sao chép vòng quay thành công.', 'wp-spin-wheel' ),
         ) );
     }
 

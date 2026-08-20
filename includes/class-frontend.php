@@ -37,6 +37,7 @@ class WP_Spin_Wheel_Frontend {
         }
 
         wp_localize_script( 'wp-spin-wheel-wheel', 'wp_spin_wheel_params', array(
+            'home_url'        => esc_url_raw( home_url( '/' ) ),
             'rest_url'        => esc_url_raw( rest_url( 'spin-wheel/v1/' ) ),
             'nonce'           => wp_create_nonce( 'wp_rest' ),
             'text_win'        => __( 'Bạn đã trúng', 'wp-spin-wheel' ),

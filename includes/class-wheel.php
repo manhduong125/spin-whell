@@ -267,9 +267,10 @@ class WP_Spin_Wheel_Wheel {
              * @param string $title
              * @param array $settings
              * @param array $prizes
+             * @param string $content
              * @return int Wheel Post ID
              */
-            public static function create_user_wheel( $user_id, $title = '', $settings = array(), $prizes = array() ) {
+            public static function create_user_wheel( $user_id, $title = '', $settings = array(), $prizes = array(), $content = '' ) {
                 $user_id = absint( $user_id );
                 if ( ! $user_id ) {
                     return 0;
@@ -279,7 +280,7 @@ class WP_Spin_Wheel_Wheel {
 
                 $post_id = wp_insert_post( array(
                     'post_title'   => sanitize_text_field( $title ),
-                    'post_content' => '',
+                    'post_content' => wp_kses_post( $content ),
                     'post_status'  => 'publish',
                     'post_type'    => 'spin_wheel',
                     'post_author'  => $user_id,
@@ -290,6 +291,8 @@ class WP_Spin_Wheel_Wheel {
                 }
 
                 update_post_meta( $post_id, '_user_id', $user_id );
+                update_post_meta( $post_id, '_spin_wheel_views', 0 );
+                update_post_meta( $post_id, '_spin_wheel_total_spins', 0 );
 
                 if ( ! empty( $settings ) && is_array( $settings ) ) {
                     update_post_meta( $post_id, '_spin_wheel_overrides', wp_json_encode( $settings ) );
@@ -316,29 +319,56 @@ class WP_Spin_Wheel_Wheel {
             }
 
             /**
-             * Nhân bản vòng quay của user
+             * Nhân bản / Sao chép vòng quay cho user
              *
              * @param int $wheel_id
              * @param int $user_id
+             * @param array $custom_data
              * @return int New Wheel Post ID
              */
-            public static function duplicate_user_wheel( $wheel_id, $user_id ) {
+            public static function duplicate_user_wheel( $wheel_id, $user_id, $custom_data = array() ) {
                 $wheel_id = absint( $wheel_id );
                 $user_id  = absint( $user_id );
-                if ( ! $wheel_id || ! $user_id ) {
+                if ( ! $user_id ) {
                     return 0;
                 }
 
-                $post = get_post( $wheel_id );
-                if ( ! $post || (int) $post->post_author !== $user_id ) {
-                    return 0;
+                $title    = '';
+                $content  = '';
+                $settings = array();
+                $prizes   = array();
+
+                if ( $wheel_id > 0 ) {
+                    $post = get_post( $wheel_id );
+                    if ( $post ) {
+                        $title    = $post->post_title;
+                        $content  = $post->post_content;
+                        $settings = WP_Spin_Wheel_Helper::get_wheel_overrides( $wheel_id );
+                        $prizes   = WP_Spin_Wheel_Prize::get_prizes( $wheel_id );
+                    }
                 }
 
-                $settings = WP_Spin_Wheel_Helper::get_wheel_overrides( $wheel_id );
-                $prizes   = WP_Spin_Wheel_Prize::get_prizes( $wheel_id );
-                $new_title = $post->post_title . ' (Bản sao)';
+                // Nhận ghi đè từ custom_data từ client nếu có
+                if ( ! empty( $custom_data['title'] ) ) {
+                    $title = sanitize_text_field( $custom_data['title'] );
+                }
+                if ( ! empty( $custom_data['description'] ) || ! empty( $custom_data['content'] ) ) {
+                    $content = wp_kses_post( $custom_data['description'] ?? $custom_data['content'] );
+                }
+                if ( ! empty( $custom_data['settings'] ) && is_array( $custom_data['settings'] ) ) {
+                    $settings = $custom_data['settings'];
+                }
+                if ( ! empty( $custom_data['prizes'] ) && is_array( $custom_data['prizes'] ) ) {
+                    $prizes = $custom_data['prizes'];
+                }
 
-                return self::create_user_wheel( $user_id, $new_title, $settings, $prizes );
+                if ( ! empty( $title ) ) {
+                    $new_title = ( strpos( $title, '(Bản sao)' ) !== false ) ? $title : ( $title . ' (Bản sao)' );
+                } else {
+                    $new_title = sprintf( __( 'Vòng quay (Bản sao %s)', 'wp-spin-wheel' ), current_time( 'd/m/Y H:i' ) );
+                }
+
+                return self::create_user_wheel( $user_id, $new_title, $settings, $prizes, $content );
             }
 
             /**
