@@ -1,0 +1,287 @@
+<?php
+if ( ! defined( 'ABSPATH' ) ) {
+    exit;
+}
+
+class WP_Spin_Wheel_Box {
+
+    /**
+     * Default Box Settings
+     */
+    public static function get_default_settings() {
+        return array(
+            'title'           => 'HỘP QUÀ MAY MẮN ONLINE',
+            'template'        => 'tpl-jib',
+            'luotchoi'        => 3,
+            'sound'           => 'winner',
+            'sound_file'      => '',
+            'noti_sound'      => 'concainit',
+            'noti_sound_file' => '',
+            'popup_title'     => 'Hộp quà có',
+            'confetti'        => true,
+            'bg_color'        => '#dc3545',
+            'color'           => '#ffffff',
+            'bg_img'          => '/wp-content/themes/twentytwentythree-child/assets/background/christmas-2.jpg',
+            'bg_gradient'     => '',
+            'btn_bg_color'    => '#dc3545',
+            'btn_color'       => '#ffffff',
+        );
+    }
+
+    /**
+     * Default Gifts List
+     */
+    public static function get_default_gifts() {
+        return array(
+            '100k',
+            'Ốp lưng iphone',
+            '50k',
+            'Chúc bạn may mắn',
+            '200k',
+            'Bút Montblanc',
+            'Ví da 500k',
+            'Sổ tay',
+            'Gối tựa lưng',
+            'Bình giữ nhiệt',
+            'Ly sứ',
+            'Hộp đựng cơm',
+        );
+    }
+
+    /**
+     * Lấy cài đặt Box theo ID
+     */
+    public static function get_box_settings( $box_id ) {
+        $box_id = absint( $box_id );
+        if ( ! $box_id ) {
+            return self::get_default_settings();
+        }
+
+        $raw = get_post_meta( $box_id, '_spin_box_overrides', true );
+        if ( empty( $raw ) ) {
+            $raw = get_post_meta( $box_id, '_spin_box_design', true );
+        }
+
+        $settings = ! empty( $raw ) ? json_decode( $raw, true ) : array();
+        if ( ! is_array( $settings ) ) {
+            $settings = array();
+        }
+
+        return array_replace_recursive( self::get_default_settings(), $settings );
+    }
+
+    /**
+     * Lấy danh sách quà tặng của Box theo ID
+     */
+    public static function get_box_gifts( $box_id ) {
+        $box_id = absint( $box_id );
+        if ( ! $box_id ) {
+            return self::get_default_gifts();
+        }
+
+        $raw = get_post_meta( $box_id, '_spin_box_gifts_json', true );
+        if ( ! empty( $raw ) ) {
+            $gifts = json_decode( $raw, true );
+            if ( is_array( $gifts ) && ! empty( $gifts ) ) {
+                return $gifts;
+            }
+        }
+
+        // Kiểm tra qua prizes
+        $prizes = WP_Spin_Wheel_Prize::get_prizes( $box_id );
+        if ( ! empty( $prizes ) && is_array( $prizes ) ) {
+            return array_map( function( $p ) {
+                return is_array( $p ) ? ( $p['title'] ?? '' ) : $p;
+            }, $prizes );
+        }
+
+        return self::get_default_gifts();
+    }
+
+    /**
+     * Tạo mới hộp quà cho User
+     */
+    public static function create_user_box( $user_id, $title = '', $settings = array(), $gifts = array(), $content = '' ) {
+        $user_id = absint( $user_id );
+        if ( ! $user_id ) {
+            return 0;
+        }
+
+        $title = trim( $title ) ?: sprintf( __( 'Hộp quà may mắn (%s)', 'wp-spin-wheel' ), current_time( 'd/m/Y H:i' ) );
+
+        $post_id = wp_insert_post( array(
+            'post_title'   => sanitize_text_field( $title ),
+            'post_content' => wp_kses_post( $content ),
+            'post_status'  => 'publish',
+            'post_type'    => 'spin_box',
+            'post_author'  => $user_id,
+        ) );
+
+        if ( is_wp_error( $post_id ) || ! $post_id ) {
+            return 0;
+        }
+
+        update_post_meta( $post_id, '_user_id', $user_id );
+        update_post_meta( $post_id, '_spin_box_views', 0 );
+        update_post_meta( $post_id, '_spin_box_total_opens', 0 );
+
+        if ( ! empty( $settings ) && is_array( $settings ) ) {
+            update_post_meta( $post_id, '_spin_box_overrides', wp_json_encode( $settings ) );
+            update_post_meta( $post_id, '_spin_box_design', wp_json_encode( $settings ) );
+            update_post_meta( $post_id, '_spin_wheel_overrides', wp_json_encode( $settings ) );
+        }
+
+        if ( ! empty( $gifts ) && is_array( $gifts ) ) {
+            update_post_meta( $post_id, '_spin_box_gifts_json', wp_json_encode( $gifts ) );
+            // Đồng bộ format prizes
+            $prizes_formatted = array_map( function( $g ) {
+                $t = is_array( $g ) ? ( $g['title'] ?? '' ) : $g;
+                return array( 'title' => $t, 'color' => '#dc3545', 'weight' => 10, 'stock' => 9999 );
+            }, $gifts );
+            WP_Spin_Wheel_Prize::sync_prizes( $post_id, $prizes_formatted );
+        } else {
+            $default_gifts = self::get_default_gifts();
+            update_post_meta( $post_id, '_spin_box_gifts_json', wp_json_encode( $default_gifts ) );
+        }
+
+        return absint( $post_id );
+    }
+
+    /**
+     * Nhân bản / Sao chép hộp quà
+     */
+    public static function duplicate_user_box( $box_id, $user_id, $custom_data = array() ) {
+        $box_id  = absint( $box_id );
+        $user_id = absint( $user_id );
+        if ( ! $user_id ) {
+            return 0;
+        }
+
+        $title    = '';
+        $content  = '';
+        $settings = array();
+        $gifts    = array();
+
+        if ( $box_id > 0 ) {
+            $post = get_post( $box_id );
+            if ( $post ) {
+                $title    = $post->post_title;
+                $content  = $post->post_content;
+                $settings = self::get_box_settings( $box_id );
+                $gifts    = self::get_box_gifts( $box_id );
+            }
+        }
+
+        if ( ! empty( $custom_data['title'] ) ) {
+            $title = sanitize_text_field( $custom_data['title'] );
+        }
+        if ( ! empty( $custom_data['content'] ) || ! empty( $custom_data['description'] ) ) {
+            $content = wp_kses_post( $custom_data['content'] ?? $custom_data['description'] );
+        }
+        if ( ! empty( $custom_data['settings'] ) && is_array( $custom_data['settings'] ) ) {
+            $settings = $custom_data['settings'];
+        }
+        if ( ! empty( $custom_data['gifts'] ) && is_array( $custom_data['gifts'] ) ) {
+            $gifts = $custom_data['gifts'];
+        } elseif ( ! empty( $custom_data['prizes'] ) && is_array( $custom_data['prizes'] ) ) {
+            $gifts = array_map( function( $p ) { return is_array($p) ? ($p['title'] ?? '') : $p; }, $custom_data['prizes'] );
+        }
+
+        if ( ! empty( $title ) ) {
+            $new_title = ( strpos( $title, '(Bản sao)' ) !== false ) ? $title : ( $title . ' (Bản sao)' );
+        } else {
+            $new_title = sprintf( __( 'Hộp quà (Bản sao %s)', 'wp-spin-wheel' ), current_time( 'd/m/Y H:i' ) );
+        }
+
+        return self::create_user_box( $user_id, $new_title, $settings, $gifts, $content );
+    }
+
+    /**
+     * Xóa hộp quà
+     */
+    public static function delete_user_box( $box_id, $user_id ) {
+        $box_id  = absint( $box_id );
+        $user_id = absint( $user_id );
+        if ( ! $box_id || ! $user_id ) {
+            return false;
+        }
+
+        $post = get_post( $box_id );
+        if ( ! $post || ( (int) $post->post_author !== $user_id && ! current_user_can( 'manage_options' ) ) ) {
+            return false;
+        }
+
+        wp_delete_post( $box_id, true );
+        return true;
+    }
+
+    /**
+     * Lấy hoặc tạo hộp quà mặc định cho user
+     */
+    public static function get_or_create_user_box( $user_id ) {
+        $user_id = absint( $user_id );
+        if ( ! $user_id ) {
+            return 0;
+        }
+
+        $boxes = get_posts( array(
+            'post_type'      => 'spin_box',
+            'post_status'    => array( 'publish', 'draft', 'private', 'pending' ),
+            'author'         => $user_id,
+            'posts_per_page' => 1,
+            'orderby'        => 'ID',
+            'order'          => 'ASC',
+            'fields'         => 'ids',
+        ) );
+
+        if ( ! empty( $boxes ) ) {
+            return absint( $boxes[0] );
+        }
+
+        $user = get_userdata( $user_id );
+        $user_name = $user ? ( $user->display_name ?: $user->user_login ) : 'User #' . $user_id;
+        $title = sprintf( __( 'Hộp quà của %s', 'wp-spin-wheel' ), $user_name );
+
+        return self::create_user_box( $user_id, $title, self::get_default_settings(), self::get_default_gifts() );
+    }
+
+    /**
+     * Lấy danh sách hộp quà của user
+     */
+    public static function get_user_boxes( $user_id, $args = array() ) {
+        $user_id = absint( $user_id );
+        if ( ! $user_id ) {
+            return array();
+        }
+
+        $defaults = array(
+            'post_type'      => 'spin_box',
+            'post_status'    => array( 'publish', 'draft', 'private', 'pending' ),
+            'author'         => $user_id,
+            'posts_per_page' => 20,
+            'orderby'        => 'ID',
+            'order'          => 'DESC',
+        );
+
+        $query = new WP_Query( wp_parse_args( $args, $defaults ) );
+        $list = array();
+
+        if ( $query->have_posts() ) {
+            while ( $query->have_posts() ) {
+                $query->the_post();
+                $pid = get_the_ID();
+                $list[] = array(
+                    'id'           => $pid,
+                    'title'        => get_the_title(),
+                    'permalink'    => get_permalink(),
+                    'created_at'   => get_the_date( 'd/m/Y H:i', $pid ),
+                    'gift_count'   => count( self::get_box_gifts( $pid ) ),
+                    'settings'     => self::get_box_settings( $pid ),
+                );
+            }
+            wp_reset_postdata();
+        }
+
+        return $list;
+    }
+}

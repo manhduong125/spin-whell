@@ -189,6 +189,52 @@ class WP_Spin_Wheel_REST_API {
             'callback'            => array( $this, 'increment_wheel_views_route' ),
             'permission_callback' => '__return_true',
         ) );
+
+        // ══════════════════════════════════════════════════════════
+        // REST API: HỘP QUÀ MAY MẮN (BOX ENDPOINTS)
+        // ══════════════════════════════════════════════════════════
+        register_rest_route( 'spin-wheel/v1', '/boxes/(?P<id>\d+)', array(
+            'methods'             => 'GET',
+            'callback'            => array( $this, 'get_box_route' ),
+            'permission_callback' => '__return_true',
+        ) );
+
+        register_rest_route( 'spin-wheel/v1', '/user/boxes', array(
+            array(
+                'methods'             => 'GET',
+                'callback'            => array( $this, 'get_user_boxes_route' ),
+                'permission_callback' => function() { return is_user_logged_in(); },
+            ),
+            array(
+                'methods'             => 'POST',
+                'callback'            => array( $this, 'create_user_box_route' ),
+                'permission_callback' => function() { return is_user_logged_in(); },
+            ),
+        ) );
+
+        register_rest_route( 'spin-wheel/v1', '/user/boxes/(?P<id>\d+)/duplicate', array(
+            array(
+                'methods'             => 'POST',
+                'callback'            => array( $this, 'duplicate_user_box_route' ),
+                'permission_callback' => function() { return is_user_logged_in(); },
+            ),
+        ) );
+
+        register_rest_route( 'spin-wheel/v1', '/user/boxes/copy', array(
+            array(
+                'methods'             => 'POST',
+                'callback'            => array( $this, 'duplicate_user_box_route' ),
+                'permission_callback' => function() { return is_user_logged_in(); },
+            ),
+        ) );
+
+        register_rest_route( 'spin-wheel/v1', '/user/boxes/(?P<id>\d+)', array(
+            array(
+                'methods'             => 'DELETE',
+                'callback'            => array( $this, 'delete_user_box_route' ),
+                'permission_callback' => function() { return is_user_logged_in(); },
+            ),
+        ) );
     }
 
     public function get_wheel( $request ) {
@@ -664,6 +710,90 @@ class WP_Spin_Wheel_REST_API {
         return rest_ensure_response( array(
             'success' => true,
             'views'   => $views,
+        ) );
+    }
+
+    // ══════════════════════════════════════════════════════════
+    // BOX REST HANDLERS
+    // ══════════════════════════════════════════════════════════
+    public function get_box_route( $request ) {
+        $box_id = absint( $request['id'] );
+        if ( ! $box_id || ( get_post_type( $box_id ) !== 'spin_box' && get_post_type( $box_id ) !== 'spin_wheel' ) ) {
+            return new WP_Error( 'invalid_box', __( 'Hộp quà không tồn tại.', 'wp-spin-wheel' ), array( 'status' => 404 ) );
+        }
+
+        $settings = WP_Spin_Wheel_Box::get_box_settings( $box_id );
+        $gifts    = WP_Spin_Wheel_Box::get_box_gifts( $box_id );
+
+        return rest_ensure_response( array(
+            'id'          => $box_id,
+            'title'       => get_the_title( $box_id ),
+            'description' => get_post_field( 'post_content', $box_id ),
+            'settings'    => $settings,
+            'gifts'       => $gifts,
+        ) );
+    }
+
+    public function get_user_boxes_route( $request ) {
+        $user_id = get_current_user_id();
+        $boxes   = WP_Spin_Wheel_Box::get_user_boxes( $user_id );
+        return rest_ensure_response( $boxes );
+    }
+
+    public function create_user_box_route( $request ) {
+        $user_id  = get_current_user_id();
+        $data     = $request->get_json_params() ?: $request->get_params();
+        $title    = sanitize_text_field( $data['title'] ?? '' );
+        $content  = wp_kses_post( $data['content'] ?? '' );
+        $settings = is_array( $data['settings'] ?? null ) ? $data['settings'] : array();
+        $gifts    = is_array( $data['gifts'] ?? null ) ? $data['gifts'] : ( is_array( $data['prizes'] ?? null ) ? $data['prizes'] : array() );
+
+        $post_id = WP_Spin_Wheel_Box::create_user_box( $user_id, $title, $settings, $gifts, $content );
+        if ( ! $post_id ) {
+            return new WP_Error( 'create_failed', __( 'Không thể tạo hộp quà mới.', 'wp-spin-wheel' ), array( 'status' => 500 ) );
+        }
+
+        return rest_ensure_response( array(
+            'success'   => true,
+            'box_id'    => $post_id,
+            'title'     => get_the_title( $post_id ),
+            'permalink' => get_permalink( $post_id ),
+            'home_url'  => home_url( '/?box_id=' . $post_id ),
+            'message'   => __( 'Đã tạo hộp quà mới thành công.', 'wp-spin-wheel' ),
+        ) );
+    }
+
+    public function duplicate_user_box_route( $request ) {
+        $user_id     = get_current_user_id();
+        $box_id      = absint( $request['id'] ?? ( $request->get_param( 'box_id' ) ?: 0 ) );
+        $custom_data = $request->get_json_params() ?: $request->get_params();
+
+        $new_id = WP_Spin_Wheel_Box::duplicate_user_box( $box_id, $user_id, $custom_data );
+        if ( ! $new_id ) {
+            return new WP_Error( 'duplicate_failed', __( 'Không thể sao chép hộp quà.', 'wp-spin-wheel' ), array( 'status' => 500 ) );
+        }
+
+        return rest_ensure_response( array(
+            'success'   => true,
+            'box_id'    => $new_id,
+            'title'     => get_the_title( $new_id ),
+            'permalink' => get_permalink( $new_id ),
+            'home_url'  => home_url( '/?box_id=' . $new_id ),
+            'message'   => __( 'Đã sao chép hộp quà thành công.', 'wp-spin-wheel' ),
+        ) );
+    }
+
+    public function delete_user_box_route( $request ) {
+        $user_id = get_current_user_id();
+        $box_id  = absint( $request['id'] );
+        $deleted = WP_Spin_Wheel_Box::delete_user_box( $box_id, $user_id );
+        if ( ! $deleted ) {
+            return new WP_Error( 'delete_failed', __( 'Không thể xóa hộp quà này.', 'wp-spin-wheel' ), array( 'status' => 403 ) );
+        }
+
+        return rest_ensure_response( array(
+            'success' => true,
+            'message' => __( 'Đã xóa hộp quà thành công.', 'wp-spin-wheel' ),
         ) );
     }
 

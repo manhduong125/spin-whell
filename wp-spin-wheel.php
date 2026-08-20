@@ -49,6 +49,7 @@ require_once WP_SPIN_WHEEL_PATH . 'includes/class-history.php';
 require_once WP_SPIN_WHEEL_PATH . 'includes/class-rest-api.php';
 require_once WP_SPIN_WHEEL_PATH . 'includes/class-export.php';
 require_once WP_SPIN_WHEEL_PATH . 'includes/class-setting.php';
+require_once WP_SPIN_WHEEL_PATH . 'includes/class-box.php';
 
 function wp_spin_wheel_init() {
     new WP_Spin_Wheel_Post_Type();
@@ -57,6 +58,7 @@ function wp_spin_wheel_init() {
     new WP_Spin_Wheel_Frontend();
     new WP_Spin_Wheel_Shortcode();
     new WP_Spin_Wheel_Wheel();
+    new WP_Spin_Wheel_Box();
     new WP_Spin_Wheel_Random();
     new WP_Spin_Wheel_Form();
     new WP_Spin_Wheel_Prize();

@@ -1,0 +1,293 @@
+/* ══════════════════════════════════════════════════════════
+   MYSTERY BOX / HỘP QUÀ MAY MẮN CSS
+   ══════════════════════════════════════════════════════════ */
+
+.lucky-box-page {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  overflow-x: hidden;
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  transition: background 0.4s ease;
+}
+
+.lucky-box {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  text-align: center;
+  position: relative;
+  z-index: 2;
+}
+
+/* Actions Header */
+.lucky-box-page .actions {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  z-index: 100;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.lucky-box-page .actions .btn {
+  background: rgba(0, 0, 0, 0.4);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(8px);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.lucky-box-page .actions .btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px);
+}
+
+.lucky-box-page .actions .btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Box Info Header */
+.box-info {
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.box-info .card {
+  border-radius: 12px;
+  border: none;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(6px);
+  transition: all 0.3s ease;
+}
+
+.box-info h1, .box-info .h1 {
+  font-size: 24px;
+  font-weight: 800;
+  margin: 0 0 6px 0;
+  letter-spacing: 0.5px;
+}
+
+/* 3D Box Jack container */
+.box-jack {
+  position: relative;
+  width: 110px;
+  height: 110px;
+  margin: 15px auto;
+  perspective: 600px;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.25s ease;
+}
+
+.box-jack:hover {
+  transform: scale(1.06);
+}
+
+/* Lid (nắp hộp) */
+.box-jack .lid {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 110px;
+  height: 25px;
+  background: linear-gradient(135deg, #ff416c, #ff4b2b);
+  border-radius: 6px 6px 0 0;
+  border: 2px solid #ffffff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+  z-index: 10;
+  transform-origin: top center;
+  transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.box-jack .lid::after {
+  content: "🎀";
+  position: absolute;
+  top: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 20px;
+}
+
+/* Front face (thân hộp) */
+.box-jack .front {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 110px;
+  height: 90px;
+  background: linear-gradient(135deg, #e52d27, #b31217);
+  border-radius: 0 0 8px 8px;
+  border: 2px solid #ffffff;
+  border-top: none;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.box-jack .front::before {
+  content: "?";
+  font-size: 32px;
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.85);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Jack / Gift popped out */
+.box-jack .jack {
+  position: absolute;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%) translateY(30px) scale(0);
+  width: 90px;
+  height: 90px;
+  z-index: 8;
+  pointer-events: none;
+  opacity: 0;
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.box-jack .gift {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.box-jack .gift .ball {
+  background: linear-gradient(135deg, #ffd700, #ffaa00);
+  color: #1a1a1a;
+  border-radius: 50%;
+  width: 75px;
+  height: 75px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 13px;
+  padding: 4px;
+  text-align: center;
+  border: 2px solid #ffffff;
+  box-shadow: 0 6px 16px rgba(255, 215, 0, 0.5);
+  word-break: break-word;
+  line-height: 1.2;
+}
+
+.box-jack .gift .spring {
+  width: 28px;
+  height: 28px;
+  margin-top: -6px;
+}
+
+.box-jack .gift .spring svg {
+  width: 100%;
+  height: 100%;
+  fill: #ffd700;
+}
+
+/* OPENED STATE */
+.box-jack.opened,
+.box-jack.active {
+  cursor: default;
+}
+
+.box-jack.opened .lid,
+.box-jack.active .lid {
+  transform: rotateX(120deg) translateY(-10px);
+}
+
+.box-jack.opened .front::before,
+.box-jack.active .front::before {
+  content: "✓";
+  color: #48bb78;
+}
+
+.box-jack.opened .jack,
+.box-jack.active .jack {
+  transform: translateX(-50%) translateY(-65px) scale(1.15);
+  opacity: 1;
+  animation: sw-jack-bounce 0.6s ease-out;
+}
+
+@keyframes sw-jack-bounce {
+  0% { transform: translateX(-50%) translateY(20px) scale(0.2); }
+  60% { transform: translateX(-50%) translateY(-80px) scale(1.25); }
+  80% { transform: translateX(-50%) translateY(-60px) scale(1.1); }
+  100% { transform: translateX(-50%) translateY(-65px) scale(1.15); }
+}
+
+/* TEMPLATE THEMES */
+/* tpl-christmas */
+.tpl-christmas .box-jack .lid { background: linear-gradient(135deg, #165b33, #146b3a); }
+.tpl-christmas .box-jack .front { background: linear-gradient(135deg, #bb2528, #ea4630); }
+.tpl-christmas .box-jack .gift .ball { background: linear-gradient(135deg, #f8b229, #f4a261); }
+
+/* tpl-egg (Đập trứng) */
+.tpl-egg .box-jack { border-radius: 50%; }
+.tpl-egg .box-jack .lid {
+  border-radius: 50% 50% 0 0;
+  height: 50px;
+  background: linear-gradient(135deg, #f6d365, #fda085);
+}
+.tpl-egg .box-jack .front {
+  border-radius: 0 0 50% 50%;
+  height: 60px;
+  background: linear-gradient(135deg, #fbc2eb, #a6c1ee);
+}
+.tpl-egg .box-jack .lid::after { content: "🥚"; }
+
+/* tpl-money-bag (Túi tiền) */
+.tpl-money-bag .box-jack .lid { background: linear-gradient(135deg, #f7971e, #ffd200); }
+.tpl-money-bag .box-jack .front { background: linear-gradient(135deg, #e65c00, #f9d423); }
+.tpl-money-bag .box-jack .lid::after { content: "💰"; }
+
+/* tpl-money (Lì xì) */
+.tpl-money .box-jack .lid { background: linear-gradient(135deg, #d31027, #ea384d); }
+.tpl-money .box-jack .front { background: linear-gradient(135deg, #b31217, #e52d27); }
+.tpl-money .box-jack .lid::after { content: "🧧"; }
+
+/* Bottom Buttons */
+.button-group .btn {
+  padding: 10px 24px;
+  font-size: 15px;
+  font-weight: 700;
+  border-radius: 8px;
+  margin: 0 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+}
+
+.button-group .btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+}
+
+@media (max-width: 768px) {
+  .box-jack { width: 85px; height: 85px; margin: 8px auto; }
+  .box-jack .lid { width: 85px; height: 20px; }
+  .box-jack .front { width: 85px; height: 70px; }
+  .box-jack .gift .ball { width: 62px; height: 62px; font-size: 11px; }
+  .box-info h1 { font-size: 18px; }
+}
