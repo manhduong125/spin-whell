@@ -219,6 +219,8 @@
         $('#btn-reload').addClass('d-none').hide();
     }
 
+    var DEFAULT_BOX_BG_GRADIENT = 'conic-gradient(from 45deg, rgb(10, 74, 89) 0deg, rgb(10, 74, 89) 45deg, rgb(13, 89, 149) 45deg, rgb(13, 89, 149) 90deg, rgb(17, 109, 208) 90deg, rgb(17, 109, 208) 135deg, rgb(22, 136, 255) 135deg, rgb(22, 136, 255) 180deg, rgb(27, 166, 255) 180deg, rgb(27, 166, 255) 225deg, rgb(33, 200, 255) 225deg, rgb(33, 200, 255) 270deg, rgb(40, 236, 255) 270deg, rgb(40, 236, 255) 315deg, rgb(47, 255, 255) 315deg, rgb(47, 255, 255) 360deg)';
+
     // Cài đặt giao diện & style
     function applyBoxSettings() {
         var title = $.trim($('#hqmm-title').val() || '') || 'HỘP QUÀ MAY MẮN ONLINE';
@@ -234,16 +236,41 @@
         var btnBgColor = $('#btn_bg_color').val() || '#dc3545';
         var btnColor = $('#btn_color').val() || '#ffffff';
 
-        var $wrap = $('#lucky-box, .lucky-box-page');
-        if (bgImg) {
-            $wrap.css({ 'background-image': 'url("' + bgImg + '")', 'background-size': 'cover', 'background-position': 'center' });
-        } else if (bgGradient) {
-            $wrap.css({ 'background': bgGradient });
-        } else if (bgColor) {
-            $wrap.css({ 'background-color': bgColor, 'background-image': 'none' });
+        var $page = $('.lucky-box-page');
+        if (!$page.length) {
+            $page = $('#lucky-box').closest('.lucky-box-page');
+        }
+        if (!$page.length) {
+            $page = $('#lucky-box');
         }
 
-        $wrap.css({ 'color': color });
+        $page.each(function () {
+            this.style.removeProperty('background');
+            this.style.removeProperty('background-image');
+            this.style.removeProperty('background-color');
+            this.style.removeProperty('background-size');
+            this.style.removeProperty('background-position');
+            this.style.removeProperty('background-repeat');
+
+            if (bgGradient) {
+                this.style.background = bgGradient;
+            } else if (bgImg) {
+                this.style.background = 'url("' + bgImg + '") center center / cover no-repeat';
+            } else if (bgColor) {
+                this.style.backgroundColor = bgColor;
+            } else {
+                this.style.background = DEFAULT_BOX_BG_GRADIENT;
+            }
+        });
+
+        $('#lucky-box').css({
+            'background': 'transparent',
+            'background-color': 'transparent',
+            'background-image': 'none',
+            'color': color
+        });
+
+        $page.css({ 'color': color });
         $('.button-group .btn, .btn-brand').css({ 'background-color': btnBgColor, 'color': btnColor });
         $('.box-info .card').css({ 'background-color': btnBgColor, 'color': btnColor });
 
@@ -302,39 +329,77 @@
 
     // Khởi tạo các sự kiện khi DOM sẵn sàng
     $(document).ready(function () {
-        // Nạp cấu hình từ localStorage nếu có
-        try {
-            var saved = parseJson(localStorage.getItem('wp_spin_box_settings_guest'), null);
-            if (saved) {
-                if (saved.title) {
-                    $('#hqmm-title').val(saved.title);
-                    $('#heading-title').text(saved.title);
-                }
-                if (saved.gifts && Array.isArray(saved.gifts)) {
-                    $('#section-list').val(saved.gifts.join('\n'));
-                }
-                if (saved.luotchoi) {
-                    $('#luotchoi').val(saved.luotchoi);
-                    maxTurns = saved.luotchoi;
-                    turnsLeft = maxTurns;
-                    $('#conlai').text(turnsLeft);
-                }
-                if (saved.template) $('#template').val(saved.template);
-                if (saved.sound) $('#sound').val(saved.sound);
-                if (saved.sound_file) $('#sound_file').val(saved.sound_file);
-                if (saved.noti_sound) $('#noti_sound').val(saved.noti_sound);
-                if (saved.noti_sound_file) $('#noti_sound_file').val(saved.noti_sound_file);
-                if (saved.bg_img) $('#bg_img').val(saved.bg_img);
-                if (saved.bg_gradient) $('#bg_gradient').val(saved.bg_gradient);
-                if (saved.bg_color) $('#bg_color').val(saved.bg_color);
-                if (saved.color) $('#color').val(saved.color);
-                if (saved.btn_bg_color) $('#btn_bg_color').val(saved.btn_bg_color);
-                if (saved.btn_color) $('#btn_color').val(saved.btn_color);
-                if (saved.confetti !== undefined) $('#confetti').prop('checked', !!saved.confetti);
+        // 1. Đọc cài đặt từ data attribute PHP
+        var containerEl = $('#lucky-box, #lucky-box-page').first();
+        var phpSettings = parseJson(containerEl.attr('data-box-settings'), null);
+        var phpGifts = parseJson(containerEl.attr('data-box-gifts'), null);
 
-                applyBoxSettings();
+        // 2. Đọc cài đặt đã lưu trong localStorage (nếu có)
+        var guestSettings = parseJson(localStorage.getItem('wp_spin_box_settings_guest'), null);
+
+        var finalSettings = $.extend({}, {
+            title: 'HỘP QUÀ MAY MẮN ONLINE',
+            template: 'tpl-jib',
+            luotchoi: 3,
+            sound: 'winner',
+            sound_file: '',
+            noti_sound: 'concainit',
+            noti_sound_file: '',
+            popup_title: 'Hộp quà có',
+            confetti: true,
+            bg_color: '#dc3545',
+            color: '#ffffff',
+            bg_img: '',
+            bg_gradient: '',
+            btn_bg_color: '#dc3545',
+            btn_color: '#ffffff'
+        }, phpSettings || {}, guestSettings || {});
+
+        if (finalSettings) {
+            if (finalSettings.title) {
+                $('#hqmm-title').val(finalSettings.title);
+                $('#heading-title').text(finalSettings.title);
             }
-        } catch (e) {}
+            if (finalSettings.gifts && Array.isArray(finalSettings.gifts) && finalSettings.gifts.length) {
+                $('#section-list').val(finalSettings.gifts.join('\n'));
+            } else if (phpGifts && Array.isArray(phpGifts) && phpGifts.length) {
+                $('#section-list').val(phpGifts.join('\n'));
+            }
+            if (finalSettings.luotchoi) {
+                $('#luotchoi').val(finalSettings.luotchoi);
+                maxTurns = parseInt(finalSettings.luotchoi, 10) || 3;
+                turnsLeft = maxTurns;
+                $('#conlai').text(turnsLeft);
+            }
+            if (finalSettings.template) {
+                $('#template').val(finalSettings.template);
+                var tplItem = $('#btn-select-tpl .dropdown-item[data-content="' + finalSettings.template + '"]');
+                if (tplItem.length) {
+                    $('#btn-dropdown-select-tpl .item-title').text(tplItem.data('title'));
+                }
+            }
+            if (finalSettings.sound) $('#sound').val(finalSettings.sound);
+            if (finalSettings.sound_file) $('#sound_file').val(finalSettings.sound_file);
+            if (finalSettings.noti_sound) $('#noti_sound').val(finalSettings.noti_sound);
+            if (finalSettings.noti_sound_file) $('#noti_sound_file').val(finalSettings.noti_sound_file);
+            if (finalSettings.bg_img) {
+                $('#bg_img').val(finalSettings.bg_img);
+                $('#box-bgr-preview').attr('src', finalSettings.bg_img);
+                $('#box-bgr-preview-wrap').show();
+            }
+            if (finalSettings.bg_gradient) {
+                $('#bg_gradient').val(finalSettings.bg_gradient);
+                $('#box-gradient-preview-box').css('background', finalSettings.bg_gradient);
+            }
+            if (finalSettings.bg_color) $('#bg_color').val(finalSettings.bg_color);
+            if (finalSettings.color) $('#color').val(finalSettings.color);
+            if (finalSettings.btn_bg_color) $('#btn_bg_color').val(finalSettings.btn_bg_color);
+            if (finalSettings.btn_color) $('#btn_color').val(finalSettings.btn_color);
+            if (finalSettings.confetti !== undefined) $('#confetti').prop('checked', !!finalSettings.confetti);
+        }
+
+        // Luôn áp dụng settings khi trang tải
+        applyBoxSettings();
 
         // Click mở hộp quà
         $(document).on('click', '.box-jack, .box', function (e) {
@@ -421,8 +486,202 @@
             var tplTitle = $(this).data('title') || 'Ball in box';
             $('#template').val(tplCode);
             $('#btn-dropdown-select-tpl .item-title').text(tplTitle);
-            $('#btn-dropdown-select-tpl .item-img').attr('class', 'item-img ' + tplCode + ' me-1');
             $('#lucky-box').attr('class', 'lucky-box no-ads ' + tplCode);
+        });
+
+        // ══════════════════════════════════════════════════════════
+        // THƯ VIỆN ẢNH NỀN VÀ GRADIENT (GIỐNG WHEEL)
+        // ══════════════════════════════════════════════════════════
+
+        // Áp dụng từ bảng Thư viện (.sw-box-media-apply)
+        $(document).on('click', '.sw-box-media-apply', function (e) {
+            e.preventDefault();
+            var $btn = $(this);
+            var type = $btn.data('type');
+            var origText = $btn.text();
+
+            if (type === 'bgr') {
+                var url = $btn.data('url') || '';
+                if (url) {
+                    $('#bg_img').val(url);
+                    $('#bg_gradient').val('');
+                    $('#box-bgr-preview').attr('src', url);
+                    $('#box-bgr-preview-wrap').show();
+                    applyBoxSettings();
+                }
+            } else if (type === 'grd') {
+                var gradientVal = $btn.data('gradient') || $btn.closest('tr').find('.sw-gradient-preview').data('gradient') || '';
+                if (gradientVal) {
+                    $('#bg_gradient').val(gradientVal);
+                    $('#bg_img').val('');
+                    $('#box-bgr-preview-wrap').hide();
+                    $('#box-gradient-preview-box').css('background', gradientVal);
+                    applyBoxSettings();
+                }
+            }
+
+            $btn.text('✓ Đã chọn').addClass('btn-success').removeClass('btn-secondary');
+            setTimeout(function () {
+                $btn.text(origText).removeClass('btn-success').addClass('btn-secondary');
+            }, 1200);
+        });
+
+        // Click các vòng tròn mẫu swatch gradient trong Tab 2
+        $(document).on('click', '.sw-box-gradient-swatch', function (e) {
+            e.preventDefault();
+            var gradientVal = $(this).data('gradient') || '';
+            if (gradientVal) {
+                $('#bg_gradient').val(gradientVal);
+                $('#bg_img').val('');
+                $('#box-bgr-preview-wrap').hide();
+                $('#box-gradient-preview-box').css('background', gradientVal);
+                applyBoxSettings();
+            }
+        });
+
+        // Nút Áp dụng Gradient thủ công
+        $(document).on('click', '#btn-apply-box-gradient', function (e) {
+            e.preventDefault();
+            var gradientVal = $.trim($('#bg_gradient').val() || '');
+            if (gradientVal) {
+                $('#bg_img').val('');
+                $('#box-bgr-preview-wrap').hide();
+                $('#box-gradient-preview-box').css('background', gradientVal);
+                applyBoxSettings();
+            }
+        });
+
+        // Nút Áp dụng ảnh URL
+        $(document).on('click', '#btn-apply-box-img', function (e) {
+            e.preventDefault();
+            var url = $.trim($('#bg_img').val() || '');
+            if (url) {
+                $('#bg_gradient').val('');
+                $('#box-bgr-preview').attr('src', url);
+                $('#box-bgr-preview-wrap').show();
+                applyBoxSettings();
+            }
+        });
+
+        // Nút Xoá ảnh nền
+        $(document).on('click', '#btn-clear-box-img', function (e) {
+            e.preventDefault();
+            $('#bg_img').val('');
+            $('#box-bgr-preview-wrap').hide();
+            $('#box-bgr-preview').attr('src', '');
+            applyBoxSettings();
+        });
+
+        // Xử lý Upload ảnh nền
+        $(document).on('change', '#upload_box_bgr', function () {
+            var file = this.files && this.files[0];
+            if (!file) return;
+            if (file.size > 5 * 1024 * 1024) {
+                alert('Dung lượng ảnh tối đa 5MB.');
+                return;
+            }
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                var dataUrl = e.target.result;
+                $('#bg_img').val(dataUrl);
+                $('#bg_gradient').val('');
+                $('#box-bgr-preview').attr('src', dataUrl);
+                $('#box-bgr-preview-wrap').show();
+                applyBoxSettings();
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // Chọn mẫu ảnh nền từ thư viện
+        $(document).on('click', '.sw-bg-sample', function (e) {
+            e.preventDefault();
+            var bgUrl = $(this).data('url') || '';
+            if (bgUrl) {
+                $('#bg_img').val(bgUrl);
+                $('#bg_gradient').val('');
+                $('#box-bgr-preview').attr('src', bgUrl);
+                $('#box-bgr-preview-wrap').show();
+                applyBoxSettings();
+            }
+        });
+
+        // Nút Áp dụng ảnh URL
+        $(document).on('click', '#btn-apply-box-img', function (e) {
+            e.preventDefault();
+            var url = $.trim($('#bg_img').val() || '');
+            if (url) {
+                $('#bg_gradient').val('');
+                $('#box-bgr-preview').attr('src', url);
+                $('#box-bgr-preview-wrap').show();
+                $('#lucky-box, .lucky-box-page').css({
+                    'background-image': 'url("' + url + '")',
+                    'background-size': 'cover',
+                    'background-position': 'center'
+                });
+            }
+        });
+
+        // Nút Xoá ảnh nền
+        $(document).on('click', '#btn-clear-box-img', function (e) {
+            e.preventDefault();
+            $('#bg_img').val('');
+            $('#box-bgr-preview-wrap').hide();
+            $('#box-bgr-preview').attr('src', '');
+            $('#lucky-box, .lucky-box-page').css({ 'background-image': 'none' });
+        });
+
+        // Xử lý Upload ảnh nền
+        $(document).on('change', '#upload_box_bgr', function () {
+            var file = this.files && this.files[0];
+            if (!file) return;
+            if (file.size > 5 * 1024 * 1024) {
+                alert('Dung lượng ảnh tối đa 5MB.');
+                return;
+            }
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                var dataUrl = e.target.result;
+                $('#bg_img').val(dataUrl);
+                $('#bg_gradient').val('');
+                $('#box-bgr-preview').attr('src', dataUrl);
+                $('#box-bgr-preview-wrap').show();
+                $('#lucky-box, .lucky-box-page').css({
+                    'background-image': 'url("' + dataUrl + '")',
+                    'background-size': 'cover',
+                    'background-position': 'center'
+                });
+            };
+            reader.readAsDataURL(file);
+        });
+
+        // Nút đặt lại cài đặt Box về mặc định (#btn-reset-box)
+        $(document).on('click', '#btn-reset-box', function (e) {
+            e.preventDefault();
+            localStorage.removeItem('wp_spin_box_settings_guest');
+
+            $('#hqmm-title').val('HỘP QUÀ MAY MẮN ONLINE');
+            $('#heading-title').text('HỘP QUÀ MAY MẮN ONLINE');
+            $('#section-list').val("100k\nỐp lưng iphone\n50k\nChúc bạn may mắn\n200k\nBút Montblanc\nVí da 500k\nSổ tay\nGối tựa lưng\nBình giữ nhiệt\nLy sứ\nHộp đựng cơm");
+            $('#luotchoi').val('3');
+            $('#sound').val('winner');
+            $('#sound_file').val('');
+            $('#noti_sound').val('concainit');
+            $('#noti_sound_file').val('');
+            $('#popup_title').val('Hộp quà có');
+            $('#confetti').prop('checked', true);
+            $('#template').val('tpl-jib');
+            $('#btn-dropdown-select-tpl .item-title').text('Ball in box (Mặc định)');
+            $('#bg_color').val('#dc3545');
+            $('#color').val('#ffffff');
+            $('#btn_bg_color').val('#dc3545');
+            $('#btn_color').val('#ffffff');
+            $('#bg_img').val('');
+            $('#bg_gradient').val('');
+            $('#show_particle').prop('checked', true);
+
+            applyBoxSettings();
+            resetGame();
+            closeModal('#settingsModal');
         });
 
         // 11. Nhận quà trong modal kết quả

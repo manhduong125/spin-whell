@@ -23,6 +23,8 @@ class WP_Spin_Wheel_Admin {
             'post-new.php',
             'edit-spin_wheel',
             'spin_wheel',
+            'edit-spin_box',
+            'spin_box',
         );
 
         if ( ! in_array( $screen_id, $allowed_screens, true ) && strpos( $hook, 'spin_wheel' ) === false ) {

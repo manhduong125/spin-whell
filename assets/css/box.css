@@ -25,6 +25,7 @@
   text-align: center;
   position: relative;
   z-index: 2;
+  background: transparent !important;
 }
 
 /* Actions Header */

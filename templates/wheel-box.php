@@ -12,23 +12,36 @@ $default_gifts = array(
     '200k', 'Bút Montblanc', 'Ví da 500k', 'Sổ tay',
     'Gối tựa lưng', 'Bình giữ nhiệt', 'Ly sứ', 'Hộp đựng cơm'
 );
+$default_box_settings = WP_Spin_Wheel_Box::get_default_settings();
 
 if ($box_id > 0) {
     $box_post = get_post($box_id);
     if ($box_post) {
         $default_box_title = $box_post->post_title ?: $default_box_title;
-        $saved_settings = WP_Spin_Wheel_Helper::get_wheel_overrides($box_id);
-        $saved_prizes = WP_Spin_Wheel_Prize::get_prizes($box_id);
+        $saved_settings = WP_Spin_Wheel_Box::get_box_settings($box_id);
+        $saved_prizes = WP_Spin_Wheel_Box::get_box_gifts($box_id);
         if (! empty($saved_prizes)) {
-            $default_gifts = array_map(function($p) { return is_array($p) ? ($p['title'] ?? '') : $p; }, $saved_prizes);
+            $default_gifts = $saved_prizes;
+        }
+        if (! empty($saved_settings)) {
+            $default_box_settings = array_replace_recursive($default_box_settings, $saved_settings);
         }
         if (! empty($saved_settings['luotchoi'])) {
             $default_turns = absint($saved_settings['luotchoi']);
         }
     }
 }
+
+$_box_bg_style = '';
+if (! empty($default_box_settings['bg_gradient'])) {
+    $_box_bg_style = 'background: ' . $default_box_settings['bg_gradient'] . ';';
+} elseif (! empty($default_box_settings['bg_img'])) {
+    $_box_bg_style = 'background-image: url(' . esc_url($default_box_settings['bg_img']) . '); background-size: cover; background-position: center;';
+} elseif (! empty($default_box_settings['bg_color'])) {
+    $_box_bg_style = 'background-color: ' . esc_attr($default_box_settings['bg_color']) . ';';
+}
 ?>
-<div class="lucky-box-page">
+<div class="lucky-box-page" id="lucky-box-page" data-box-id="<?php echo esc_attr($box_id); ?>" data-box-settings="<?php echo esc_attr(wp_json_encode($default_box_settings)); ?>" data-box-gifts="<?php echo esc_attr(wp_json_encode($default_gifts)); ?>" style="<?php echo esc_attr($_box_bg_style); ?>">
 <div class="position-absolute top-0 end-0 mt-1 actions" id="actions">
     <button class="btn d-none" id="btn-reload" style="color: rgb(255, 255, 255);">Chơi lại</button>
 
@@ -88,8 +101,7 @@ if ($box_id > 0) {
         </svg></button>
 </div>
 
-<div class="lucky-box no-ads noads tpl-jib" id="lucky-box"
-    style="color: rgb(255, 255, 255); position: absolute; top: 50%; transform: translate(0px, -50%); padding-top: unset; padding-bottom: unset;">
+<div class="lucky-box no-ads tpl-jib" id="lucky-box" data-box-id="<?php echo esc_attr($box_id); ?>" data-box-settings="<?php echo esc_attr(wp_json_encode($default_box_settings)); ?>" data-box-gifts="<?php echo esc_attr(wp_json_encode($default_gifts)); ?>">
     <div class="hqmm-meta mb-5" id="hqmm-meta">
         <span id="edit-mode-txt"></span>
 
