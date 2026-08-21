@@ -57,6 +57,7 @@ class WP_Spin_Wheel_History {
         $data = array(
             'wheel_id'    => $wheel_id,
             'prize_id'    => $prize_id,
+            'prize_title' => $prize_title,
             'name'        => $name,
             'email'       => $email,
             'phone'       => $phone,
@@ -69,7 +70,7 @@ class WP_Spin_Wheel_History {
         $inserted = $wpdb->insert(
             $table,
             $data,
-            array( '%d', '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s' )
+            array( '%d', '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s' )
         );
 
         if ( $inserted ) {
@@ -86,7 +87,83 @@ class WP_Spin_Wheel_History {
     }
 
     /**
-     * Lấy danh sách lịch sử quay với bộ lọc và phân trang
+     * Ghi nhận lượt mở/nhận quà của Hộp quà may mắn vào database
+     *
+     * @param int    $box_id
+     * @param string $gift_name
+     * @param string $reward_code
+     * @param array  $form_data
+     * @return array|false
+     */
+    public function record_box_claim( $box_id, $gift_name, $reward_code = '', $form_data = array() ) {
+        global $wpdb;
+        $table  = $wpdb->prefix . 'spin_history';
+        $box_id = absint( $box_id );
+        $gift   = sanitize_text_field( $gift_name );
+
+        $name  = sanitize_text_field( $form_data['name'] ?? '' );
+        $email = sanitize_email( $form_data['email'] ?? '' );
+        $phone = sanitize_text_field( $form_data['phone'] ?? '' );
+
+        if ( is_user_logged_in() ) {
+            $current_user = wp_get_current_user();
+            if ( empty( $name ) ) {
+                $name = $current_user->display_name ?: $current_user->user_login;
+            }
+            if ( empty( $email ) ) {
+                $email = $current_user->user_email;
+            }
+        }
+
+        if ( empty( $name ) ) {
+            $name = __( 'Khách mở hộp quà', 'wp-spin-wheel' );
+        }
+
+        if ( empty( $reward_code ) ) {
+            $reward_code = 'HQ-' . wp_rand( 100000, 999999 );
+        }
+
+        $ip = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
+
+        $data = array(
+            'wheel_id'    => $box_id,
+            'prize_id'    => 0,
+            'prize_title' => $gift,
+            'name'        => $name,
+            'email'       => $email,
+            'phone'       => $phone,
+            'address'     => sanitize_text_field( $form_data['address'] ?? '' ),
+            'company'     => sanitize_text_field( $form_data['company'] ?? '' ),
+            'ip'          => $ip,
+            'status'      => 'claimed',
+            'reward_code' => $reward_code,
+            'created_at'  => current_time( 'mysql' ),
+        );
+
+        $inserted = $wpdb->insert(
+            $table,
+            $data,
+            array( '%d', '%d', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s' )
+        );
+
+        if ( $inserted ) {
+            $record_id = (int) $wpdb->insert_id;
+            if ( $box_id > 0 ) {
+                $total_opens = (int) get_post_meta( $box_id, '_spin_box_total_opens', true );
+                update_post_meta( $box_id, '_spin_box_total_opens', $total_opens + 1 );
+            }
+            return array(
+                'id'          => $record_id,
+                'reward_code' => $reward_code,
+                'gift_name'   => $gift,
+            );
+        }
+
+        return false;
+    }
+
+    /**
+     * Lấy danh sách lịch sử quay/nhận quà với bộ lọc và phân trang
      *
      * @param array $args
      * @return array { items, total, total_pages, page, per_page }
@@ -99,6 +176,8 @@ class WP_Spin_Wheel_History {
 
         $defaults = array(
             'wheel_id'  => 0,
+            'box_id'    => 0,
+            'post_type' => '', // 'spin_wheel', 'spin_box', hoặc rỗng (tất cả)
             'email'     => '',
             'name'      => '',
             'phone'     => '',
@@ -115,10 +194,18 @@ class WP_Spin_Wheel_History {
         $where  = array( '1=1' );
         $values = array();
 
-        // Lọc theo wheel_id
-        if ( ! empty( $params['wheel_id'] ) ) {
-            if ( is_array( $params['wheel_id'] ) ) {
-                $clean_ids = array_filter( array_map( 'absint', $params['wheel_id'] ) );
+        // Lọc theo post_type (spin_wheel hoặc spin_box)
+        if ( ! empty( $params['post_type'] ) ) {
+            $pt = sanitize_key( $params['post_type'] );
+            $where[]  = 'w.post_type = %s';
+            $values[] = $pt;
+        }
+
+        // Lọc theo wheel_id hoặc box_id
+        $target_item_id = ! empty( $params['box_id'] ) ? $params['box_id'] : $params['wheel_id'];
+        if ( ! empty( $target_item_id ) ) {
+            if ( is_array( $target_item_id ) ) {
+                $clean_ids = array_filter( array_map( 'absint', $target_item_id ) );
                 if ( ! empty( $clean_ids ) ) {
                     $placeholders = implode( ',', array_fill( 0, count( $clean_ids ), '%d' ) );
                     $where[]      = "h.wheel_id IN ($placeholders)";
@@ -128,7 +215,7 @@ class WP_Spin_Wheel_History {
                 }
             } else {
                 $where[]  = 'h.wheel_id = %d';
-                $values[] = absint( $params['wheel_id'] );
+                $values[] = absint( $target_item_id );
             }
         }
 
@@ -214,8 +301,9 @@ class WP_Spin_Wheel_History {
         $order_sql       = strtoupper( (string) $params['order'] ) === 'ASC' ? 'ASC' : 'DESC';
 
         $select_sql = "SELECT h.*,
-                              COALESCE(p.title, CONCAT('Giải #', h.prize_id)) AS prize_name,
-                              COALESCE(w.post_title, CONCAT('Vòng quay #', h.wheel_id)) AS wheel_name
+                              COALESCE(NULLIF(h.prize_title, ''), p.title, CONCAT('Giải #', h.prize_id)) AS prize_name,
+                              COALESCE(w.post_title, CONCAT('#', h.wheel_id)) AS wheel_name,
+                              w.post_type
                        FROM {$table_history} h
                        LEFT JOIN {$table_prizes} p ON h.prize_id = p.id
                        LEFT JOIN {$table_posts} w ON h.wheel_id = w.ID
@@ -334,11 +422,70 @@ class WP_Spin_Wheel_History {
     }
 
     /**
-     * Thống kê tổng quan chung của hệ thống hoặc theo vòng quay
+     * Thống kê dành riêng cho Hộp quà may mắn (Lucky Box)
      *
-     * @param int $wheel_id (tuỳ chọn)
+     * @param int $box_id
      * @return array
      */
+    public function get_box_stats( $box_id = 0 ) {
+        global $wpdb;
+        $history_table = $wpdb->prefix . 'spin_history';
+        $box_id        = absint( $box_id );
+
+        if ( $box_id > 0 ) {
+            $total_claims  = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$history_table} WHERE wheel_id = %d", $box_id ) );
+            $today_claims  = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$history_table} WHERE wheel_id = %d AND DATE(created_at) = CURDATE()", $box_id ) );
+            $total_players = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(DISTINCT email) FROM {$history_table} WHERE wheel_id = %d AND email != ''", $box_id ) );
+            $top_gift      = $wpdb->get_var( $wpdb->prepare( "SELECT prize_title FROM {$history_table} WHERE wheel_id = %d AND prize_title IS NOT NULL AND prize_title != '' GROUP BY prize_title ORDER BY COUNT(*) DESC LIMIT 1", $box_id ) );
+            $views         = (int) get_post_meta( $box_id, '_spin_box_views', true );
+            if ( $views <= 0 ) {
+                $views = (int) get_post_meta( $box_id, '_spin_box_total_opens', true );
+            }
+
+            return array(
+                'total_claims'  => $total_claims,
+                'today_claims'  => $today_claims,
+                'total_players' => $total_players ?: max( 1, $total_claims ),
+                'top_gift'      => $top_gift ?: __( 'N/A', 'wp-spin-wheel' ),
+                'views'         => max( $views, $total_claims ),
+            );
+        }
+
+        // Toàn bộ các hộp quà (post_type = 'spin_box')
+        $total_claims  = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$history_table} h INNER JOIN {$wpdb->posts} w ON h.wheel_id = w.ID WHERE w.post_type = 'spin_box'" );
+        $today_claims  = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$history_table} h INNER JOIN {$wpdb->posts} w ON h.wheel_id = w.ID WHERE w.post_type = 'spin_box' AND DATE(h.created_at) = CURDATE()" );
+        $total_players = (int) $wpdb->get_var( "SELECT COUNT(DISTINCT h.email) FROM {$history_table} h INNER JOIN {$wpdb->posts} w ON h.wheel_id = w.ID WHERE w.post_type = 'spin_box' AND h.email != ''" );
+        $top_gift      = $wpdb->get_var( "SELECT h.prize_title FROM {$history_table} h INNER JOIN {$wpdb->posts} w ON h.wheel_id = w.ID WHERE w.post_type = 'spin_box' AND h.prize_title IS NOT NULL AND h.prize_title != '' GROUP BY h.prize_title ORDER BY COUNT(*) DESC LIMIT 1" );
+        $top_box       = $wpdb->get_var( "SELECT w.post_title FROM {$history_table} h INNER JOIN {$wpdb->posts} w ON h.wheel_id = w.ID WHERE w.post_type = 'spin_box' GROUP BY h.wheel_id ORDER BY COUNT(*) DESC LIMIT 1" );
+
+        return array(
+            'total_claims'  => $total_claims,
+            'today_claims'  => $today_claims,
+            'total_players' => $total_players ?: max( 1, $total_claims ),
+            'top_gift'      => $top_gift ?: __( 'N/A', 'wp-spin-wheel' ),
+            'top_box'       => $top_box ?: __( 'N/A', 'wp-spin-wheel' ),
+        );
+    }
+
+    /**
+     * Xóa sạch lịch sử nhận thưởng của Hộp quà
+     *
+     * @param int $box_id (0 = xóa toàn bộ lịch sử các hộp quà)
+     * @return bool
+     */
+    public function clear_box_history( $box_id = 0 ) {
+        global $wpdb;
+        $table  = $wpdb->prefix . 'spin_history';
+        $box_id = absint( $box_id );
+
+        if ( $box_id > 0 ) {
+            $res = $wpdb->delete( $table, array( 'wheel_id' => $box_id ), array( '%d' ) );
+        } else {
+            $res = $wpdb->query( "DELETE h FROM {$table} h INNER JOIN {$wpdb->posts} w ON h.wheel_id = w.ID WHERE w.post_type = 'spin_box'" );
+        }
+
+        return false !== $res;
+    }
     public function get_stats( $wheel_id = 0 ) {
         global $wpdb;
         $history_table = $wpdb->prefix . 'spin_history';

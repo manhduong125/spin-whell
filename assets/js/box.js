@@ -734,14 +734,37 @@
             closeModal('#settingsModal');
         });
 
-        // 11. Nhận quà trong modal kết quả -> Mở popup xác nhận nhận quà (#modalBoxClaim)
+        // 11. Nhận quà trong modal kết quả -> Ghi nhận vào DB & Mở popup xác nhận (#modalBoxClaim)
         $(document).on('click', '.btn-claim-gift', function (e) {
             e.preventDefault();
-            var giftName = $(this).data('gift') || 'Phần quà may mắn';
+            var $btn = $(this);
+            var giftName = $btn.data('gift') || 'Phần quà may mắn';
             var randomCode = 'HQ-' + Math.floor(100000 + Math.random() * 900000);
 
             $('#modal-box-claim-gift-name').text(giftName);
             $('#modal-box-claim-code').text(randomCode);
+
+            // Ghi nhận lượt nhận quà lên Database
+            var params = window.wp_spin_box_params || window.wp_spin_wheel_params || {};
+            var activeBoxId = boxId || parseInt($('#lucky-box').attr('data-box-id'), 10) || (params.user_box_id || 0);
+
+            if (params.rest_url) {
+                $.ajax({
+                    url: params.rest_url + 'boxes/' + activeBoxId + '/claim',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        box_id: activeBoxId,
+                        gift: giftName,
+                        code: randomCode
+                    }),
+                    success: function (res) {
+                        if (res && res.reward_code) {
+                            $('#modal-box-claim-code').text(res.reward_code);
+                        }
+                    }
+                });
+            }
 
             closeModal('#modalKetqua');
             setTimeout(function() {

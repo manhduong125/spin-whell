@@ -77,9 +77,10 @@ if (! empty($default_box_settings['bg_gradient'])) {
                 </path>
             </svg>
         </button>
-        <a href="/box-gallery" class="btn btn-sm" style="color: rgb(255, 255, 255);"><svg xmlns="http://www.w3.org/2000/svg"
-                width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                stroke-linecap="round" stroke-linejoin="round" class="feather feather-grid">
+        <a href="/box-gallery" class="btn btn-sm" style="color: rgb(255, 255, 255);"><svg
+                xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                class="feather feather-grid">
                 <rect x="3" y="3" width="7" height="7"></rect>
                 <rect x="14" y="3" width="7" height="7"></rect>
                 <rect x="14" y="14" width="7" height="7"></rect>
@@ -118,8 +119,6 @@ if (! empty($default_box_settings['bg_gradient'])) {
                     </div>
                 </div>
             </div>
-
-
         </div>
         <div class="row g-3 g-lg-4 g-xl-5 justify-content-center align-items-center" id="lucky-box-content">
             <div class="col-4 col-md-3 col-lg-2">
@@ -128,7 +127,6 @@ if (! empty($default_box_settings['bg_gradient'])) {
                     <div class="top"></div>
                     <div class="front"></div>
                     <div class="right"></div>
-
                     <div class="jack">
                         <div class="gift">
                             <div class="ball">

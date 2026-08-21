@@ -21,7 +21,8 @@ class WP_Spin_Wheel_Export {
         $history_data     = $history_obj->get_history( $args );
         $items            = $history_data['items'] ?? array();
 
-        $filename = 'lich-su-quay-' . date( 'Y-m-d_H-i-s' ) . '.csv';
+        $is_box = isset( $args['post_type'] ) && $args['post_type'] === 'spin_box';
+        $filename = ( $is_box ? 'lich-su-nhan-qua-box-' : 'lich-su-quay-' ) . date( 'Y-m-d_H-i-s' ) . '.csv';
 
         // Gửi headers
         header( 'Content-Type: text/csv; charset=UTF-8' );
@@ -37,16 +38,16 @@ class WP_Spin_Wheel_Export {
         // Headers
         $headers = array(
             __( 'ID', 'wp-spin-wheel' ),
-            __( 'Vòng quay', 'wp-spin-wheel' ),
-            __( 'Giải thưởng', 'wp-spin-wheel' ),
-            __( 'Tên người chơi', 'wp-spin-wheel' ),
+            $is_box ? __( 'Hộp quà', 'wp-spin-wheel' ) : __( 'Vòng quay', 'wp-spin-wheel' ),
+            $is_box ? __( 'Phần quà nhận', 'wp-spin-wheel' ) : __( 'Giải thưởng', 'wp-spin-wheel' ),
+            $is_box ? __( 'Tên khách hàng', 'wp-spin-wheel' ) : __( 'Tên người chơi', 'wp-spin-wheel' ),
             __( 'Email', 'wp-spin-wheel' ),
             __( 'Số điện thoại', 'wp-spin-wheel' ),
             __( 'Địa chỉ', 'wp-spin-wheel' ),
             __( 'Công ty', 'wp-spin-wheel' ),
             __( 'IP', 'wp-spin-wheel' ),
-            __( 'Mã trúng thưởng', 'wp-spin-wheel' ),
-            __( 'Thời gian quay', 'wp-spin-wheel' ),
+            __( 'Mã nhận thưởng', 'wp-spin-wheel' ),
+            $is_box ? __( 'Thời gian nhận', 'wp-spin-wheel' ) : __( 'Thời gian quay', 'wp-spin-wheel' ),
         );
         fputcsv( $output, $headers );
 

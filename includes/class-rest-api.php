@@ -259,6 +259,25 @@ class WP_Spin_Wheel_REST_API {
                 'permission_callback' => function() { return is_user_logged_in(); },
             ),
         ) );
+
+        // Ghi nhận nhận thưởng Hộp quà
+        register_rest_route( 'spin-wheel/v1', '/boxes/(?P<id>\d+)/claim', array(
+            'methods'             => 'POST',
+            'callback'            => array( $this, 'claim_box_reward' ),
+            'permission_callback' => '__return_true',
+        ) );
+
+        register_rest_route( 'spin-wheel/v1', '/box/claim', array(
+            'methods'             => 'POST',
+            'callback'            => array( $this, 'claim_box_reward' ),
+            'permission_callback' => '__return_true',
+        ) );
+
+        register_rest_route( 'spin-wheel/v1', '/boxes/(?P<id>\d+)/history', array(
+            'methods'             => 'GET',
+            'callback'            => array( $this, 'get_box_history' ),
+            'permission_callback' => '__return_true',
+        ) );
     }
 
     public function get_wheel( $request ) {
@@ -964,6 +983,39 @@ class WP_Spin_Wheel_REST_API {
             'success' => true,
             'message' => __( 'Đã xóa hộp quà thành công.', 'wp-spin-wheel' ),
         ) );
+    }
+
+    public function claim_box_reward( $request ) {
+        $box_id      = absint( $request['id'] ?? ( $request->get_param( 'box_id' ) ?: 0 ) );
+        $gift_name   = sanitize_text_field( $request->get_param( 'gift' ) ?: ( $request->get_param( 'prize' ) ?: '' ) );
+        $reward_code = sanitize_text_field( $request->get_param( 'code' ) ?: ( $request->get_param( 'reward_code' ) ?: '' ) );
+        $form_data   = $request->get_json_params() ?: $request->get_params();
+
+        if ( empty( $gift_name ) ) {
+            return new WP_Error( 'missing_gift', __( 'Thiếu tên phần quà.', 'wp-spin-wheel' ), array( 'status' => 400 ) );
+        }
+
+        $history_obj = new WP_Spin_Wheel_History();
+        $result      = $history_obj->record_box_claim( $box_id, $gift_name, $reward_code, $form_data );
+
+        if ( ! $result ) {
+            return new WP_Error( 'record_failed', __( 'Không thể ghi nhận lượt nhận thưởng.', 'wp-spin-wheel' ), array( 'status' => 500 ) );
+        }
+
+        return rest_ensure_response( array(
+            'success'     => true,
+            'id'          => $result['id'],
+            'reward_code' => $result['reward_code'],
+            'gift_name'   => $result['gift_name'],
+            'message'     => __( 'Đã ghi nhận nhận thưởng thành công.', 'wp-spin-wheel' ),
+        ) );
+    }
+
+    public function get_box_history( $request ) {
+        $box_id = absint( $request['id'] );
+        $request->set_param( 'box_id', $box_id );
+        $request->set_param( 'post_type', 'spin_box' );
+        return $this->get_history( $request );
     }
 
     public function sync_prizes_db( $wheel_id, $prizes ) {

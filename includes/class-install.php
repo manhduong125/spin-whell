@@ -63,7 +63,8 @@ class WP_Spin_Wheel_Install {
         $sql_history = "CREATE TABLE {$table_history} (
             id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
             wheel_id bigint(20) unsigned NOT NULL,
-            prize_id bigint(20) unsigned NOT NULL,
+            prize_id bigint(20) unsigned NOT NULL DEFAULT 0,
+            prize_title varchar(255) DEFAULT NULL,
             player_id bigint(20) unsigned DEFAULT 0,
             name varchar(255) DEFAULT NULL,
             email varchar(255) DEFAULT NULL,
@@ -77,6 +78,7 @@ class WP_Spin_Wheel_Install {
             PRIMARY KEY  (id),
             KEY wheel_id (wheel_id),
             KEY prize_id (prize_id),
+            KEY prize_title (prize_title(191)),
             KEY player_id (player_id),
             KEY created_at (created_at),
             KEY wheel_created_at (wheel_id, created_at),
