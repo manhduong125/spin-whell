@@ -32,6 +32,10 @@ if ($box_id > 0) {
     }
 }
 
+$default_template = ! empty($default_box_settings['template'])
+    ? sanitize_key($default_box_settings['template'])
+    : 'tpl-jib';
+
 $_box_bg_style = '';
 if (! empty($default_box_settings['bg_gradient'])) {
     $_box_bg_style = 'background: ' . $default_box_settings['bg_gradient'] . ';';
