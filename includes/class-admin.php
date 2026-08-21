@@ -58,38 +58,12 @@ class WP_Spin_Wheel_Admin {
     public function register_dashboard_page() {
         add_submenu_page(
             'edit.php?post_type=spin_wheel',
-            __( 'Spin Wheel Dashboard', 'wp-spin-wheel' ),
-            __( 'Dashboard', 'wp-spin-wheel' ),
-            'manage_options',
-            'wp-spin-wheel-dashboard',
-            array( $this, 'render_dashboard_page' )
-        );
-
-        add_submenu_page(
-            'edit.php?post_type=spin_wheel',
             __( 'Lịch sử quay thưởng', 'wp-spin-wheel' ),
             __( 'Lịch sử quay', 'wp-spin-wheel' ),
             'manage_options',
             'spin-wheel-history',
             array( $this, 'render_history_page' )
         );
-    }
-
-    public function render_dashboard_page() {
-        $history = new WP_Spin_Wheel_History();
-        $stats   = $history->get_stats();
-        ?>
-        <div class="wrap">
-            <h1><?php esc_html_e( 'Spin Wheel Dashboard', 'wp-spin-wheel' ); ?></h1>
-            <div class="wp-spin-wheel-dashboard">
-                <div class="stat-item"><strong><?php echo esc_html( $stats['total_spins'] ); ?></strong><span><?php esc_html_e( 'Tổng lượt quay', 'wp-spin-wheel' ); ?></span></div>
-                <div class="stat-item"><strong><?php echo esc_html( $stats['total_players'] ); ?></strong><span><?php esc_html_e( 'Tổng người chơi', 'wp-spin-wheel' ); ?></span></div>
-                <div class="stat-item"><strong><?php echo esc_html( $stats['today_spins'] ); ?></strong><span><?php esc_html_e( 'Lượt quay hôm nay', 'wp-spin-wheel' ); ?></span></div>
-                <div class="stat-item"><strong><?php echo esc_html( $stats['top_prize'] ); ?></strong><span><?php esc_html_e( 'Top phần thưởng', 'wp-spin-wheel' ); ?></span></div>
-                <div class="stat-item"><strong><?php echo esc_html( $stats['top_wheel'] ); ?></strong><span><?php esc_html_e( 'Top vòng quay', 'wp-spin-wheel' ); ?></span></div>
-            </div>
-        </div>
-        <?php
     }
 
     public function render_history_page() {

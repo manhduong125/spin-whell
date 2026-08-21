@@ -58,7 +58,7 @@ if (! empty($default_box_settings['bg_gradient'])) {
                 <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
                 <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
             </svg></button>
-        <button class="btn btn-sm" id="btn-manage" data-bs-toggle="tooltip" data-bs-title="Danh sách đã tạo"
+        <button class="btn btn-sm" id="btn-quatang" data-bs-toggle="tooltip" data-bs-title="Danh sách đã tạo"
             data-bs-placement="bottom" style="color: rgb(255, 255, 255);"><svg xmlns="http://www.w3.org/2000/svg"
                 width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                 stroke-linecap="round" stroke-linejoin="round" class="feather feather-folder">
@@ -77,8 +77,7 @@ if (! empty($default_box_settings['bg_gradient'])) {
                 </path>
             </svg>
         </button>
-        <a href="#" class="btn btn-sm" id="btn-manage" data-bs-toggle="tooltip" data-bs-title="Bộ sưu tập"
-            data-bs-placement="bottom" style="color: rgb(255, 255, 255);"><svg xmlns="http://www.w3.org/2000/svg"
+        <a href="/box-gallery" class="btn btn-sm" style="color: rgb(255, 255, 255);"><svg xmlns="http://www.w3.org/2000/svg"
                 width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                 stroke-linecap="round" stroke-linejoin="round" class="feather feather-grid">
                 <rect x="3" y="3" width="7" height="7"></rect>
