@@ -21,9 +21,9 @@ $col_class    = 'col-12 col-md-6 col-lg-' . ( 12 / max( 1, min( 6, $columns ) ) 
 <div class="container-fluid sw-user-boxes-container py-3">
     <!-- Header Title & Tools -->
     <div class="d-flex flex-wrap align-items-center justify-content-between mb-3 gap-2">
-        <h2 class="h3 fw-bold mb-0 text-dark"><?php echo esc_html( $title ); ?></h2>
+        <h2 class="h2 mb-2 text-dark fw-bold"><?php echo esc_html( $title ); ?></h2>
         <?php if ( is_user_logged_in() ) : ?>
-            <a href="<?php echo esc_url( home_url( '/hop-qua-may-man/' ) ); ?>" class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm d-flex align-items-center gap-1">
+            <a href="<?php echo esc_url( home_url( '/hop-qua-may-man/' ) ); ?>" class="btn btn-primary btn-sm rounded-pill px-3 shadow-sm mb-2">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                 <?php esc_html_e( 'Tạo hộp quà mới', 'wp-spin-wheel' ); ?>
             </a>
@@ -32,40 +32,36 @@ $col_class    = 'col-12 col-md-6 col-lg-' . ( 12 / max( 1, min( 6, $columns ) ) 
 
     <!-- Search & Sort Filter Bar -->
     <?php if ( $show_search || $show_sort ) : ?>
-        <div class="card border-0 shadow-sm mb-4 bg-light">
-            <div class="card-body p-3">
-                <form method="GET" class="row g-2 align-items-center" id="sw-box-filter-form">
-                    <?php if ( $show_search ) : ?>
-                        <div class="col-12 col-md-6 col-lg-5">
-                            <div class="input-group input-group-sm">
-                                <span class="input-group-text bg-white border-end-0">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                                </span>
-                                <input type="text" name="sw_keyword" class="form-control border-start-0" placeholder="<?php esc_attr_e( 'Tìm kiếm hộp quà...', 'wp-spin-wheel' ); ?>" value="<?php echo esc_attr( $keyword ); ?>">
-                                <button type="submit" class="btn btn-primary"><?php esc_html_e( 'Tìm kiếm', 'wp-spin-wheel' ); ?></button>
-                            </div>
+        <div class="align-items-center bg-light p-3 rounded-3 border mb-3">
+            <form method="GET" class="row g-2 align-items-center" id="sw-box-filter-form">
+                <?php if ( $show_search ) : ?>
+                        <div class="input-group input-group-sm">
+                            <span class="input-group-text bg-white border-end-0">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-muted"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                            </span>
+                            <input type="text" name="sw_keyword" class="form-control border-start-0" placeholder="<?php esc_attr_e( 'Tìm kiếm hộp quà...', 'wp-spin-wheel' ); ?>" value="<?php echo esc_attr( $keyword ); ?>">
+                            <button type="submit" class="btn btn-primary"><?php esc_html_e( 'Tìm kiếm', 'wp-spin-wheel' ); ?></button>
                         </div>
-                    <?php endif; ?>
+                <?php endif; ?>
 
-                    <?php if ( $show_sort ) : ?>
-                        <div class="col-12 col-md-6 col-lg-7 d-flex justify-content-md-end align-items-center flex-wrap gap-3">
-                            <span class="small text-muted fw-semibold"><?php esc_html_e( 'Sắp xếp:', 'wp-spin-wheel' ); ?></span>
-                            <div class="form-check form-check-inline mb-0">
-                                <input class="form-check-input sw-box-order-radio" type="radio" name="sw_order_by" id="sw_box_order_date" value="date" <?php checked( $orderby, 'date' ); ?>>
-                                <label class="form-check-label small" for="sw_box_order_date"><?php esc_html_e( 'Mới nhất', 'wp-spin-wheel' ); ?></label>
-                            </div>
-                            <div class="form-check form-check-inline mb-0">
-                                <input class="form-check-input sw-box-order-radio" type="radio" name="sw_order_by" id="sw_box_order_views" value="views" <?php checked( $orderby, 'views' ); ?>>
-                                <label class="form-check-label small" for="sw_box_order_views"><?php esc_html_e( 'Xem nhiều', 'wp-spin-wheel' ); ?></label>
-                            </div>
-                            <div class="form-check form-check-inline mb-0">
-                                <input class="form-check-input sw-box-order-radio" type="radio" name="sw_order_by" id="sw_box_order_title" value="title" <?php checked( $orderby, 'title' ); ?>>
-                                <label class="form-check-label small" for="sw_box_order_title"><?php esc_html_e( 'Tên A-Z', 'wp-spin-wheel' ); ?></label>
-                            </div>
+                <?php if ( $show_sort ) : ?>
+                    <div class="d-flex mb-3">
+                        <span class="small text-muted fw-semibold"><?php esc_html_e( 'Sắp xếp:', 'wp-spin-wheel' ); ?>&nbsp;</span>
+                        <div class="form-check form-check-inline mb-0">
+                            <input class="form-check-input sw-box-order-radio" type="radio" name="sw_order_by" id="sw_box_order_date" value="date" <?php checked( $orderby, 'date' ); ?>>
+                            <label class="form-check-label small" for="sw_box_order_date"><?php esc_html_e( 'Mới nhất', 'wp-spin-wheel' ); ?>&nbsp;</label>
                         </div>
-                    <?php endif; ?>
-                </form>
-            </div>
+                        <div class="form-check form-check-inline mb-0">
+                            <input class="form-check-input sw-box-order-radio" type="radio" name="sw_order_by" id="sw_box_order_views" value="views" <?php checked( $orderby, 'views' ); ?>>
+                            <label class="form-check-label small" for="sw_box_order_views"><?php esc_html_e( 'Xem nhiều', 'wp-spin-wheel' ); ?>&nbsp;</label>
+                        </div>
+                        <div class="form-check form-check-inline mb-0">
+                            <input class="form-check-input sw-box-order-radio" type="radio" name="sw_order_by" id="sw_box_order_title" value="title" <?php checked( $orderby, 'title' ); ?>>
+                            <label class="form-check-label small" for="sw_box_order_title"><?php esc_html_e( 'Tên A-Z', 'wp-spin-wheel' ); ?>&nbsp;</label>
+                        </div>
+                    </div>
+                <?php endif; ?>
+            </form>
         </div>
     <?php endif; ?>
 

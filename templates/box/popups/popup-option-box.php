@@ -15,7 +15,7 @@ $_audios_end      = WP_Spin_Wheel_Helper::get_audio_library('end') ?: array();
 
 <!-- Option cho Box -->
 <div class="modal fade" id="settingsModal" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered modal-lg">
+    <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title d-flex align-items-center gap-2" id="settingsModalLabel">
@@ -32,7 +32,7 @@ $_audios_end      = WP_Spin_Wheel_Helper::get_audio_library('end') ?: array();
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body py-3">
-                <ul class="nav nav-tabs" id="boxTab" role="tablist">
+                <ul class="nav nav-tabs" id="myTab" role="tablist">
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active" id="box-gen-setting-tab" data-bs-toggle="tab"
                             data-bs-target="#box-gen-setting-tab-pane" type="button" role="tab"
@@ -409,16 +409,20 @@ Hộp đựng cơm</textarea>
                             <div class="form-check mb-1">
                                 <input class="form-check-input" type="checkbox" checked id="box_show_particle">
                                 <label class="form-check-label fw-semibold" for="box_show_particle">
-                                    <?php esc_html_e('Bật hiệu ứng', 'wp-spin-wheel'); ?> <sup class="text-danger fw-bold"><?php esc_html_e('Mới', 'wp-spin-wheel'); ?></sup>
+                                    <?php esc_html_e('Bật hiệu ứng', 'wp-spin-wheel'); ?> <sup
+                                        class="text-danger fw-bold"><?php esc_html_e('Mới', 'wp-spin-wheel'); ?></sup>
                                 </label>
                             </div>
                             <select class="form-select form-select-sm mb-1" id="box_particle_type">
-                                <option value="default"><?php esc_html_e('Mặc định (Hạt chuyển động)', 'wp-spin-wheel'); ?></option>
+                                <option value="default">
+                                    <?php esc_html_e('Mặc định (Hạt chuyển động)', 'wp-spin-wheel'); ?></option>
                                 <option value="snow"><?php esc_html_e('Tuyết rơi ❄️', 'wp-spin-wheel'); ?></option>
                                 <option value="bubble"><?php esc_html_e('Bong bóng 🫧', 'wp-spin-wheel'); ?></option>
                                 <option value="heart"><?php esc_html_e('Trái tim ❤️', 'wp-spin-wheel'); ?></option>
                             </select>
-                            <div class="small text-muted mb-2"><?php esc_html_e('Nền phải khác màu trắng mới thấy rõ hiệu ứng', 'wp-spin-wheel'); ?></div>
+                            <div class="small text-muted mb-2">
+                                <?php esc_html_e('Nền phải khác màu trắng mới thấy rõ hiệu ứng', 'wp-spin-wheel'); ?>
+                            </div>
 
                         </fieldset>
                     </div>
