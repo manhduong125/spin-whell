@@ -45,6 +45,7 @@ if (! empty($default_box_settings['bg_gradient'])) {
     data-box-settings="<?php echo esc_attr(wp_json_encode($default_box_settings)); ?>"
     data-box-gifts="<?php echo esc_attr(wp_json_encode($default_gifts)); ?>"
     style="<?php echo esc_attr($_box_bg_style); ?>">
+    <div id="box-particles-js" class="box-particles-layer"></div>
     <div class="position-absolute top-0 end-0 mt-1 actions" id="actions">
         <button class="btn d-none" id="btn-reload" style="color: rgb(255, 255, 255);">Chơi lại</button>
 

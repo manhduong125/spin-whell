@@ -295,6 +295,92 @@
 
     var DEFAULT_BOX_BG_GRADIENT = 'conic-gradient(from 45deg, rgb(10, 74, 89) 0deg, rgb(10, 74, 89) 45deg, rgb(13, 89, 149) 45deg, rgb(13, 89, 149) 90deg, rgb(17, 109, 208) 90deg, rgb(17, 109, 208) 135deg, rgb(22, 136, 255) 135deg, rgb(22, 136, 255) 180deg, rgb(27, 166, 255) 180deg, rgb(27, 166, 255) 225deg, rgb(33, 200, 255) 225deg, rgb(33, 200, 255) 270deg, rgb(40, 236, 255) 270deg, rgb(40, 236, 255) 315deg, rgb(47, 255, 255) 315deg, rgb(47, 255, 255) 360deg)';
 
+    // ── Hiệu ứng Particles cho Hộp quà (tương tự Wheel) ──
+    var BOX_PARTICLE_CONFIGS = {
+        default: {
+            particles: {
+                number: { value: 60, density: { enable: true, value_area: 800 } },
+                color: { value: ['#ff6b6b', '#feca57', '#48dbfb', '#ff9ff3', '#54a0ff', '#5f27cd'] },
+                shape: { type: 'circle' },
+                opacity: { value: 0.6, random: true, anim: { enable: true, speed: 0.5, opacity_min: 0.1 } },
+                size: { value: 4, random: true },
+                line_linked: { enable: true, distance: 120, color: '#ffffff', opacity: 0.2, width: 1 },
+                move: { enable: true, speed: 2, direction: 'none', random: true, out_mode: 'out' }
+            },
+            interactivity: {
+                detect_on: 'canvas',
+                events: { onhover: { enable: false }, onclick: { enable: false } }
+            },
+            retina_detect: true
+        },
+        snow: {
+            particles: {
+                number: { value: 120, density: { enable: true, value_area: 800 } },
+                color: { value: '#ffffff' },
+                shape: { type: 'circle' },
+                opacity: { value: 0.8, random: true },
+                size: { value: 5, random: true },
+                line_linked: { enable: false },
+                move: { enable: true, speed: 2, direction: 'bottom', random: true, straight: false, out_mode: 'out', bounce: false }
+            },
+            interactivity: {
+                detect_on: 'canvas',
+                events: { onhover: { enable: false }, onclick: { enable: false } }
+            },
+            retina_detect: true
+        },
+        bubble: {
+            particles: {
+                number: { value: 40, density: { enable: true, value_area: 800 } },
+                color: { value: ['#a8edea', '#fed6e3', '#96fbc4', '#f9f7d9', '#ffecd2'] },
+                shape: { type: 'circle', stroke: { width: 2, color: '#ffffff' } },
+                opacity: { value: 0.4, random: true, anim: { enable: true, speed: 1, opacity_min: 0.1, sync: false } },
+                size: { value: 18, random: true, anim: { enable: true, speed: 3, size_min: 4, sync: false } },
+                line_linked: { enable: false },
+                move: { enable: true, speed: 1.5, direction: 'top', random: true, straight: false, out_mode: 'out' }
+            },
+            interactivity: {
+                detect_on: 'canvas',
+                events: { onhover: { enable: false }, onclick: { enable: false } }
+            },
+            retina_detect: true
+        },
+        heart: {
+            particles: {
+                number: { value: 30, density: { enable: true, value_area: 800 } },
+                color: { value: ['#ff6b6b', '#ff4757', '#ff6b81', '#ff4500', '#ffa502'] },
+                shape: {
+                    type: 'char',
+                    stroke: { width: 0 },
+                    character: { value: ['❤', '💕', '💖', '💗'], font: 'Verdana', style: '', weight: '400' }
+                },
+                opacity: { value: 0.8, random: true, anim: { enable: true, speed: 0.5, opacity_min: 0.2 } },
+                size: { value: 14, random: true },
+                line_linked: { enable: false },
+                move: { enable: true, speed: 2, direction: 'top', random: true, straight: false, out_mode: 'out' }
+            },
+            interactivity: {
+                detect_on: 'canvas',
+                events: { onhover: { enable: false }, onclick: { enable: false } }
+            },
+            retina_detect: true
+        }
+    };
+
+    function initBoxParticles() {
+        if (typeof window.particlesJS === 'undefined') return;
+        var enabled = $('#box_show_particle').length ? $('#box_show_particle').is(':checked') : ($('#show_particle').length ? $('#show_particle').is(':checked') : true);
+        var type = $('#box_particle_type').length ? $('#box_particle_type').val() : ($('#particle_type').length ? $('#particle_type').val() : 'default');
+        var el = document.getElementById('box-particles-js') || document.getElementById('particles-js');
+        if (!el) return;
+
+        el.innerHTML = '';
+        if (!enabled) return;
+
+        var config = BOX_PARTICLE_CONFIGS[type] || BOX_PARTICLE_CONFIGS['default'];
+        window.particlesJS(el.id, config);
+    }
+
     // Cài đặt giao diện & style
     function applyBoxSettings() {
         var title = $.trim($('#hqmm-title').val() || '') || 'HỘP QUÀ MAY MẮN ONLINE';
@@ -374,11 +460,14 @@
                 color: color,
                 btn_bg_color: btnBgColor,
                 btn_color: btnColor,
-                show_particle: $('#box_show_particle').length ? $('#box_show_particle').is(':checked') : ($('#show_particle').length ? $('#show_particle').is(':checked') : true)
+                show_particle: $('#box_show_particle').length ? $('#box_show_particle').is(':checked') : ($('#show_particle').length ? $('#show_particle').is(':checked') : true),
+                particle_type: $('#box_particle_type').length ? $('#box_particle_type').val() : ($('#particle_type').length ? $('#particle_type').val() : 'default')
             };
             localStorage.setItem(getBoxStorageKey(), JSON.stringify(boxPayload));
             localStorage.setItem('wp_spin_box_settings_guest', JSON.stringify(boxPayload));
         } catch (e) {}
+
+        initBoxParticles();
 
         // Nếu đã đăng nhập -> Lưu lên server
         var params = window.wp_spin_box_params || window.wp_spin_wheel_params;
@@ -498,10 +587,19 @@
             if (finalSettings.show_particle !== undefined) {
                 $('#box_show_particle, #show_particle').prop('checked', !!finalSettings.show_particle);
             }
+            if (finalSettings.particle_type) {
+                $('#box_particle_type, #particle_type').val(finalSettings.particle_type);
+            }
         }
 
         // Luôn áp dụng settings khi trang tải
         applyBoxSettings();
+        setTimeout(initBoxParticles, 300);
+
+        // Live update hiệu ứng khi thay đổi trong popup
+        $(document).on('change', '#box_show_particle, #show_particle, #box_particle_type, #particle_type', function () {
+            initBoxParticles();
+        });
 
         // Click mở hộp quà
         $(document).on('click', '.box-jack, .box', function (e) {
@@ -782,8 +880,10 @@
             $('#bg_img').val('');
             $('#bg_gradient').val('');
             $('#box_show_particle, #show_particle').prop('checked', true);
+            $('#box_particle_type, #particle_type').val('default');
 
             applyBoxSettings();
+            initBoxParticles();
             resetGame();
             closeModal('#settingsModal');
         });

@@ -403,11 +403,23 @@ Hộp đựng cơm</textarea>
                             <button class="btn btn-outline-primary btn-sm w-100 mb-3"
                                 id="btn-apply-box-gradient"><?php esc_html_e('Áp dụng gradient', 'wp-spin-wheel'); ?></button>
 
-                            <div class="form-check mt-3">
-                                <input class="form-check-input" type="checkbox" id="box_show_particle" checked>
-                                <label class="form-check-label small"
-                                    for="box_show_particle"><?php esc_html_e('Hiệu ứng hạt nền chuyển động', 'wp-spin-wheel'); ?></label>
+                            <hr class="my-2">
+
+                            <!-- Hiệu ứng chuyển động -->
+                            <div class="form-check mb-1">
+                                <input class="form-check-input" type="checkbox" checked id="box_show_particle">
+                                <label class="form-check-label fw-semibold" for="box_show_particle">
+                                    <?php esc_html_e('Bật hiệu ứng', 'wp-spin-wheel'); ?> <sup class="text-danger fw-bold"><?php esc_html_e('Mới', 'wp-spin-wheel'); ?></sup>
+                                </label>
                             </div>
+                            <select class="form-select form-select-sm mb-1" id="box_particle_type">
+                                <option value="default"><?php esc_html_e('Mặc định (Hạt chuyển động)', 'wp-spin-wheel'); ?></option>
+                                <option value="snow"><?php esc_html_e('Tuyết rơi ❄️', 'wp-spin-wheel'); ?></option>
+                                <option value="bubble"><?php esc_html_e('Bong bóng 🫧', 'wp-spin-wheel'); ?></option>
+                                <option value="heart"><?php esc_html_e('Trái tim ❤️', 'wp-spin-wheel'); ?></option>
+                            </select>
+                            <div class="small text-muted mb-2"><?php esc_html_e('Nền phải khác màu trắng mới thấy rõ hiệu ứng', 'wp-spin-wheel'); ?></div>
+
                         </fieldset>
                     </div>
 
