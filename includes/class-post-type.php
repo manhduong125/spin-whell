@@ -83,12 +83,18 @@ class WP_Spin_Wheel_Post_Type
     public function load_single_template($template)
     {
         if (is_singular('spin_wheel')) {
-            $plugin_template = WP_SPIN_WHEEL_PATH . 'templates/single-spin_wheel.php';
+            $plugin_template = WP_SPIN_WHEEL_PATH . 'templates/wheel/single-spin_wheel.php';
+            if (! file_exists($plugin_template)) {
+                $plugin_template = WP_SPIN_WHEEL_PATH . 'templates/single-spin_wheel.php';
+            }
             if (file_exists($plugin_template)) {
                 return $plugin_template;
             }
         } elseif (is_singular('spin_box')) {
-            $plugin_template = WP_SPIN_WHEEL_PATH . 'templates/single-box.php';
+            $plugin_template = WP_SPIN_WHEEL_PATH . 'templates/box/single-box.php';
+            if (! file_exists($plugin_template)) {
+                $plugin_template = WP_SPIN_WHEEL_PATH . 'templates/single-box.php';
+            }
             if (file_exists($plugin_template)) {
                 return $plugin_template;
             }

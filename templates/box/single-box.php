@@ -39,7 +39,11 @@ do_action( 'flatsome_after_header' );
         while ( have_posts() ) :
             the_post();
             $box_id = get_the_ID();
-            include WP_SPIN_WHEEL_PATH . 'templates/wheel-box.php';
+            $box_template = WP_SPIN_WHEEL_PATH . 'templates/box/wheel-box.php';
+            if ( ! file_exists( $box_template ) ) {
+                $box_template = WP_SPIN_WHEEL_PATH . 'templates/wheel-box.php';
+            }
+            include $box_template;
         endwhile;
         ?>
     </div>

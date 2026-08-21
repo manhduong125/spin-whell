@@ -20,7 +20,7 @@ if (! defined('ABSPATH')) {
             </div>
             <div class="modal-body" id="modal-body">
                 <p class="alert alert-info">Danh sách quà tặng bao gồm:</p>
-                <table class="table table-striped fs-4">
+                <table class="table table-striped">
                     <thead>
                         <tr>
                             <th style="width: 70px;">STT</th>

@@ -20,7 +20,7 @@
             </div>
             <div class="modal-body" id="modal-body">
                 <p class="alert alert-warning">Hãy chọn một món quà mà bạn muốn và ấn nút nhận quà.</p>
-                <table class="table table-striped fs-4">
+                <table class="table table-striped">
                     <thead>
                         <tr>
                             <th style="width: 80px;">Lần mở</th>

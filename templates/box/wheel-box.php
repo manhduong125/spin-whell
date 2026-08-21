@@ -112,7 +112,7 @@ if (! empty($default_box_settings['bg_gradient'])) {
             <div class="box-info mx-auto mb-3">
                 <div class="card" style="background-color: rgb(220, 53, 69); color: rgb(255, 255, 255);">
                     <div class="card-body">
-                        <h1 class="wp-block-heading has-x-large-font-size" id="heading-title">HỘP QUÀ MAY MẮN ONLINE
+                        <h1 id="heading-title" style="color: #fff">HỘP QUÀ MAY MẮN ONLINE
                         </h1>
                         <div class="badgex bg-secondaryx">Bạn còn <span class="fw-bold" id="conlai">3</span> lượt mở
                         </div>
@@ -634,11 +634,10 @@ if (! empty($default_box_settings['bg_gradient'])) {
 </div>
 
 <?php
-require_once WP_SPIN_WHEEL_PATH . 'templates/popup/popup-option-box.php';
-require_once WP_SPIN_WHEEL_PATH . 'templates/popup/popup-box-item.php';
-require_once WP_SPIN_WHEEL_PATH . 'templates/popup/popup-result-box.php';
-require_once WP_SPIN_WHEEL_PATH . 'templates/popup/popup-share.php';
-require_once WP_SPIN_WHEEL_PATH . 'templates/popup/popup-user.php';
-require_once WP_SPIN_WHEEL_PATH . 'templates/popup/popup-user-info.php';
-require_once WP_SPIN_WHEEL_PATH . 'templates/popup/popup-none-user.php';
+require_once WP_SPIN_WHEEL_PATH . 'templates/box/popups/popup-option-box.php';
+require_once WP_SPIN_WHEEL_PATH . 'templates/box/popups/popup-box-item.php';
+require_once WP_SPIN_WHEEL_PATH . 'templates/box/popups/popup-result-box.php';
+require_once WP_SPIN_WHEEL_PATH . 'templates/box/popups/popup-share.php';
+require_once WP_SPIN_WHEEL_PATH . 'templates/box/popups/popup-user-info.php';
+require_once WP_SPIN_WHEEL_PATH . 'templates/box/popups/popup-none-user.php';
 ?>

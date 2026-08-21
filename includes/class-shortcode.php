@@ -43,16 +43,23 @@ class WP_Spin_Wheel_Shortcode {
         $post_id = absint( $atts['id'] );
         if ( $post_id && get_post_type( $post_id ) === 'spin_wheel' ) {
             ob_start();
-            $template = WP_SPIN_WHEEL_PATH . 'templates/wheel-user.php';
+            $template = WP_SPIN_WHEEL_PATH . 'templates/wheel/wheel-user.php';
             if ( ! file_exists( $template ) ) {
-                $template = WP_SPIN_WHEEL_PATH . 'templates/wheel-default.php';
+                $template = WP_SPIN_WHEEL_PATH . 'templates/wheel/wheel-default.php';
+            }
+            if ( ! file_exists( $template ) ) {
+                $template = WP_SPIN_WHEEL_PATH . 'templates/wheel-user.php';
             }
             include $template;
             return ob_get_clean();
         }
 
         ob_start();
-        include WP_SPIN_WHEEL_PATH . 'templates/wheel-default.php';
+        $default_tpl = WP_SPIN_WHEEL_PATH . 'templates/wheel/wheel-default.php';
+        if ( ! file_exists( $default_tpl ) ) {
+            $default_tpl = WP_SPIN_WHEEL_PATH . 'templates/wheel-default.php';
+        }
+        include $default_tpl;
         return ob_get_clean();
     }
 
@@ -542,7 +549,10 @@ class WP_Spin_Wheel_Shortcode {
         $total_pages = $query->max_num_pages;
 
         ob_start();
-        $template = WP_SPIN_WHEEL_PATH . 'templates/user-wheels-list.php';
+        $template = WP_SPIN_WHEEL_PATH . 'templates/wheel/user-wheels-list.php';
+        if ( ! file_exists( $template ) ) {
+            $template = WP_SPIN_WHEEL_PATH . 'templates/user-wheels-list.php';
+        }
         if ( file_exists( $template ) ) {
             include $template;
         }
@@ -665,7 +675,10 @@ class WP_Spin_Wheel_Shortcode {
 
         $box_id = absint( $atts['id'] );
         ob_start();
-        $template = WP_SPIN_WHEEL_PATH . 'templates/wheel-box.php';
+        $template = WP_SPIN_WHEEL_PATH . 'templates/box/wheel-box.php';
+        if ( ! file_exists( $template ) ) {
+            $template = WP_SPIN_WHEEL_PATH . 'templates/wheel-box.php';
+        }
         if ( file_exists( $template ) ) {
             include $template;
         }
@@ -787,7 +800,10 @@ class WP_Spin_Wheel_Shortcode {
         $total_pages = $query->max_num_pages;
 
         ob_start();
-        $template = WP_SPIN_WHEEL_PATH . 'templates/user-boxs-list.php';
+        $template = WP_SPIN_WHEEL_PATH . 'templates/box/user-boxs-list.php';
+        if ( ! file_exists( $template ) ) {
+            $template = WP_SPIN_WHEEL_PATH . 'templates/user-boxs-list.php';
+        }
         if ( file_exists( $template ) ) {
             include $template;
         }

@@ -278,14 +278,14 @@ if (! empty($wheel_id)) {
 </div>
 
 <?php
-require_once WP_SPIN_WHEEL_PATH . 'templates/popup/popup-user.php';
-require_once WP_SPIN_WHEEL_PATH . 'templates/popup/popup-edit-title.php';
-require_once WP_SPIN_WHEEL_PATH . 'templates/popup/popup-result.php';
-require_once WP_SPIN_WHEEL_PATH . 'templates/popup/popup-option.php';
-require_once WP_SPIN_WHEEL_PATH . 'templates/popup/popup-json.php';
-require_once WP_SPIN_WHEEL_PATH . 'templates/popup/popup-share.php';
-require_once WP_SPIN_WHEEL_PATH . 'templates/popup/popup-user-info.php';
-require_once WP_SPIN_WHEEL_PATH . 'templates/popup/popup-none-user.php';
+require_once WP_SPIN_WHEEL_PATH . 'templates/wheel/popups/popup-user.php';
+require_once WP_SPIN_WHEEL_PATH . 'templates/wheel/popups/popup-edit-title.php';
+require_once WP_SPIN_WHEEL_PATH . 'templates/wheel/popups/popup-result.php';
+require_once WP_SPIN_WHEEL_PATH . 'templates/wheel/popups/popup-option.php';
+require_once WP_SPIN_WHEEL_PATH . 'templates/wheel/popups/popup-json.php';
+require_once WP_SPIN_WHEEL_PATH . 'templates/wheel/popups/popup-share.php';
+require_once WP_SPIN_WHEEL_PATH . 'templates/wheel/popups/popup-user-info.php';
+require_once WP_SPIN_WHEEL_PATH . 'templates/wheel/popups/popup-none-user.php';
 ?>
 
 <script>

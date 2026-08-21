@@ -104,10 +104,10 @@ if (! empty($wheel_id)) {
 </div>
 
 <?php
-require_once WP_SPIN_WHEEL_PATH . 'templates/popup/popup-user.php';
-require_once WP_SPIN_WHEEL_PATH . 'templates/popup/popup-result.php';
-require_once WP_SPIN_WHEEL_PATH . 'templates/popup/popup-info.php';
-require_once WP_SPIN_WHEEL_PATH . 'templates/popup/popup-share.php';
+require_once WP_SPIN_WHEEL_PATH . 'templates/wheel/popups/popup-user.php';
+require_once WP_SPIN_WHEEL_PATH . 'templates/wheel/popups/popup-result.php';
+require_once WP_SPIN_WHEEL_PATH . 'templates/wheel/popups/popup-info.php';
+require_once WP_SPIN_WHEEL_PATH . 'templates/wheel/popups/popup-share.php';
 ?>
 
 <script>
