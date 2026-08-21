@@ -79,7 +79,7 @@ class WP_Spin_Wheel_Settings
             'confetti'         => array('type' => 'checkbox', 'default' => 1),
             'bg_color'         => array('type' => 'color',    'default' => '#dc3545'),
             'color'            => array('type' => 'color',    'default' => '#ffffff'),
-            'bg_img'           => array('type' => 'image',    'default' => ''),
+            'bg_img'           => array('type' => 'image',    'default' => defined('WP_SPIN_WHEEL_URL') ? WP_SPIN_WHEEL_URL . 'assets/img/christmas-2.jpg' : '/wp-content/plugins/spin-whell/assets/img/christmas-2.jpg'),
             'bg_gradient'      => array('type' => 'textarea', 'default' => ''),
             'btn_bg_color'     => array('type' => 'color',    'default' => '#dc3545'),
             'btn_color'        => array('type' => 'color',    'default' => '#ffffff'),
@@ -200,7 +200,11 @@ class WP_Spin_Wheel_Settings
         }
 
         if ('image' === $type) {
-            return is_string($value) ? esc_url_raw(trim($value)) : '';
+            if (! is_string($value) || '' === trim($value)) {
+                return '';
+            }
+            $resolved = WP_Spin_Wheel_Helper::resolve_asset_url($value);
+            return esc_url_raw(trim($resolved ?: $value));
         }
 
         if ('textarea' === $type) {
@@ -553,6 +557,13 @@ class WP_Spin_Wheel_Settings
                             <th scope="row"><label for="box_bg_color"><?php esc_html_e('Màu nền giao diện', 'wp-spin-wheel'); ?></label></th>
                             <td>
                                 <input name="wp_spin_box_settings[bg_color]" type="text" id="box_bg_color" value="<?php echo esc_attr($box_opts['bg_color'] ?? '#dc3545'); ?>" class="regular-text" />
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <th scope="row"><label for="box_bg_img"><?php esc_html_e('Ảnh nền giao diện (Mặc định)', 'wp-spin-wheel'); ?></label></th>
+                            <td>
+                                <input name="wp_spin_box_settings[bg_img]" type="text" id="box_bg_img" value="<?php echo esc_attr($box_opts['bg_img'] ?? (defined('WP_SPIN_WHEEL_URL') ? WP_SPIN_WHEEL_URL . 'assets/img/christmas-2.jpg' : '/wp-content/plugins/spin-whell/assets/img/christmas-2.jpg')); ?>" class="regular-text" />
                             </td>
                         </tr>
 

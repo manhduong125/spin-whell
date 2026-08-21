@@ -21,6 +21,7 @@ class WP_Spin_Wheel_Helper
             return '';
         }
         $url = trim((string) $url);
+        $url = str_replace('\\', '/', $url);
         // Nếu đã là full URL hợp lệ hoặc data URI
         if (preg_match('/^(https?:|\/\/|data:)/i', $url)) {
             $url = preg_replace('/^https?:\/\/:\/?/', '/', $url);
@@ -30,8 +31,8 @@ class WP_Spin_Wheel_Helper
             }
         }
         $clean = ltrim($url, '/');
-        // Bỏ prefix wp-content/plugins/spin-whell/ nếu có
-        $clean = preg_replace('/^wp-content\/plugins\/spin-whell\//', '', $clean);
+        // Bỏ prefix wp-content/plugins/spin-whell/ hoặc spin-whell/ nếu có
+        $clean = preg_replace('/^(wp-content\/plugins\/spin-whell|spin-whell)\//i', '', $clean);
         return WP_SPIN_WHEEL_URL . ltrim($clean, '/');
     }
 

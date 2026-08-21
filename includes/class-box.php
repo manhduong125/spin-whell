@@ -10,6 +10,7 @@ class WP_Spin_Wheel_Box {
      */
     public static function get_default_settings() {
         $box_global = WP_Spin_Wheel_Helper::get_box_global_settings();
+        $default_bg_img = defined('WP_SPIN_WHEEL_URL') ? WP_SPIN_WHEEL_URL . 'assets/img/christmas-2.jpg' : '/wp-content/plugins/spin-whell/assets/img/christmas-2.jpg';
         $defaults = array(
             'title'           => 'HỘP QUÀ MAY MẮN ONLINE',
             'template'        => 'tpl-jib',
@@ -22,7 +23,7 @@ class WP_Spin_Wheel_Box {
             'confetti'        => true,
             'bg_color'        => '#dc3545',
             'color'           => '#ffffff',
-            'bg_img'          => '',
+            'bg_img'          => $default_bg_img,
             'bg_gradient'     => '',
             'btn_bg_color'    => '#dc3545',
             'btn_color'       => '#ffffff',
@@ -63,7 +64,7 @@ class WP_Spin_Wheel_Box {
             $defaults['color'] = $box_global['color'];
         }
         if ( ! empty( $box_global['bg_img'] ) ) {
-            $defaults['bg_img'] = $box_global['bg_img'];
+            $defaults['bg_img'] = WP_Spin_Wheel_Helper::resolve_asset_url( $box_global['bg_img'] );
         }
         if ( ! empty( $box_global['bg_gradient'] ) ) {
             $defaults['bg_gradient'] = $box_global['bg_gradient'];
@@ -125,6 +126,10 @@ class WP_Spin_Wheel_Box {
         $settings = ! empty( $raw ) ? json_decode( $raw, true ) : array();
         if ( ! is_array( $settings ) ) {
             $settings = array();
+        }
+
+        if ( ! empty( $settings['bg_img'] ) ) {
+            $settings['bg_img'] = WP_Spin_Wheel_Helper::resolve_asset_url( $settings['bg_img'] );
         }
 
         return array_replace_recursive( self::get_default_settings(), $settings );

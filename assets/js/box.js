@@ -293,6 +293,10 @@
         $('#btn-reload').addClass('d-none').hide();
     }
 
+    var defaultPluginUrl = (typeof wp_spin_wheel_params !== 'undefined' && wp_spin_wheel_params.plugin_url)
+        ? wp_spin_wheel_params.plugin_url
+        : ((typeof wp_spin_box_params !== 'undefined' && wp_spin_box_params.plugin_url) ? wp_spin_box_params.plugin_url : '/wp-content/plugins/spin-whell/');
+    var DEFAULT_BOX_BG_IMG = defaultPluginUrl + 'assets/img/christmas-2.jpg';
     var DEFAULT_BOX_BG_GRADIENT = 'conic-gradient(from 45deg, rgb(10, 74, 89) 0deg, rgb(10, 74, 89) 45deg, rgb(13, 89, 149) 45deg, rgb(13, 89, 149) 90deg, rgb(17, 109, 208) 90deg, rgb(17, 109, 208) 135deg, rgb(22, 136, 255) 135deg, rgb(22, 136, 255) 180deg, rgb(27, 166, 255) 180deg, rgb(27, 166, 255) 225deg, rgb(33, 200, 255) 225deg, rgb(33, 200, 255) 270deg, rgb(40, 236, 255) 270deg, rgb(40, 236, 255) 315deg, rgb(47, 255, 255) 315deg, rgb(47, 255, 255) 360deg)';
 
     // ── Hiệu ứng Particles cho Hộp quà (tương tự Wheel) ──
@@ -419,7 +423,7 @@
             } else if (bgColor) {
                 this.style.backgroundColor = bgColor;
             } else {
-                this.style.background = DEFAULT_BOX_BG_GRADIENT;
+                this.style.background = 'url("' + DEFAULT_BOX_BG_IMG + '") center center / cover no-repeat';
             }
         });
 
@@ -537,7 +541,7 @@
             confetti: true,
             bg_color: '#dc3545',
             color: '#ffffff',
-            bg_img: '',
+            bg_img: DEFAULT_BOX_BG_IMG,
             bg_gradient: '',
             btn_bg_color: '#dc3545',
             btn_color: '#ffffff',
@@ -806,55 +810,6 @@
             }
         });
 
-        // Nút Áp dụng ảnh URL
-        $(document).on('click', '#btn-apply-box-img', function (e) {
-            e.preventDefault();
-            var url = $.trim($('#bg_img').val() || '');
-            if (url) {
-                $('#bg_gradient').val('');
-                $('#box-bgr-preview').attr('src', url);
-                $('#box-bgr-preview-wrap').show();
-                $('#lucky-box, .lucky-box-page').css({
-                    'background-image': 'url("' + url + '")',
-                    'background-size': 'cover',
-                    'background-position': 'center'
-                });
-            }
-        });
-
-        // Nút Xoá ảnh nền
-        $(document).on('click', '#btn-clear-box-img', function (e) {
-            e.preventDefault();
-            $('#bg_img').val('');
-            $('#box-bgr-preview-wrap').hide();
-            $('#box-bgr-preview').attr('src', '');
-            $('#lucky-box, .lucky-box-page').css({ 'background-image': 'none' });
-        });
-
-        // Xử lý Upload ảnh nền
-        $(document).on('change', '#upload_box_bgr', function () {
-            var file = this.files && this.files[0];
-            if (!file) return;
-            if (file.size > 5 * 1024 * 1024) {
-                alert('Dung lượng ảnh tối đa 5MB.');
-                return;
-            }
-            var reader = new FileReader();
-            reader.onload = function (e) {
-                var dataUrl = e.target.result;
-                $('#bg_img').val(dataUrl);
-                $('#bg_gradient').val('');
-                $('#box-bgr-preview').attr('src', dataUrl);
-                $('#box-bgr-preview-wrap').show();
-                $('#lucky-box, .lucky-box-page').css({
-                    'background-image': 'url("' + dataUrl + '")',
-                    'background-size': 'cover',
-                    'background-position': 'center'
-                });
-            };
-            reader.readAsDataURL(file);
-        });
-
         // Nút đặt lại cài đặt Box về mặc định (#btn-reset-box)
         $(document).on('click', '#btn-reset-box', function (e) {
             e.preventDefault();
@@ -877,8 +832,10 @@
             $('#color').val('#ffffff');
             $('#btn_bg_color').val('#dc3545');
             $('#btn_color').val('#ffffff');
-            $('#bg_img').val('');
+            $('#bg_img').val(DEFAULT_BOX_BG_IMG);
             $('#bg_gradient').val('');
+            $('#box-bgr-preview').attr('src', DEFAULT_BOX_BG_IMG);
+            $('#box-bgr-preview-wrap').show();
             $('#box_show_particle, #show_particle').prop('checked', true);
             $('#box_particle_type, #particle_type').val('default');
 

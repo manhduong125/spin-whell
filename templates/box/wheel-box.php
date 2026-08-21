@@ -36,9 +36,11 @@ $_box_bg_style = '';
 if (! empty($default_box_settings['bg_gradient'])) {
     $_box_bg_style = 'background: ' . $default_box_settings['bg_gradient'] . ';';
 } elseif (! empty($default_box_settings['bg_img'])) {
-    $_box_bg_style = 'background-image: url(' . esc_url($default_box_settings['bg_img']) . '); background-size: cover; background-position: center;';
+    $_box_bg_style = 'background-image: url(' . esc_url(WP_Spin_Wheel_Helper::resolve_asset_url($default_box_settings['bg_img'])) . '); background-size: cover; background-position: center;';
 } elseif (! empty($default_box_settings['bg_color'])) {
     $_box_bg_style = 'background-color: ' . esc_attr($default_box_settings['bg_color']) . ';';
+} else {
+    $_box_bg_style = 'background-image: url(' . esc_url(WP_SPIN_WHEEL_URL . 'assets/img/christmas-2.jpg') . '); background-size: cover; background-position: center;';
 }
 ?>
 <div class="lucky-box-page" id="lucky-box-page" data-box-id="<?php echo esc_attr($box_id); ?>"
