@@ -648,29 +648,58 @@
   }
 }
 
+/* Modal Box Result & Claim Styles */
+#modalBoxResult .modal-content,
+#modalBoxClaim .modal-content {
+  border-radius: 20px;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+#modalBoxResult .btn,
+#modalBoxClaim .btn {
+  transition: all 0.2s ease;
+}
+
+#modalBoxResult .btn:hover,
+#modalBoxClaim .btn:hover {
+  transform: translateY(-2px);
+}
+
+#modal-box-result-title {
+  letter-spacing: 0.5px;
+}
+
+#modalKetqua .table tbody tr {
+  transition: background 0.15s ease;
+}
+
+#modalKetqua .table tbody tr:hover {
+  background: rgba(220, 53, 69, 0.05);
+}
+
 @media (max-width: 480px) {
   :root {
     --size: 80px;
     --sideW: 34.64px;
     --sideXAdj: 5.36px;
   }
-
   .box-jack {
     margin: 6px auto;
   }
-
   .box-jack:after {
     width: 18px;
     height: 18px;
     font-size: 9px;
     line-height: 18px;
   }
-
   .ball .txt {
     font-size: 9.5px;
   }
-
   .box-info h1 {
     font-size: 15px;
+  }
+  #modal-box-result-title {
+    font-size: 26px !important;
   }
 }

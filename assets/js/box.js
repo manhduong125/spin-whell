@@ -204,18 +204,30 @@
         var openSoundUrl = resolveAudioUrl(soundVal, soundFileVal, 'sound');
         playSound(openSoundUrl);
 
-        // Nếu hết lượt mở -> phát âm thanh kết thúc và mở modal kết quả
-        if (turnsLeft <= 0) {
-            setTimeout(function () {
+        // Hiển thị Popup Trúng Thưởng sau khi nắp hộp mở (400ms)
+        setTimeout(function () {
+            var customPopupTitle = $.trim($('#popup_title').val() || '') || 'Hộp quà có';
+            $('#modal-box-result-label').text(customPopupTitle);
+            $('#modal-box-result-title').text(selectedPrize);
+
+            if (turnsLeft > 0) {
+                $('#modal-box-result-turns').text('Bạn còn ' + turnsLeft + ' lượt mở').removeClass('bg-danger-subtle text-danger').addClass('bg-secondary-subtle text-secondary-emphasis');
+                $('#btn-box-continue').removeClass('d-none').show().text('Mở tiếp (' + turnsLeft + ' lượt) ➔');
+                $('#btn-box-view-all').text('Xem tất cả kết quả');
+            } else {
+                $('#modal-box-result-turns').text('Bạn đã hết lượt mở!').removeClass('bg-secondary-subtle text-secondary-emphasis').addClass('bg-danger-subtle text-danger');
+                $('#btn-box-continue').addClass('d-none').hide();
+                $('#btn-box-view-all').text('Tổng kết & Nhận quà 🎁');
+
+                // Phát âm thanh kết thúc
                 var notiSoundVal = $('#noti_sound').val() || 'concainit';
                 var notiSoundFileVal = $.trim($('#noti_sound_file').val() || '');
                 var notiSoundUrl = resolveAudioUrl(notiSoundVal, notiSoundFileVal, 'noti_sound');
                 playSound(notiSoundUrl);
+            }
 
-                renderKetquaTable();
-                openModal('#modalKetqua');
-            }, 1200);
-        }
+            openModal('#modalBoxResult');
+        }, 400);
     }
 
     // Reset lại toàn bộ trò chơi
@@ -722,14 +734,39 @@
             closeModal('#settingsModal');
         });
 
-        // 11. Nhận quà trong modal kết quả
+        // 11. Nhận quà trong modal kết quả -> Mở popup xác nhận nhận quà (#modalBoxClaim)
         $(document).on('click', '.btn-claim-gift', function (e) {
             e.preventDefault();
-            var giftName = $(this).data('gift') || '';
-            alert('Chúc mừng bạn đã chọn nhận phần quà: ' + giftName + '!\nVui lòng liên hệ ban tổ chức để hoàn tất.');
+            var giftName = $(this).data('gift') || 'Phần quà may mắn';
+            var randomCode = 'HQ-' + Math.floor(100000 + Math.random() * 900000);
+
+            $('#modal-box-claim-gift-name').text(giftName);
+            $('#modal-box-claim-code').text(randomCode);
+
+            closeModal('#modalKetqua');
+            setTimeout(function() {
+                openModal('#modalBoxClaim');
+            }, 300);
         });
 
-        // 12. Preview âm thanh trong popup cài đặt
+        // 12. Click nút "Xem tất cả kết quả & Nhận quà" từ Popup trúng thưởng
+        $(document).on('click', '#btn-box-view-all', function (e) {
+            e.preventDefault();
+            closeModal('#modalBoxResult');
+            renderKetquaTable();
+            setTimeout(function() {
+                openModal('#modalKetqua');
+            }, 300);
+        });
+
+        // 13. Click nút "Chơi lại lượt mới" trong popup kết quả
+        $(document).on('click', '#btn-modal-reload-box', function (e) {
+            e.preventDefault();
+            closeModal('#modalKetqua');
+            resetGame();
+        });
+
+        // 14. Preview âm thanh trong popup cài đặt
         $(document).on('click', '#btn-sound-play', function () {
             var val = $('#sound').val();
             var url = resolveAudioUrl(val, '', 'sound');
