@@ -9,7 +9,8 @@ class WP_Spin_Wheel_Box {
      * Default Box Settings
      */
     public static function get_default_settings() {
-        return array(
+        $box_global = WP_Spin_Wheel_Helper::get_box_global_settings();
+        $defaults = array(
             'title'           => 'HỘP QUÀ MAY MẮN ONLINE',
             'template'        => 'tpl-jib',
             'luotchoi'        => 3,
@@ -21,17 +22,76 @@ class WP_Spin_Wheel_Box {
             'confetti'        => true,
             'bg_color'        => '#dc3545',
             'color'           => '#ffffff',
-            'bg_img'          => '/wp-content/themes/twentytwentythree-child/assets/background/christmas-2.jpg',
+            'bg_img'          => '',
             'bg_gradient'     => '',
             'btn_bg_color'    => '#dc3545',
             'btn_color'       => '#ffffff',
+            'show_particle'   => true,
         );
+
+        if ( ! empty( $box_global['box_title'] ) ) {
+            $defaults['title'] = $box_global['box_title'];
+        }
+        if ( ! empty( $box_global['template'] ) ) {
+            $defaults['template'] = $box_global['template'];
+        }
+        if ( isset( $box_global['luotchoi'] ) && '' !== $box_global['luotchoi'] ) {
+            $defaults['luotchoi'] = absint( $box_global['luotchoi'] );
+        }
+        if ( ! empty( $box_global['sound'] ) ) {
+            $defaults['sound'] = $box_global['sound'];
+        }
+        if ( isset( $box_global['sound_file'] ) ) {
+            $defaults['sound_file'] = $box_global['sound_file'];
+        }
+        if ( ! empty( $box_global['noti_sound'] ) ) {
+            $defaults['noti_sound'] = $box_global['noti_sound'];
+        }
+        if ( isset( $box_global['noti_sound_file'] ) ) {
+            $defaults['noti_sound_file'] = $box_global['noti_sound_file'];
+        }
+        if ( ! empty( $box_global['popup_title'] ) ) {
+            $defaults['popup_title'] = $box_global['popup_title'];
+        }
+        if ( isset( $box_global['confetti'] ) ) {
+            $defaults['confetti'] = ! empty( $box_global['confetti'] );
+        }
+        if ( ! empty( $box_global['bg_color'] ) ) {
+            $defaults['bg_color'] = $box_global['bg_color'];
+        }
+        if ( ! empty( $box_global['color'] ) ) {
+            $defaults['color'] = $box_global['color'];
+        }
+        if ( ! empty( $box_global['bg_img'] ) ) {
+            $defaults['bg_img'] = $box_global['bg_img'];
+        }
+        if ( ! empty( $box_global['bg_gradient'] ) ) {
+            $defaults['bg_gradient'] = $box_global['bg_gradient'];
+        }
+        if ( ! empty( $box_global['btn_bg_color'] ) ) {
+            $defaults['btn_bg_color'] = $box_global['btn_bg_color'];
+        }
+        if ( ! empty( $box_global['btn_color'] ) ) {
+            $defaults['btn_color'] = $box_global['btn_color'];
+        }
+        if ( isset( $box_global['show_particle'] ) ) {
+            $defaults['show_particle'] = ! empty( $box_global['show_particle'] );
+        }
+
+        return $defaults;
     }
 
     /**
      * Default Gifts List
      */
     public static function get_default_gifts() {
+        $box_global = WP_Spin_Wheel_Helper::get_box_global_settings();
+        if ( ! empty( $box_global['default_gifts'] ) ) {
+            $lines = array_values( array_filter( array_map( 'trim', explode( "\n", $box_global['default_gifts'] ) ) ) );
+            if ( ! empty( $lines ) ) {
+                return $lines;
+            }
+        }
         return array(
             '100k',
             'Ốp lưng iphone',
@@ -128,7 +188,6 @@ class WP_Spin_Wheel_Box {
         if ( ! empty( $settings ) && is_array( $settings ) ) {
             update_post_meta( $post_id, '_spin_box_overrides', wp_json_encode( $settings ) );
             update_post_meta( $post_id, '_spin_box_design', wp_json_encode( $settings ) );
-            update_post_meta( $post_id, '_spin_wheel_overrides', wp_json_encode( $settings ) );
         }
 
         if ( ! empty( $gifts ) && is_array( $gifts ) ) {

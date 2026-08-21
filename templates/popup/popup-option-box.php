@@ -4,7 +4,7 @@ if (! defined('ABSPATH')) {
 }
 
 // Lấy option nhạc từ global settings và danh sách audio items
-$_global_opts     = WP_Spin_Wheel_Helper::get_global_settings();
+$_global_opts     = WP_Spin_Wheel_Helper::get_box_global_settings();
 $_sound           = $_global_opts['sound'] ?? 'winner';
 $_sound_file      = $_global_opts['sound_file'] ?? '';
 $_noti_sound      = $_global_opts['noti_sound'] ?? 'concainit';
@@ -25,30 +25,30 @@ $_audios_end      = WP_Spin_Wheel_Helper::get_audio_library('end') ?: array();
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body py-3">
-                <ul class="nav nav-tabs" id="myTab" role="tablist">
+                <ul class="nav nav-tabs" id="boxTab" role="tablist">
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="gen-setting-tab" data-bs-toggle="tab" data-bs-target="#gen-setting-tab-pane" type="button" role="tab" aria-controls="gen-setting-tab-pane" aria-selected="true">
+                        <button class="nav-link active" id="box-gen-setting-tab" data-bs-toggle="tab" data-bs-target="#box-gen-setting-tab-pane" type="button" role="tab" aria-controls="box-gen-setting-tab-pane" aria-selected="true">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
                             <span><?php esc_html_e('Chung', 'wp-spin-wheel'); ?></span>
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="appearance-tab" data-bs-toggle="tab" data-bs-target="#appearance-tab-pane" type="button" role="tab" aria-controls="appearance-tab-pane" aria-selected="false">
+                        <button class="nav-link" id="box-appearance-tab" data-bs-toggle="tab" data-bs-target="#box-appearance-tab-pane" type="button" role="tab" aria-controls="box-appearance-tab-pane" aria-selected="false">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path></svg>
                             <span><?php esc_html_e('Giao diện', 'wp-spin-wheel'); ?></span>
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="media-tab" data-bs-toggle="tab" data-bs-target="#media-tab-pane" type="button" role="tab" aria-controls="media-tab-pane" aria-selected="false">
+                        <button class="nav-link" id="box-media-tab" data-bs-toggle="tab" data-bs-target="#box-media-tab-pane" type="button" role="tab" aria-controls="box-media-tab-pane" aria-selected="false">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
                             <span><?php esc_html_e('Thư viện', 'wp-spin-wheel'); ?></span>
                         </button>
                     </li>
                 </ul>
 
-                <div class="tab-content" id="myTabContent">
+                <div class="tab-content" id="boxTabContent">
                     <!-- TAB 1: CHUNG -->
-                    <div class="tab-pane fade pt-3 show active" id="gen-setting-tab-pane" role="tabpanel" aria-labelledby="gen-setting-tab" tabindex="0">
+                    <div class="tab-pane fade pt-3 show active" id="box-gen-setting-tab-pane" role="tabpanel" aria-labelledby="box-gen-setting-tab" tabindex="0">
                         <!-- Tiêu đề -->
                         <div class="mb-3">
                             <label for="hqmm-title" class="form-label fw-bold"><?php esc_html_e('Tiêu đề hộp quà', 'wp-spin-wheel'); ?></label>
@@ -163,7 +163,7 @@ Hộp đựng cơm</textarea>
                     </div>
 
                     <!-- TAB 2: GIAO DIỆN -->
-                    <div class="tab-pane fade pt-3" id="appearance-tab-pane" role="tabpanel" aria-labelledby="appearance-tab" tabindex="0">
+                    <div class="tab-pane fade pt-3" id="box-appearance-tab-pane" role="tabpanel" aria-labelledby="box-appearance-tab" tabindex="0">
                         <!-- Chọn chủ đề mẫu -->
                         <fieldset class="border border-2 rounded-3 p-3 mb-3">
                             <legend class="float-none w-auto px-2 fs-6 fw-bold"><?php esc_html_e('Chủ đề mẫu Hộp quà', 'wp-spin-wheel'); ?></legend>
@@ -274,14 +274,14 @@ Hộp đựng cơm</textarea>
                             <button class="btn btn-outline-primary btn-sm w-100 mb-3" id="btn-apply-box-gradient"><?php esc_html_e('Áp dụng gradient', 'wp-spin-wheel'); ?></button>
 
                             <div class="form-check mt-3">
-                                <input class="form-check-input" type="checkbox" id="show_particle" checked>
-                                <label class="form-check-label small" for="show_particle"><?php esc_html_e('Hiệu ứng hạt nền chuyển động', 'wp-spin-wheel'); ?></label>
+                                <input class="form-check-input" type="checkbox" id="box_show_particle" checked>
+                                <label class="form-check-label small" for="box_show_particle"><?php esc_html_e('Hiệu ứng hạt nền chuyển động', 'wp-spin-wheel'); ?></label>
                             </div>
                         </fieldset>
                     </div>
 
                     <!-- TAB 3: THƯ VIỆN -->
-                    <div class="tab-pane fade pt-3" id="media-tab-pane" role="tabpanel" aria-labelledby="media-tab" tabindex="0">
+                    <div class="tab-pane fade pt-3" id="box-media-tab-pane" role="tabpanel" aria-labelledby="box-media-tab" tabindex="0">
                         <div id="box-uploaded-list" class="mb-3">
                             <ul class="nav nav-tabs" id="boxMediaTabs" role="tablist">
                                 <li class="nav-item" role="presentation">

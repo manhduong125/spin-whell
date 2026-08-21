@@ -1,5 +1,8 @@
 jQuery(document).ready(function ($) {
     var container = $('#wheel-wrapper');
+    if (!container.length) {
+        return;
+    }
     var wheelId = parseInt(container.data('wheel-id'), 10) || 0;
     var nonce = container.data('nonce');
     var rawSettings = container.attr('data-wheel-settings');

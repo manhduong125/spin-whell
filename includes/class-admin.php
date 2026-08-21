@@ -82,6 +82,15 @@ class WP_Spin_Wheel_Admin {
             'wp-spin-wheel-settings',
             array( $this->settings, 'render_settings_page' )
         );
+
+        add_submenu_page(
+            'edit.php?post_type=spin_box',
+            __( 'Cài đặt Hộp quà may mắn', 'wp-spin-wheel' ),
+            __( 'Settings', 'wp-spin-wheel' ),
+            'manage_options',
+            'wp-spin-box-settings',
+            array( $this->settings, 'render_box_settings_page' )
+        );
     }
 
     public function render_dashboard_page() {

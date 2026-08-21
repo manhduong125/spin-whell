@@ -723,7 +723,7 @@ class WP_Spin_Wheel_Shortcode {
         }
 
         $query_args = array(
-            'post_type'      => 'spin_wheel',
+            'post_type'      => 'spin_box',
             'post_status'    => array( 'publish', 'draft', 'private', 'pending' ),
             'posts_per_page' => $limit,
             'paged'          => $current_page,
@@ -738,7 +738,7 @@ class WP_Spin_Wheel_Shortcode {
         }
 
         if ( 'views' === $orderby ) {
-            $query_args['meta_key'] = '_spin_wheel_views';
+            $query_args['meta_key'] = '_spin_box_views';
             $query_args['orderby']  = 'meta_value_num';
             $query_args['order']    = 'DESC';
         } elseif ( 'title' === $orderby ) {
@@ -759,17 +759,12 @@ class WP_Spin_Wheel_Shortcode {
                 $author_id   = get_the_author_meta( 'ID' );
                 $author_name = get_the_author_meta( 'display_name' ) ?: get_the_author_meta( 'user_login' );
 
-                $prizes = WP_Spin_Wheel_Prize::get_prizes( $post_id );
-                if ( empty( $prizes ) ) {
-                    $prizes = array(
-                        array( 'title' => '100k' ),
-                        array( 'title' => '50k' ),
-                        array( 'title' => 'Chúc bạn may mắn' ),
-                    );
+                $gifts    = WP_Spin_Wheel_Box::get_box_gifts( $post_id );
+                $settings = WP_Spin_Wheel_Box::get_box_settings( $post_id );
+                $views    = (int) get_post_meta( $post_id, '_spin_box_views', true );
+                if ( $views <= 0 ) {
+                    $views = (int) get_post_meta( $post_id, '_spin_box_total_opens', true );
                 }
-
-                $settings = WP_Spin_Wheel_Helper::get_wheel_overrides( $post_id );
-                $views    = (int) get_post_meta( $post_id, '_spin_wheel_views', true );
 
                 $boxes[] = array(
                     'id'            => $post_id,
@@ -780,7 +775,7 @@ class WP_Spin_Wheel_Shortcode {
                     'author_name'   => $author_name,
                     'created_date'  => get_the_date( 'd/m/Y H:i', $post_id ),
                     'time_ago'      => WP_Spin_Wheel_History::human_time_ago( get_the_date( 'Y-m-d H:i:s', $post_id ) ),
-                    'prizes'        => $prizes,
+                    'prizes'        => $gifts,
                     'settings'      => $settings,
                     'template'      => $settings['template'] ?? 'tpl-jib',
                     'conlai'        => $settings['luotchoi'] ?? 3,

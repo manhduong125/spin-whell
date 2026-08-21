@@ -74,7 +74,7 @@ if (! empty($default_box_settings['bg_gradient'])) {
             </path>
         </svg>
     </button>
-    <a href="https://vongquaymayman.co/box-gallery/" class="btn btn-sm" id="btn-manage" data-bs-toggle="tooltip"
+    <a href="#" class="btn btn-sm" id="btn-manage" data-bs-toggle="tooltip"
         data-bs-title="Bộ sưu tập" data-bs-placement="bottom" style="color: rgb(255, 255, 255);"><svg
             xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"

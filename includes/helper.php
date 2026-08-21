@@ -72,6 +72,12 @@ class WP_Spin_Wheel_Helper
         return is_array($settings) ? $settings : array();
     }
 
+    public static function get_box_global_settings()
+    {
+        $settings = get_option('wp_spin_box_settings', array());
+        return is_array($settings) ? $settings : array();
+    }
+
     public static function get_setting_items($type)
     {
         $stored = get_option('wp_spin_wheel_setting_items', array());

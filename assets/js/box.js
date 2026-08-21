@@ -4,13 +4,25 @@
 (function ($) {
     'use strict';
 
-    var container = $('#lucky-box');
+    if (!$('#lucky-box, .lucky-box-page').length) {
+        return;
+    }
+
+    var container = $('#lucky-box, .lucky-box-page').first();
     var boxId = parseInt(container.data('box-id'), 10) || 0;
     var maxTurns = parseInt($('#luotchoi').val(), 10) || parseInt($('#conlai').text(), 10) || 3;
     var turnsLeft = maxTurns;
     var openedBoxes = 0;
     var sessionResults = [];
     var giftList = [];
+
+    // Key lưu settings vào localStorage (phân biệt theo từng box_id và user_id)
+    function getBoxStorageKey() {
+        var activeId = boxId || $('#lucky-box').attr('data-box-id') || '0';
+        var params = window.wp_spin_box_params || window.wp_spin_wheel_params || {};
+        var userId = params.user_id ? params.user_id : 'guest';
+        return 'wp_spin_box_ui_settings_box_' + activeId + '_user_' + userId;
+    }
 
     // Parse JSON an toàn
     function parseJson(val, fallback) {
@@ -278,7 +290,7 @@
         turnsLeft = maxTurns;
         updateTurnsDisplay();
 
-        // Lưu vào localStorage cho khách
+        // Lưu vào localStorage cho khách & user
         try {
             var boxPayload = {
                 title: title,
@@ -296,34 +308,46 @@
                 bg_color: bgColor,
                 color: color,
                 btn_bg_color: btnBgColor,
-                btn_color: btnColor
+                btn_color: btnColor,
+                show_particle: $('#box_show_particle').length ? $('#box_show_particle').is(':checked') : ($('#show_particle').length ? $('#show_particle').is(':checked') : true)
             };
+            localStorage.setItem(getBoxStorageKey(), JSON.stringify(boxPayload));
             localStorage.setItem('wp_spin_box_settings_guest', JSON.stringify(boxPayload));
         } catch (e) {}
 
         // Nếu đã đăng nhập -> Lưu lên server
-        if (typeof wp_spin_wheel_params !== 'undefined' && wp_spin_wheel_params.is_logged_in) {
+        var params = window.wp_spin_box_params || window.wp_spin_wheel_params;
+        if (params && params.is_logged_in) {
             syncBoxToServer(boxPayload);
         }
     }
 
-    // Đồng bộ lên server nếu đăng nhập
+    // Đồng bộ lên server nếu đăng nhập (chỉ lưu vào Box, tuyệt đối không ảnh hưởng đến Wheel)
     function syncBoxToServer(payload) {
-        if (typeof wp_spin_wheel_params === 'undefined' || !wp_spin_wheel_params.is_logged_in) return;
+        var params = window.wp_spin_box_params || window.wp_spin_wheel_params;
+        if (!params || !params.is_logged_in) return;
+        var activeId = boxId || parseInt($('#lucky-box').attr('data-box-id'), 10) || (params.user_box_id || 0);
+
         $.ajax({
-            url: wp_spin_wheel_params.rest_url + 'user-wheel',
+            url: params.rest_url + 'user-box',
             method: 'POST',
             beforeSend: function (xhr) {
-                xhr.setRequestHeader('X-WP-Nonce', wp_spin_wheel_params.nonce);
+                xhr.setRequestHeader('X-WP-Nonce', params.nonce);
             },
             contentType: 'application/json',
             data: JSON.stringify({
-                wheel_id: boxId || 0,
-                type: 'box',
+                box_id: activeId,
+                id: activeId,
                 title: payload.title,
                 settings: payload,
-                prizes: payload.gifts.map(function(g) { return { title: g, color: '#dc3545' }; })
-            })
+                gifts: payload.gifts
+            }),
+            success: function (res) {
+                if (res && res.box_id) {
+                    boxId = parseInt(res.box_id, 10);
+                    $('#lucky-box').attr('data-box-id', res.box_id);
+                }
+            }
         });
     }
 
@@ -334,7 +358,17 @@
         var phpSettings = parseJson(containerEl.attr('data-box-settings'), null);
         var phpGifts = parseJson(containerEl.attr('data-box-gifts'), null);
 
-        // 2. Đọc cài đặt đã lưu trong localStorage (nếu có)
+        // 2. Đọc cài đặt của user đăng nhập từ server params (nếu có)
+        var params = window.wp_spin_box_params || window.wp_spin_wheel_params || {};
+        var serverSettings = null;
+        var serverGifts = null;
+        if (params.user_box_data) {
+            if (params.user_box_data.settings) serverSettings = params.user_box_data.settings;
+            if (params.user_box_data.gifts) serverGifts = params.user_box_data.gifts;
+        }
+
+        // 3. Đọc cài đặt đã lưu trong localStorage (nếu có)
+        var storedSettings = parseJson(localStorage.getItem(getBoxStorageKey()), null);
         var guestSettings = parseJson(localStorage.getItem('wp_spin_box_settings_guest'), null);
 
         var finalSettings = $.extend({}, {
@@ -352,8 +386,9 @@
             bg_img: '',
             bg_gradient: '',
             btn_bg_color: '#dc3545',
-            btn_color: '#ffffff'
-        }, phpSettings || {}, guestSettings || {});
+            btn_color: '#ffffff',
+            show_particle: true
+        }, phpSettings || {}, serverSettings || {}, storedSettings || {}, guestSettings || {});
 
         if (finalSettings) {
             if (finalSettings.title) {
@@ -395,7 +430,9 @@
             if (finalSettings.color) $('#color').val(finalSettings.color);
             if (finalSettings.btn_bg_color) $('#btn_bg_color').val(finalSettings.btn_bg_color);
             if (finalSettings.btn_color) $('#btn_color').val(finalSettings.btn_color);
-            if (finalSettings.confetti !== undefined) $('#confetti').prop('checked', !!finalSettings.confetti);
+            if (finalSettings.show_particle !== undefined) {
+                $('#box_show_particle, #show_particle').prop('checked', !!finalSettings.show_particle);
+            }
         }
 
         // Luôn áp dụng settings khi trang tải
@@ -657,6 +694,7 @@
         // Nút đặt lại cài đặt Box về mặc định (#btn-reset-box)
         $(document).on('click', '#btn-reset-box', function (e) {
             e.preventDefault();
+            localStorage.removeItem(getBoxStorageKey());
             localStorage.removeItem('wp_spin_box_settings_guest');
 
             $('#hqmm-title').val('HỘP QUÀ MAY MẮN ONLINE');
@@ -677,7 +715,7 @@
             $('#btn_color').val('#ffffff');
             $('#bg_img').val('');
             $('#bg_gradient').val('');
-            $('#show_particle').prop('checked', true);
+            $('#box_show_particle, #show_particle').prop('checked', true);
 
             applyBoxSettings();
             resetGame();

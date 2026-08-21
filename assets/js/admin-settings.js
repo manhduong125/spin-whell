@@ -1,70 +1,64 @@
 (function($){
-    var pageMatch = window.location.search.indexOf('page=wp-spin-wheel-settings') !== -1;
-    if ( ! pageMatch ) {
+    var isWheelSettings = window.location.search.indexOf('wp-spin-wheel-settings') !== -1;
+    var isBoxSettings   = window.location.search.indexOf('wp-spin-box-settings') !== -1;
+
+    if ( ! isWheelSettings && ! isBoxSettings ) {
         return;
     }
 
-    var optionBase = 'wp_spin_wheel_settings';
-    var params = window.wp_spin_wheel_settings_params || window.wp_spin_wheel_admin_params || {};
+    var params   = window.wp_spin_wheel_settings_params || window.wp_spin_wheel_admin_params || {};
     var restRoot = (params && params.rest_url) ? params.rest_url.replace(/\/$/, '') : (window.wpApiSettings && window.wpApiSettings.root ? window.wpApiSettings.root + 'spin-wheel/v1' : '/wp-json/spin-wheel/v1');
-    var endpoint = restRoot + '/settings';
-    var nonce = (params && params.nonce) ? params.nonce : (window.wpApiSettings && window.wpApiSettings.nonce ? window.wpApiSettings.nonce : '');
+    var nonce    = (params && params.nonce) ? params.nonce : (window.wpApiSettings && window.wpApiSettings.nonce ? window.wpApiSettings.nonce : '');
 
-    function loadSettings() {
-        fetch(endpoint, { credentials: 'same-origin', headers: { 'X-WP-Nonce': nonce } })
-        .then(function(res){ return res.json(); })
-        .then(function(data){
-            if (!data) return;
-            Object.keys(data).forEach(function(key){
-                var sel = '[name="' + optionBase + '[' + key + ']"]';
-                var el = $(sel);
-                if (!el.length) return;
-                if (el.is(':checkbox')) {
-                    el.prop('checked', !!data[key]);
-                } else {
-                    el.val(data[key]);
-                }
-            });
-        }).catch(function(){ /* ignore */ });
+    // 1. Wheel Form Handler
+    var wheelForm = $('#form-spin-wheel-settings, form[data-option-base="wp_spin_wheel_settings"]');
+    if (wheelForm.length) {
+        var wheelBase = 'wp_spin_wheel_settings';
+        var wheelEndpoint = restRoot + '/settings';
+
+        function loadWheelSettings() {
+            fetch(wheelEndpoint, { credentials: 'same-origin', headers: { 'X-WP-Nonce': nonce } })
+            .then(function(res){ return res.json(); })
+            .then(function(data){
+                if (!data) return;
+                Object.keys(data).forEach(function(key){
+                    var sel = '[name="' + wheelBase + '[' + key + ']"]';
+                    var el = $(sel);
+                    if (!el.length) return;
+                    if (el.is(':checkbox')) {
+                        el.prop('checked', !!data[key]);
+                    } else {
+                        el.val(data[key]);
+                    }
+                });
+            }).catch(function(){});
+        }
+        loadWheelSettings();
     }
 
-    $(function(){
-        var form = $('form[action="options.php"]');
-        if (!form.length) return;
+    // 2. Box Form Handler
+    var boxForm = $('#form-spin-box-settings, form[data-option-base="wp_spin_box_settings"]');
+    if (boxForm.length) {
+        var boxBase = 'wp_spin_box_settings';
+        var boxEndpoint = restRoot + '/box-settings';
 
-        form.on('submit', function(e){
-            e.preventDefault();
-            var payload = {};
-            form.find('[name^="' + optionBase + '"]').each(function(){
-                var name = $(this).attr('name');
-                var m = name.match(/\[(.+)\]$/);
-                if (!m) return;
-                var key = m[1];
-                if ($(this).is(':checkbox')) payload[key] = $(this).is(':checked') ? 1 : 0;
-                else payload[key] = $(this).val();
-            });
-
-            fetch(endpoint, {
-                method: 'POST',
-                credentials: 'same-origin',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-WP-Nonce': nonce
-                },
-                body: JSON.stringify(payload)
-            }).then(function(res){
-                return res.json();
-            }).then(function(data){
-                if (params && params.text_saved) {
-                    alert(params.text_saved);
-                } else {
-                    alert('Saved');
-                }
-            }).catch(function(){
-                alert('Error saving settings');
-            });
-        });
-
-        loadSettings();
-    });
+        function loadBoxSettings() {
+            fetch(boxEndpoint, { credentials: 'same-origin', headers: { 'X-WP-Nonce': nonce } })
+            .then(function(res){ return res.json(); })
+            .then(function(data){
+                if (!data) return;
+                Object.keys(data).forEach(function(key){
+                    var sel = '[name="' + boxBase + '[' + key + ']"]';
+                    var el = $(sel);
+                    if (!el.length) return;
+                    if (el.is(':checkbox')) {
+                        el.prop('checked', !!data[key]);
+                    } else {
+                        el.val(data[key]);
+                    }
+                });
+            }).catch(function(){});
+        }
+        loadBoxSettings();
+    }
 })(jQuery);

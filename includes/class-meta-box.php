@@ -167,7 +167,6 @@ class WP_Spin_Wheel_Meta_Box {
 
                 update_post_meta( $post_id, '_spin_box_overrides', wp_json_encode( $settings ) );
                 update_post_meta( $post_id, '_spin_box_design', wp_json_encode( $settings ) );
-                update_post_meta( $post_id, '_spin_wheel_overrides', wp_json_encode( $settings ) );
                 update_post_meta( $post_id, '_spin_box_gifts_json', wp_json_encode( $gifts ) );
 
                 if ( ! empty( $gifts ) ) {

@@ -199,6 +199,20 @@ class WP_Spin_Wheel_REST_API {
             'permission_callback' => '__return_true',
         ) );
 
+        // User box for logged-in users (1 user = 1 spin_box default post)
+        register_rest_route( 'spin-wheel/v1', '/user-box', array(
+            array(
+                'methods'             => 'GET',
+                'callback'            => array( $this, 'get_user_box' ),
+                'permission_callback' => function() { return is_user_logged_in(); },
+            ),
+            array(
+                'methods'             => 'POST',
+                'callback'            => array( $this, 'save_user_box' ),
+                'permission_callback' => function() { return is_user_logged_in(); },
+            ),
+        ) );
+
         register_rest_route( 'spin-wheel/v1', '/user/boxes', array(
             array(
                 'methods'             => 'GET',
@@ -208,6 +222,24 @@ class WP_Spin_Wheel_REST_API {
             array(
                 'methods'             => 'POST',
                 'callback'            => array( $this, 'create_user_box_route' ),
+                'permission_callback' => function() { return is_user_logged_in(); },
+            ),
+        ) );
+
+        register_rest_route( 'spin-wheel/v1', '/user/boxes/(?P<id>\d+)', array(
+            array(
+                'methods'             => 'GET',
+                'callback'            => array( $this, 'get_single_user_box' ),
+                'permission_callback' => function() { return is_user_logged_in(); },
+            ),
+            array(
+                'methods'             => array( 'POST', 'PUT', 'PATCH' ),
+                'callback'            => array( $this, 'update_single_user_box' ),
+                'permission_callback' => function() { return is_user_logged_in(); },
+            ),
+            array(
+                'methods'             => 'DELETE',
+                'callback'            => array( $this, 'delete_user_box_route' ),
                 'permission_callback' => function() { return is_user_logged_in(); },
             ),
         ) );
@@ -224,14 +256,6 @@ class WP_Spin_Wheel_REST_API {
             array(
                 'methods'             => 'POST',
                 'callback'            => array( $this, 'duplicate_user_box_route' ),
-                'permission_callback' => function() { return is_user_logged_in(); },
-            ),
-        ) );
-
-        register_rest_route( 'spin-wheel/v1', '/user/boxes/(?P<id>\d+)', array(
-            array(
-                'methods'             => 'DELETE',
-                'callback'            => array( $this, 'delete_user_box_route' ),
                 'permission_callback' => function() { return is_user_logged_in(); },
             ),
         ) );
@@ -731,6 +755,151 @@ class WP_Spin_Wheel_REST_API {
             'description' => get_post_field( 'post_content', $box_id ),
             'settings'    => $settings,
             'gifts'       => $gifts,
+        ) );
+    }
+
+    public function get_user_box() {
+        $user_id = get_current_user_id();
+        if ( ! $user_id ) {
+            return new WP_Error( 'not_logged_in', __( 'User not logged in.', 'wp-spin-wheel' ), array( 'status' => 401 ) );
+        }
+
+        $box_id = WP_Spin_Wheel_Box::get_or_create_user_box( $user_id );
+        if ( ! $box_id ) {
+            return new WP_Error( 'not_found', __( 'Box not found.', 'wp-spin-wheel' ), array( 'status' => 404 ) );
+        }
+
+        $settings = WP_Spin_Wheel_Box::get_box_settings( $box_id );
+        $gifts    = WP_Spin_Wheel_Box::get_box_gifts( $box_id );
+
+        return rest_ensure_response( array(
+            'id'          => $box_id,
+            'title'       => get_the_title( $box_id ),
+            'description' => get_post_field( 'post_content', $box_id ),
+            'settings'    => $settings,
+            'gifts'       => $gifts,
+        ) );
+    }
+
+    public function save_user_box( $request ) {
+        $user_id = get_current_user_id();
+        if ( ! $user_id ) {
+            return new WP_Error( 'not_logged_in', __( 'User not logged in.', 'wp-spin-wheel' ), array( 'status' => 401 ) );
+        }
+
+        $target_id = absint( $request->get_param( 'box_id' ) ?: ( $request->get_param( 'id' ) ?: 0 ) );
+        $box_id = 0;
+        if ( $target_id ) {
+            $post = get_post( $target_id );
+            if ( $post && $post->post_type === 'spin_box' && ( (int) $post->post_author === $user_id || current_user_can( 'manage_options' ) ) ) {
+                $box_id = $target_id;
+            }
+        }
+        if ( ! $box_id ) {
+            $box_id = WP_Spin_Wheel_Box::get_or_create_user_box( $user_id );
+        }
+
+        if ( ! $box_id ) {
+            return new WP_Error( 'create_failed', __( 'Unable to find or create box for user.', 'wp-spin-wheel' ), array( 'status' => 500 ) );
+        }
+
+        $title       = $request->get_param( 'title' );
+        $description = $request->get_param( 'description' ) ?: $request->get_param( 'content' );
+        $settings    = $request->get_param( 'settings' );
+        $gifts       = $request->get_param( 'gifts' ) ?: $request->get_param( 'prizes' );
+
+        $update_post = array( 'ID' => $box_id );
+        if ( isset( $title ) && '' !== trim( $title ) ) {
+            $update_post['post_title'] = sanitize_text_field( $title );
+        }
+        if ( isset( $description ) ) {
+            $update_post['post_content'] = wp_kses_post( $description );
+        }
+        wp_update_post( $update_post );
+
+        if ( ! empty( $settings ) && is_array( $settings ) ) {
+            update_post_meta( $box_id, '_spin_box_overrides', wp_json_encode( $settings ) );
+            update_post_meta( $box_id, '_spin_box_design', wp_json_encode( $settings ) );
+        }
+
+        if ( ! empty( $gifts ) && is_array( $gifts ) ) {
+            update_post_meta( $box_id, '_spin_box_gifts_json', wp_json_encode( $gifts ) );
+            $prizes_formatted = array_map( function( $g ) {
+                $t = is_array( $g ) ? ( $g['title'] ?? '' ) : $g;
+                return array( 'title' => $t, 'color' => '#dc3545', 'weight' => 10, 'stock' => 9999 );
+            }, $gifts );
+            $this->sync_prizes_db( $box_id, $prizes_formatted );
+        }
+
+        return rest_ensure_response( array(
+            'success'  => true,
+            'box_id'   => $box_id,
+            'title'    => get_the_title( $box_id ),
+            'message'  => __( 'Đã lưu cài đặt hộp quà thành công.', 'wp-spin-wheel' ),
+        ) );
+    }
+
+    public function get_single_user_box( $request ) {
+        $user_id = get_current_user_id();
+        $box_id  = absint( $request['id'] );
+        $post    = get_post( $box_id );
+        if ( ! $post || $post->post_type !== 'spin_box' || ( (int) $post->post_author !== $user_id && ! current_user_can( 'manage_options' ) ) ) {
+            return new WP_Error( 'not_found', __( 'Box not found or access denied.', 'wp-spin-wheel' ), array( 'status' => 404 ) );
+        }
+
+        $settings = WP_Spin_Wheel_Box::get_box_settings( $box_id );
+        $gifts    = WP_Spin_Wheel_Box::get_box_gifts( $box_id );
+
+        return rest_ensure_response( array(
+            'id'          => $box_id,
+            'title'       => get_the_title( $box_id ),
+            'description' => get_post_field( 'post_content', $box_id ),
+            'settings'    => $settings,
+            'gifts'       => $gifts,
+        ) );
+    }
+
+    public function update_single_user_box( $request ) {
+        $user_id = get_current_user_id();
+        $box_id  = absint( $request['id'] );
+        $post    = get_post( $box_id );
+        if ( ! $post || $post->post_type !== 'spin_box' || ( (int) $post->post_author !== $user_id && ! current_user_can( 'manage_options' ) ) ) {
+            return new WP_Error( 'not_found', __( 'Box not found or access denied.', 'wp-spin-wheel' ), array( 'status' => 404 ) );
+        }
+
+        $title       = $request->get_param( 'title' );
+        $description = $request->get_param( 'description' ) ?: $request->get_param( 'content' );
+        $settings    = $request->get_param( 'settings' );
+        $gifts       = $request->get_param( 'gifts' ) ?: $request->get_param( 'prizes' );
+
+        $update_post = array( 'ID' => $box_id );
+        if ( isset( $title ) && '' !== trim( $title ) ) {
+            $update_post['post_title'] = sanitize_text_field( $title );
+        }
+        if ( isset( $description ) ) {
+            $update_post['post_content'] = wp_kses_post( $description );
+        }
+        wp_update_post( $update_post );
+
+        if ( ! empty( $settings ) && is_array( $settings ) ) {
+            update_post_meta( $box_id, '_spin_box_overrides', wp_json_encode( $settings ) );
+            update_post_meta( $box_id, '_spin_box_design', wp_json_encode( $settings ) );
+        }
+
+        if ( ! empty( $gifts ) && is_array( $gifts ) ) {
+            update_post_meta( $box_id, '_spin_box_gifts_json', wp_json_encode( $gifts ) );
+            $prizes_formatted = array_map( function( $g ) {
+                $t = is_array( $g ) ? ( $g['title'] ?? '' ) : $g;
+                return array( 'title' => $t, 'color' => '#dc3545', 'weight' => 10, 'stock' => 9999 );
+            }, $gifts );
+            $this->sync_prizes_db( $box_id, $prizes_formatted );
+        }
+
+        return rest_ensure_response( array(
+            'success'  => true,
+            'box_id'   => $box_id,
+            'title'    => get_the_title( $box_id ),
+            'message'  => __( 'Đã cập nhật hộp quà thành công.', 'wp-spin-wheel' ),
         ) );
     }
 
