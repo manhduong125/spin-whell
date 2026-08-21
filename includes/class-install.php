@@ -69,6 +69,8 @@ class WP_Spin_Wheel_Install {
             name varchar(255) DEFAULT NULL,
             email varchar(255) DEFAULT NULL,
             phone varchar(100) DEFAULT NULL,
+            address varchar(255) DEFAULT NULL,
+            company varchar(255) DEFAULT NULL,
             ip varchar(100) DEFAULT NULL,
             cookie varchar(255) DEFAULT NULL,
             user_agent varchar(255) DEFAULT NULL,
@@ -92,6 +94,8 @@ class WP_Spin_Wheel_Install {
         dbDelta( $sql_prizes );
         dbDelta( $sql_players );
         dbDelta( $sql_history );
+        // Nâng cấp bảng đã tồn tại trước khi plugin bổ sung cột address/company
+        self::migrate_history_table();
         // ensure capabilities are assigned after tables are created
         self::add_capabilities();
     }
@@ -114,6 +118,33 @@ class WP_Spin_Wheel_Install {
                     $role->add_cap( $cap );
                 }
             }
+        }
+    }
+
+    /**
+     * Nâng cấp bảng spin_history cho các site đã cài trước khi có cột address/company.
+     * Idempotent: an toàn chạy lại nhiều lần.
+     */
+    public static function migrate_history_table() {
+        global $wpdb;
+
+        $table_history = $wpdb->prefix . 'spin_history';
+        // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+        $table_exists = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $table_history ) );
+        if ( $table_exists !== $table_history ) {
+            return;
+        }
+
+        $existing_columns = $wpdb->get_col( "SHOW COLUMNS FROM {$table_history}" );
+
+        // Thêm cột address nếu chưa có
+        if ( ! in_array( 'address', $existing_columns, true ) ) {
+            $wpdb->query( "ALTER TABLE {$table_history} ADD COLUMN address varchar(255) DEFAULT NULL AFTER phone" );
+        }
+
+        // Thêm cột company nếu chưa có
+        if ( ! in_array( 'company', $existing_columns, true ) ) {
+            $wpdb->query( "ALTER TABLE {$table_history} ADD COLUMN company varchar(255) DEFAULT NULL AFTER address" );
         }
     }
 

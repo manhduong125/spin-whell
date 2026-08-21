@@ -170,10 +170,14 @@ class WP_Spin_Wheel_Helper
 
         // 1. Kiểm tra file mp3 cục bộ trong thư mục assets/audio/audio-{type}/
         if (is_dir($dir_path)) {
-            $files = glob(
-                $dir_path . '/*.{mp3,ogg,wav,m4a,aac}',
-                GLOB_BRACE
-            );
+            $files = array();
+            $audio_extensions = array('mp3', 'ogg', 'wav', 'm4a', 'aac');
+            foreach ($audio_extensions as $audio_ext) {
+                $matches = glob($dir_path . '/*.' . $audio_ext);
+                if (! empty($matches)) {
+                    $files = array_merge($files, $matches);
+                }
+            }
 
             if (! empty($files)) {
                 sort($files);

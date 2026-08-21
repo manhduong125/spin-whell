@@ -1027,10 +1027,10 @@ class WP_Spin_Wheel_REST_API {
         if ( empty( $nonce ) ) {
             $nonce = $request->get_param( 'nonce' );
         }
-        if ( empty( $nonce ) ) {
-            return true;
+        if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
+            return false;
         }
-        return wp_verify_nonce( $nonce, 'wp_rest' );
+        return true;
     }
 
     private function get_safe_prizes( $prizes ) {

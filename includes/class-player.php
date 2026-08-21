@@ -69,21 +69,28 @@ class WP_Spin_Wheel_Player {
 
         global $wpdb;
         $table = $wpdb->prefix . 'spin_players';
-        $data = array();
-        $formats = array();
+
+        $sets  = array();
+        $args  = array();
 
         if ( $spins !== 0 ) {
-            $data['total_spins'] = $wpdb->prepare( 'total_spins + %d', $spins );
+            $sets[]  = 'total_spins = total_spins + %d';
+            $args[]  = $spins;
         }
 
         if ( $wins !== 0 ) {
-            $data['total_wins'] = $wpdb->prepare( 'total_wins + %d', $wins );
+            $sets[]  = 'total_wins = total_wins + %d';
+            $args[]  = $wins;
         }
 
-        if ( empty( $data ) ) {
+        if ( empty( $sets ) ) {
             return;
         }
 
-        $wpdb->query( $wpdb->prepare( "UPDATE {$table} SET total_spins = total_spins + %d, total_wins = total_wins + %d, updated_at = %s WHERE id = %d", $spins, $wins, current_time( 'mysql' ), $player_id ) );
+        $sets[] = 'updated_at = %s';
+        $args[] = current_time( 'mysql' );
+        $args[] = $player_id;
+
+        $wpdb->query( $wpdb->prepare( "UPDATE {$table} SET " . implode( ', ', $sets ) . ' WHERE id = %d', $args ) );
     }
 }

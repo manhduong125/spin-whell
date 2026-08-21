@@ -69,22 +69,6 @@ class WP_Spin_Wheel_Frontend {
             'user_wheel_data' => $user_wheel_data,
         ) );
 
-        wp_localize_script( 'wp-spin-wheel-box', 'wp_spin_wheel_params', array(
-            'home_url'        => esc_url_raw( home_url( '/' ) ),
-            'rest_url'        => esc_url_raw( rest_url( 'spin-wheel/v1/' ) ),
-            'nonce'           => wp_create_nonce( 'wp_rest' ),
-            'text_win'        => __( 'Bạn đã trúng', 'wp-spin-wheel' ),
-            'text_error'      => __( 'Đã có lỗi xảy ra.', 'wp-spin-wheel' ),
-            'plugin_url'      => WP_SPIN_WHEEL_URL,
-            'themes_json_url' => WP_SPIN_WHEEL_URL . 'assets/data/themes.json',
-            'is_logged_in'    => $is_logged_in,
-            'user_id'         => $user_id,
-            'user_box_id'     => $user_box_id,
-            'user_box_data'   => $user_box_data,
-            'user_wheel_id'   => $user_wheel_id,
-            'user_wheel_data' => $user_wheel_data,
-        ) );
-
         wp_localize_script( 'wp-spin-wheel-box', 'wp_spin_box_params', array(
             'home_url'        => esc_url_raw( home_url( '/' ) ),
             'rest_url'        => esc_url_raw( rest_url( 'spin-wheel/v1/' ) ),
