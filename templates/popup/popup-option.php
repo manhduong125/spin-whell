@@ -12,26 +12,40 @@
             <div class="modal-body py-3">
                 <ul class="nav nav-tabs" id="myTab" role="tablist">
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="gen-setting-tab" data-bs-toggle="tab" data-bs-target="#gen-setting-tab-pane" type="button" role="tab" aria-controls="gen-setting-tab-pane" aria-selected="true">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <button class="nav-link active" id="gen-setting-tab" data-bs-toggle="tab"
+                            data-bs-target="#gen-setting-tab-pane" type="button" role="tab"
+                            aria-controls="gen-setting-tab-pane" aria-selected="true">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
                                 <circle cx="12" cy="12" r="3"></circle>
-                                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                                <path
+                                    d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z">
+                                </path>
                             </svg>
                             <span>Chung</span>
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="appearance-tab" data-bs-toggle="tab" data-bs-target="#appearance-tab-pane" type="button" role="tab" aria-controls="appearance-tab-pane" aria-selected="false">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <button class="nav-link" id="appearance-tab" data-bs-toggle="tab"
+                            data-bs-target="#appearance-tab-pane" type="button" role="tab"
+                            aria-controls="appearance-tab-pane" aria-selected="false">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
                                 <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
                             </svg>
                             <span>Giao diện</span>
                         </button>
                     </li>
                     <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="media-tab" data-bs-toggle="tab" data-bs-target="#media-tab-pane" type="button" role="tab" aria-controls="media-tab-pane" aria-selected="false">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                        <button class="nav-link" id="media-tab" data-bs-toggle="tab" data-bs-target="#media-tab-pane"
+                            type="button" role="tab" aria-controls="media-tab-pane" aria-selected="false">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                                fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round">
+                                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z">
+                                </path>
                             </svg>
                             <span>Thư viện</span>
                         </button>
@@ -53,23 +67,23 @@
                                         <?php selected(in_array($_start_sound, array('0', ''), true), true); ?>>Tắt
                                         tiếng</option>
                                     <?php if (! empty($_audios_start)) : ?>
-                                        <option value="random" <?php selected($_start_sound, 'random'); ?>>Ngẫu nhiên
-                                        </option>
+                                    <option value="random" <?php selected($_start_sound, 'random'); ?>>Ngẫu nhiên
+                                    </option>
                                     <?php endif; ?>
                                     <?php if (! empty($_audios_start)) : ?>
-                                        <optgroup label="── Thư viện nhạc ──">
-                                            <!-- chỗ này trả ra danh sách tên nhạc và file nhạc -->
-                                            <?php foreach ($_audios_start as $_as) :
+                                    <optgroup label="── Thư viện nhạc ──">
+                                        <!-- chỗ này trả ra danh sách tên nhạc và file nhạc -->
+                                        <?php foreach ($_audios_start as $_as) :
                                                 $_as_id  = $_as['id'] ?? '';
                                                 $_as_url = $_as['config']['file'] ?? '';
                                                 $_as_lbl = $_as['name'] ?? '';
                                             ?>
-                                                <option value="<?php echo esc_attr($_as_id); ?>"
-                                                    data-url="<?php echo esc_url($_as_url); ?>"
-                                                    <?php selected($_start_sound, $_as_id); ?>><?php echo esc_html($_as_lbl); ?>
-                                                </option>
-                                            <?php endforeach; ?>
-                                        </optgroup>
+                                        <option value="<?php echo esc_attr($_as_id); ?>"
+                                            data-url="<?php echo esc_url($_as_url); ?>"
+                                            <?php selected($_start_sound, $_as_id); ?>><?php echo esc_html($_as_lbl); ?>
+                                        </option>
+                                        <?php endforeach; ?>
+                                    </optgroup>
                                     <?php endif; ?>
                                 </select>
                                 <button type="button" class="btn btn-outline-secondary sw-btn-preview"
@@ -120,24 +134,24 @@
                                         <?php selected(in_array($_end_sound, array('0', ''), true), true); ?>>Tắt tiếng
                                     </option>
                                     <?php if (! empty($_audios_end)) : ?>
-                                        <option value="random" <?php selected($_end_sound, 'random'); ?>>Ngẫu nhiên</option>
+                                    <option value="random" <?php selected($_end_sound, 'random'); ?>>Ngẫu nhiên</option>
                                     <?php endif; ?>
                                     <option value="read" <?php selected($_end_sound, 'read'); ?>>Đọc kết quả</option>
                                     <option value="slot_end" <?php selected($_end_sound, 'slot_end'); ?>>Slot end
                                     </option>
                                     <?php if (! empty($_audios_end)) : ?>
-                                        <optgroup label="── Thư viện nhạc ──">
-                                            <?php foreach ($_audios_end as $_ae) :
+                                    <optgroup label="── Thư viện nhạc ──">
+                                        <?php foreach ($_audios_end as $_ae) :
                                                 $_ae_id  = $_ae['id'] ?? '';
                                                 $_ae_url = $_ae['config']['file'] ?? '';
                                                 $_ae_lbl = $_ae['name'] ?? '';
                                             ?>
-                                                <option value="<?php echo esc_attr($_ae_id); ?>"
-                                                    data-url="<?php echo esc_url($_ae_url); ?>"
-                                                    <?php selected($_end_sound, $_ae_id); ?>><?php echo esc_html($_ae_lbl); ?>
-                                                </option>
-                                            <?php endforeach; ?>
-                                        </optgroup>
+                                        <option value="<?php echo esc_attr($_ae_id); ?>"
+                                            data-url="<?php echo esc_url($_ae_url); ?>"
+                                            <?php selected($_end_sound, $_ae_id); ?>><?php echo esc_html($_ae_lbl); ?>
+                                        </option>
+                                        <?php endforeach; ?>
+                                    </optgroup>
                                     <?php endif; ?>
                                 </select>
                                 <button type="button" class="btn btn-outline-secondary sw-btn-preview"
@@ -189,8 +203,8 @@
                                 );
                                 foreach ($duration_options as $_sec => $_label) :
                                 ?>
-                                    <option value="<?php echo esc_attr($_sec); ?>" <?php selected((int) $_dur, $_sec); ?>>
-                                        <?php echo esc_html($_label); ?></option>
+                                <option value="<?php echo esc_attr($_sec); ?>" <?php selected((int) $_dur, $_sec); ?>>
+                                    <?php echo esc_html($_label); ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
@@ -276,7 +290,8 @@
                                             data-bs-auto-close="outside"> Áp dụng một chủ đề </button>
                                         <div class="dropdown-menu"></div>
                                     </div>
-                                    <div class="d-flex justify-content-between mb-3"><span>Hội màu sắc vòng quay</span></div>
+                                    <div class="d-flex justify-content-between mb-3"><span>Hội màu sắc vòng quay</span>
+                                    </div>
                                     <div class="row g-1 g-lg-1 mb-3">
                                         <div class="col-2 col-lg-2">
                                             <div class="d-flex">
@@ -520,9 +535,11 @@
                                     style="width:44px;height:44px;border-radius:6px;border:1px solid #ccc;flex-shrink:0;transition:.2s;background:conic-gradient(from 90deg,#df3000,#feb81a,#df3000);">
                                 </div>
                                 <textarea class="form-control form-control-sm" id="bg-gradient" rows="4"
-                                    placeholder="Nhap CSS gradient (vd: conic-gradient(...))">conic-gradient(from 90deg,#df3000 0deg,#feb81a 180deg,#df3000 360deg)</textarea>
+                                    placeholder="Nhap CSS gradient (vd: conic-gradient(...))"
+                                    style="min-height: 100px">conic-gradient(from 90deg,#df3000 0deg,#feb81a 180deg,#df3000 360deg)</textarea>
                             </div>
-                            <button class="btn btn-outline-primary btn-sm w-100 mb-3" id="btn-apply-body-gradient">Áp dụng gradient</button>
+                            <button class="btn btn-outline-primary btn-sm w-100 mb-3" id="btn-apply-body-gradient">Áp
+                                dụng gradient</button>
 
                             <hr class="my-2">
 
@@ -594,24 +611,25 @@
                                                         $_btn_name = pathinfo($_btn_file, PATHINFO_FILENAME);
                                                         $_btn_file_url = $_btn_url . rawurlencode(basename($_btn_file));
                                                 ?>
-                                                        <tr>
-                                                            <td><span class="badge bg-secondary"><?php echo esc_html($_btn_i); ?></span></td>
-                                                            <td class="small"><?php echo esc_html($_btn_name); ?></td>
-                                                            <td><img
-                                                                    src="<?php echo esc_url($_btn_file_url); ?>"
-                                                                    width="50" height="50"
-                                                                    class="border border-1 rounded-1"></td>
-                                                            <td><button class="btn btn-sm btn-secondary sw-media-apply"
-                                                                    data-type="btn"
-                                                                    data-url="<?php echo esc_url($_btn_file_url); ?>">Nút
-                                                                    Quay</button></td>
-                                                            <td>∗</td>
-                                                        </tr>
-                                                    <?php endforeach; ?>
+                                                <tr>
+                                                    <td><span
+                                                            class="badge bg-secondary"><?php echo esc_html($_btn_i); ?></span>
+                                                    </td>
+                                                    <td class="small"><?php echo esc_html($_btn_name); ?></td>
+                                                    <td><img src="<?php echo esc_url($_btn_file_url); ?>" width="50"
+                                                            height="50" class="border border-1 rounded-1"></td>
+                                                    <td><button class="btn btn-sm btn-secondary sw-media-apply"
+                                                            data-type="btn"
+                                                            data-url="<?php echo esc_url($_btn_file_url); ?>">Nút
+                                                            Quay</button></td>
+                                                    <td>∗</td>
+                                                </tr>
+                                                <?php endforeach; ?>
                                                 <?php else : ?>
-                                                    <tr>
-                                                        <td colspan="5" class="text-center text-muted small">Không có ảnh nút quay</td>
-                                                    </tr>
+                                                <tr>
+                                                    <td colspan="5" class="text-center text-muted small">Không có ảnh
+                                                        nút quay</td>
+                                                </tr>
                                                 <?php endif; ?>
                                             </tbody>
                                         </table>
@@ -643,24 +661,25 @@
                                                         $_bgr_name = pathinfo($_bgr_file, PATHINFO_FILENAME);
                                                         $_bgr_file_url = $_bgr_url . rawurlencode(basename($_bgr_file));
                                                 ?>
-                                                        <tr>
-                                                            <td><span class="badge bg-secondary"><?php echo esc_html($_bgr_i); ?></span></td>
-                                                            <td class="small"><?php echo esc_html($_bgr_name); ?></td>
-                                                            <td><img
-                                                                    src="<?php echo esc_url($_bgr_file_url); ?>"
-                                                                    width="50" height="50"
-                                                                    class="border border-1 rounded-1"></td>
-                                                            <td><button class="btn btn-sm btn-secondary sw-media-apply"
-                                                                    data-type="bgr"
-                                                                    data-url="<?php echo esc_url($_bgr_file_url); ?>">Nền</button>
-                                                            </td>
-                                                            <td>∗</td>
-                                                        </tr>
-                                                    <?php endforeach; ?>
+                                                <tr>
+                                                    <td><span
+                                                            class="badge bg-secondary"><?php echo esc_html($_bgr_i); ?></span>
+                                                    </td>
+                                                    <td class="small"><?php echo esc_html($_bgr_name); ?></td>
+                                                    <td><img src="<?php echo esc_url($_bgr_file_url); ?>" width="50"
+                                                            height="50" class="border border-1 rounded-1"></td>
+                                                    <td><button class="btn btn-sm btn-secondary sw-media-apply"
+                                                            data-type="bgr"
+                                                            data-url="<?php echo esc_url($_bgr_file_url); ?>">Nền</button>
+                                                    </td>
+                                                    <td>∗</td>
+                                                </tr>
+                                                <?php endforeach; ?>
                                                 <?php else : ?>
-                                                    <tr>
-                                                        <td colspan="5" class="text-center text-muted small">Không có ảnh nền</td>
-                                                    </tr>
+                                                <tr>
+                                                    <td colspan="5" class="text-center text-muted small">Không có ảnh
+                                                        nền</td>
+                                                </tr>
                                                 <?php endif; ?>
                                             </tbody>
                                         </table>
@@ -711,26 +730,29 @@
                                                         $_grd_i++;
                                                         $_grd_name = (! empty($_grd_item['section']) ? $_grd_item['section'] . '-' : '') . $_grd_i;
                                                 ?>
-                                                        <tr>
-                                                            <td><span class="badge bg-secondary"><?php echo esc_html($_grd_i); ?></span></td>
-                                                            <td class="small"><?php echo esc_html($_grd_name); ?></td>
-                                                            <td>
-                                                                <div class="sw-gradient-preview"
-                                                                    data-gradient="<?php echo esc_attr($_grd_item['value']); ?>"
-                                                                    style="width:50px;height:50px;border:1px solid #ccc;background:<?php echo esc_attr($_grd_item['value']); ?>">
-                                                                </div>
-                                                            </td>
-                                                            <td><button class="btn btn-sm btn-secondary sw-media-apply"
-                                                                    data-type="grd"
-                                                                    data-gradient="<?php echo esc_attr($_grd_item['value']); ?>">Nền</button>
-                                                            </td>
-                                                            <td>∗</td>
-                                                        </tr>
-                                                    <?php endforeach; ?>
+                                                <tr>
+                                                    <td><span
+                                                            class="badge bg-secondary"><?php echo esc_html($_grd_i); ?></span>
+                                                    </td>
+                                                    <td class="small"><?php echo esc_html($_grd_name); ?></td>
+                                                    <td>
+                                                        <div class="sw-gradient-preview"
+                                                            data-gradient="<?php echo esc_attr($_grd_item['value']); ?>"
+                                                            style="width:50px;height:50px;border:1px solid #ccc;background:<?php echo esc_attr($_grd_item['value']); ?>">
+                                                        </div>
+                                                    </td>
+                                                    <td><button class="btn btn-sm btn-secondary sw-media-apply"
+                                                            data-type="grd"
+                                                            data-gradient="<?php echo esc_attr($_grd_item['value']); ?>">Nền</button>
+                                                    </td>
+                                                    <td>∗</td>
+                                                </tr>
+                                                <?php endforeach; ?>
                                                 <?php else : ?>
-                                                    <tr>
-                                                        <td colspan="5" class="text-center text-muted small">Không có gradient</td>
-                                                    </tr>
+                                                <tr>
+                                                    <td colspan="5" class="text-center text-muted small">Không có
+                                                        gradient</td>
+                                                </tr>
                                                 <?php endif; ?>
                                             </tbody>
                                         </table>
