@@ -411,86 +411,117 @@
    10 CHỦ ĐỀ MẪU HỘP QUÀ (TEMPLATES)
    ══════════════════════════════════════════════════════════ */
 
-/* 1. tpl-jib (Ball in box - Mặc định) */
-.tpl-jib .box-jack .lid {
-  background-color: #c97429;
+/* ══════════════════════════════════════════════════════════
+   10 CHỦ ĐỀ MẪU HỘP QUÀ (TEMPLATES) - GẮN BG-IMAGE
+   ══════════════════════════════════════════════════════════ */
+
+.box {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto;
+    text-align: center;
+    transition: all 0.25s ease;
+    opacity: 0.95;
+    background-position: center center;
+    background-size: contain;
+    background-repeat: no-repeat;
+    text-indent: -99999px;
+    cursor: pointer;
+    position: relative;
+    user-select: none;
 }
 
-.tpl-jib .box-jack .top {
-  background-color: #ffd633;
+.box:hover {
+    opacity: 1;
+    transform: scale(1.15);
+    filter: drop-shadow(0 8px 16px rgba(0,0,0,0.3));
 }
 
-.tpl-jib .box-jack .front {
-  background: #ee4444 url("../img/jib_front.png") center center / cover no-repeat;
+.box:after {
+    counter-increment: jack-counter;
+    content: counter(jack-counter);
+    position: absolute;
+    bottom: -4px;
+    right: -4px;
+    font-weight: 800;
+    background-color: #F19533;
+    color: #ffffff;
+    width: 26px;
+    height: 26px;
+    text-align: center;
+    font-size: 13px;
+    line-height: 26px;
+    border-radius: 50%;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    z-index: 10;
+    border: 2px solid #ffffff;
+    text-indent: 0;
 }
 
-.tpl-jib .box-jack .right {
-  background: #ffcc00 url("../img/jib_right.png") center right / cover no-repeat;
+.box.opened {
+    animation: unset;
+    animation-play-state: unset;
 }
 
-/* 2. tpl-default (Hộp quà truyền thống 🎁) */
-.tpl-default .box-jack .lid {
-  background: linear-gradient(135deg, #e52d27, #b31217);
+.box.opened.giftbox {
+    filter: grayscale(100%) brightness(0.85);
+    opacity: 0.65;
+    transform: none;
+    cursor: default;
 }
 
-.tpl-default .box-jack .top {
-  background: linear-gradient(135deg, #f7971e, #ffd200);
+/* 1. tpl-default (Hộp quà truyền thống / mặc định 🎁) */
+.tpl-default .box.giftbox {
+    background-image: url("../icon-box/gift-box-cute.png");
 }
 
-.tpl-default .box-jack .front {
-  background: linear-gradient(135deg, #d31027, #ea384d);
-  border-right: 4px solid #ffd700;
+/* 2. tpl-jib (Ball in box 📦) */
+.tpl-jib .box.giftbox {
+    background-image: url("../icon-box/jackinbox.png");
 }
-
-.tpl-default .box-jack .right {
-  background: linear-gradient(135deg, #c0392b, #962d22);
-  border-left: 4px solid #ffd700;
-}
-
-.tpl-default .box-jack .gift .ball .shade {
-  background: radial-gradient(at 50% 50%, #ffffff, #e11d48, #9f1239, #4c0519);
-}
+.tpl-jib .box-jack .lid { background-color: #c97429; }
+.tpl-jib .box-jack .top { background-color: #ffd633; }
+.tpl-jib .box-jack .front { background: #ee4444 url("../img/jib_front.png") center center / cover no-repeat; }
+.tpl-jib .box-jack .right { background: #ffcc00 url("../img/jib_right.png") center right / cover no-repeat; }
 
 /* 3. tpl-christmas (Giáng sinh Christmas 🎄) */
-.tpl-christmas .box-jack .lid {
-  background: linear-gradient(135deg, #15803d, #166534);
-}
-
-.tpl-christmas .box-jack .top {
-  background: linear-gradient(135deg, #facc15, #ca8a04);
-}
-
-.tpl-christmas .box-jack .front {
-  background: linear-gradient(135deg, #dc2626, #b91c1c);
-}
-
-.tpl-christmas .box-jack .right {
-  background: linear-gradient(135deg, #16a34a, #15803d);
-}
-
-.tpl-christmas .box-jack .gift .ball .shade {
-  background: radial-gradient(at 50% 50%, #ffffff, #22c55e, #15803d, #14532d);
+.tpl-christmas .box.giftbox {
+    background-image: url("../icon-box/gift-box-xmas.png");
 }
 
 /* 4. tpl-money-bag (Túi tiền tài lộc 💰) */
-.tpl-money-bag .box-jack .lid {
-  background: linear-gradient(135deg, #eab308, #ca8a04);
+.tpl-money-bag .box.giftbox {
+    background-image: url("../icon-box/giftbox-money-bag.png");
 }
 
-.tpl-money-bag .box-jack .top {
-  background: linear-gradient(135deg, #fef08a, #fde047);
+/* 5. tpl-blind-bag (Túi mù bí ẩn 🛍️) */
+.tpl-blind-bag .box.giftbox {
+    background-image: url("../icon-box/giftbox-blind-bag.png");
 }
 
-.tpl-money-bag .box-jack .front {
-  background: linear-gradient(135deg, #f59e0b, #d97706);
+/* 6. tpl-money (Bao lì xì Tết 🧧) */
+.tpl-money .box.giftbox {
+    background-image: url("../icon-box/lixi.png");
 }
 
-.tpl-money-bag .box-jack .right {
-  background: linear-gradient(135deg, #b45309, #78350f);
+/* 7. tpl-egg (Đập trứng vàng 🥚) */
+.tpl-egg .box.giftbox {
+    background-image: url("../icon-box/egg.png");
 }
 
-.tpl-money-bag .box-jack .gift .ball .shade {
-  background: radial-gradient(at 50% 50%, #ffffff, #eab308, #ca8a04, #713f12);
+/* 8. tpl-jar (Đập lu đất 🏺) */
+.tpl-jar .box.giftbox {
+    background-image: url("../icon-box/chum.png");
+}
+
+/* 9. tpl-rat (Đập chuột may mắn 🐭) */
+.tpl-rat .box.giftbox {
+    background-image: url("../icon-box/rat.png");
+}
+
+/* 10. tpl-ghost (Halloween Diệt ma 👻) */
+.tpl-ghost .box.giftbox {
+    background-image: url("../icon-box/ghost.png");
 }
 
 /* ══════════════════════════════════════════════════════════

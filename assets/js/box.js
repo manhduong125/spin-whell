@@ -230,6 +230,56 @@
         }, 400);
     }
 
+    // Tự động sinh danh sách box tương ứng với số lượng phần quà và mẫu được chọn
+    function renderBoxes() {
+        var gifts = parseGiftsFromTextarea();
+        var template = $('#template').val() || 'tpl-default';
+        var $content = $('#lucky-box-content');
+        if (!$content.length) return;
+
+        $content.empty();
+
+        var springSvg = '<svg version="1.0" xmlns="http://www.w3.org/2000/svg" width="512.000000pt" height="512.000000pt" viewBox="0 0 512.000000 512.000000" preserveAspectRatio="xMidYMid meet"><g transform="translate(0.000000,512.000000) scale(0.100000,-0.100000)" stroke="none"><path d="M2810 4553 c-457 -32 -823 -110 -1054 -224 -192 -96 -307 -207 -359 -347 -17 -46 -21 -79 -21 -172 0 -100 4 -124 27 -182 36 -93 86 -168 163 -244 l66 -64 -30 -34 c-16 -18 -43 -57 -60 -87 -100 -176 -100 -374 -2 -569 55 -109 175 -243 280 -311 l24 -16 -56 -62 c-30 -34 -71 -92 -89 -129 -32 -63 -34 -73 -33 -167 0 -84 4 -110 26 -162 31 -72 75 -140 135 -204 l44 -47 -41 -58 c-56 -80 -74 -147 -67 -248 23 -333 317 -571 802 -651 50 -8 117 -15 151 -15 73 0 104 24 104 81 0 59 -30 78 -141 90 -278 31 -497 119 -625 251 -62 64 -87 106 -108 177 -30 102 -13 193 47 249 l23 21 84 -43 c255 -132 535 -199 830 -199 182 0 273 17 379 70 185 94 213 327 56 472 -152 140 -486 178 -869 99 -129 -26 -311 -89 -405 -139 -89 -48 -98 -45 -166 38 -66 81 -90 137 -90 213 0 84 21 127 102 208 l63 62 38 -16 c292 -128 597 -194 901 -194 492 0 744 187 615 457 -44 91 -141 159 -284 199 -101 29 -433 27 -590 -3 -219 -42 -472 -128 -619 -210 l-63 -35 -68 46 c-279 191 -371 478 -221 688 64 91 49 87 152 38 202 -93 426 -160 664 -196 169 -26 561 -27 690 -1 271 54 434 147 502 285 38 77 40 200 5 277 -60 131 -210 221 -435 262 -136 24 -402 22 -585 -6 -333 -50 -647 -162 -861 -305 l-83 -55 -42 34 c-158 129 -218 333 -143 481 119 235 629 400 1326 430 86 4 164 11 174 16 24 12 45 63 39 94 -9 50 -44 64 -156 62 -55 -1 -121 -3 -146 -5z m489 -923 c144 -29 259 -102 277 -176 11 -42 -3 -103 -31 -140 -82 -107 -286 -170 -587 -181 -338 -12 -704 54 -974 177 l-69 31 25 20 c50 38 267 139 385 178 179 58 380 97 595 115 85 7 293 -6 379 -24z m-39 -1148 c82 -27 136 -70 151 -123 11 -35 10 -43 -7 -67 -26 -36 -113 -78 -199 -97 -100 -22 -328 -30 -460 -16 -145 16 -320 53 -445 96 -56 18 -105 36 -108 39 -13 14 220 101 378 140 173 43 279 55 460 52 135 -3 177 -7 230 -24z m-218 -797 c137 -24 221 -69 248 -135 79 -192 -350 -260 -816 -129 -92 25 -276 97 -292 114 -9 9 13 21 101 55 243 95 545 133 759 95z"></path></g></svg>';
+
+        gifts.forEach(function (gift, index) {
+            var boxItemHtml = '';
+            if (template === 'tpl-jib') {
+                boxItemHtml = '<div class="col-4 col-md-3 col-lg-2 box-col-item">' +
+                    '<div class="box-jack" id="box-' + index + '" data-index="' + index + '">' +
+                        '<div class="lid"></div>' +
+                        '<div class="top"></div>' +
+                        '<div class="front"></div>' +
+                        '<div class="right"></div>' +
+                        '<div class="jack">' +
+                            '<div class="gift">' +
+                                '<div class="ball">' +
+                                    '<div class="txt">🎀</div>' +
+                                    '<div class="layer moving">' +
+                                        '<div class="layer gridplane xline"></div>' +
+                                        '<div class="layer gridplane xline2"></div>' +
+                                        '<div class="layer gridplane yline"></div>' +
+                                        '<div class="layer gridplane zline"></div>' +
+                                        '<div class="layer gridplane laser"></div>' +
+                                        '<div class="layer gridplane laser2"></div>' +
+                                    '</div>' +
+                                    '<div class="layer clip">' +
+                                        '<div class="shade"></div>' +
+                                    '</div>' +
+                                '</div>' +
+                                '<div class="spring">' + springSvg + '</div>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>' +
+                '</div>';
+            } else {
+                boxItemHtml = '<div class="col-4 col-md-3 col-lg-2 box-col-item">' +
+                    '<div class="box giftbox" id="box-' + index + '" data-index="' + index + '">BOX ' + (index + 1) + '</div>' +
+                '</div>';
+            }
+            $content.append(boxItemHtml);
+        });
+    }
+
     // Reset lại toàn bộ trò chơi
     function resetGame() {
         maxTurns = parseInt($('#luotchoi').val(), 10) || 3;
@@ -250,7 +300,7 @@
         var title = $.trim($('#hqmm-title').val() || '') || 'HỘP QUÀ MAY MẮN ONLINE';
         $('#heading-title').text(title);
 
-        var templateClass = $('#template').val() || 'tpl-jib';
+        var templateClass = $('#template').val() || 'tpl-default';
         $('#lucky-box').attr('class', 'lucky-box no-ads ' + templateClass);
 
         var bgImg = $.trim($('#bg_img').val() || '');
@@ -301,6 +351,9 @@
         maxTurns = parseInt($('#luotchoi').val(), 10) || 3;
         turnsLeft = maxTurns;
         updateTurnsDisplay();
+
+        // Tự động sinh lại các box theo số lượng quà và mẫu
+        renderBoxes();
 
         // Lưu vào localStorage cho khách & user
         try {
@@ -531,11 +584,12 @@
         // 10. Chọn template giao diện trong dropdown #btn-select-tpl
         $(document).on('click', '#btn-select-tpl .dropdown-item', function (e) {
             e.preventDefault();
-            var tplCode = $(this).data('content') || 'tpl-jib';
-            var tplTitle = $(this).data('title') || 'Ball in box';
+            var tplCode = $(this).data('content') || 'tpl-default';
+            var tplTitle = $(this).data('title') || 'Hộp quà truyền thống';
             $('#template').val(tplCode);
             $('#btn-dropdown-select-tpl .item-title').text(tplTitle);
             $('#lucky-box').attr('class', 'lucky-box no-ads ' + tplCode);
+            renderBoxes();
         });
 
         // ══════════════════════════════════════════════════════════

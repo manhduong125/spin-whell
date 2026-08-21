@@ -247,25 +247,24 @@ Hộp đựng cơm</textarea>
                             <div class="mb-3">
                                 <label
                                     class="form-label fw-bold"><?php esc_html_e('Chọn kiểu mẫu:', 'wp-spin-wheel'); ?></label>
-                                <input type="hidden" id="template" value="tpl-jib">
+                                <input type="hidden" id="template" value="tpl-default">
                                 <div class="dropdown" id="boxTemplateDropdown">
                                     <button
                                         class="btn btn-outline-secondary w-100 d-flex align-items-center justify-content-between dropdown-toggle"
                                         id="btn-dropdown-select-tpl" type="button" data-bs-toggle="dropdown"
                                         aria-expanded="false">
                                         <div class="d-flex align-items-center gap-2">
-                                            <span class="fs-5">📦</span>
-                                            <span class="item-title fw-bold">Ball in box (Mặc định)</span>
+                                            <span class="fs-5">🎁</span>
+                                            <span class="item-title fw-bold">Hộp quà truyền thống (Mặc định)</span>
                                         </div>
                                     </button>
                                     <div class="dropdown-menu w-100 shadow-lg" id="btn-select-tpl"
                                         style="max-height: 280px; overflow-y: auto;">
-                                        <div class="dropdown-item py-2 cursor-pointer" data-content="tpl-jib"
-                                            data-title="Ball in box (Mặc định)"><span class="me-2">📦</span> Ball in box
-                                            (Mặc định)</div>
                                         <div class="dropdown-item py-2 cursor-pointer" data-content="tpl-default"
                                             data-title="Hộp quà truyền thống"><span class="me-2">🎁</span> Hộp quà
-                                            truyền thống</div>
+                                            truyền thống (Mặc định)</div>
+                                        <div class="dropdown-item py-2 cursor-pointer" data-content="tpl-jib"
+                                            data-title="Ball in box"><span class="me-2">📦</span> Ball in box</div>
                                         <div class="dropdown-item py-2 cursor-pointer" data-content="tpl-christmas"
                                             data-title="Giáng sinh Christmas"><span class="me-2">🎄</span> Giáng sinh
                                             Christmas</div>
