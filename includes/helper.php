@@ -3,6 +3,46 @@ if (! defined('ABSPATH')) {
     exit;
 }
 
+/**
+ * Khôi phục chuỗi Unicode bị hỏng dạng "Hu1ed8P QUu00c0" (\uXXXX mất backslash
+ * do stripslashes/wp_unslash chạy sau json_encode). Chỉ can thiệp với mã nằm
+ * trong vùng dấu tiếng Việt nên không ảnh hưởng từ thường (menu1234, uuid...).
+ *
+ * @param mixed $value String hoặc array lồng nhau.
+ * @return mixed
+ */
+function wp_spin_wheel_fix_mangled_unicode($value)
+{
+    if (is_string($value)) {
+        $pattern_char = '(?:00[c-fC-F][0-9a-fA-F])|(?:0[1-9a-bA-B][0-9a-fA-F]{2})|(?:1e[a-fA-F][0-9a-fA-F])';
+        $has = preg_match('/[^\x5C]u(' . $pattern_char . ')/', $value)
+            || preg_match('/^u(' . $pattern_char . ')/', $value);
+        if ($has) {
+            $value = preg_replace_callback(
+                '/(^|[^\x5C])u(' . $pattern_char . ')/',
+                function ($m) {
+                    $cp = hexdec($m[2]);
+                    if ($cp <= 0 || $cp > 0x10FFFF) {
+                        return $m[1];
+                    }
+                    return $m[1] . mb_convert_encoding('&#x' . dechex($cp) . ';', 'UTF-8', 'HTML-ENTITIES');
+                },
+                $value
+            );
+        }
+        return $value;
+    }
+
+    if (is_array($value)) {
+        foreach ($value as $k => $v) {
+            $value[$k] = wp_spin_wheel_fix_mangled_unicode($v);
+        }
+        return $value;
+    }
+
+    return $value;
+}
+
 class WP_Spin_Wheel_Helper
 {
     public static function sanitize_text($text)

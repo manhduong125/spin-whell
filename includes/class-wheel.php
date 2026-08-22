@@ -249,7 +249,7 @@ class WP_Spin_Wheel_Wheel {
                     $prizes = WP_Spin_Wheel_Prize::get_prizes( $p->ID );
                     $list[] = array(
                         'id'           => $p->ID,
-                        'title'        => $p->post_title ?: sprintf( __( 'Vòng quay #%d', 'wp-spin-wheel' ), $p->ID ),
+                        'title'        => wp_spin_wheel_fix_mangled_unicode( $p->post_title ) ?: sprintf( __( 'Vòng quay #%d', 'wp-spin-wheel' ), $p->ID ),
                         'created_at'   => get_the_date( 'd/m/Y H:i', $p->ID ),
                         'prizes_count' => is_array( $prizes ) ? count( $prizes ) : 0,
                         'shortcode'    => '[spin_wheel id="' . $p->ID . '"]',

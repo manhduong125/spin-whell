@@ -789,21 +789,6 @@ class WP_Spin_Wheel_Admin {
 
                 $title = sprintf( __( 'Vòng quay %s', 'wp-spin-wheel' ), $theme_title );
 
-                // Tránh tạo trùng tên nếu đã import trước đó
-                $exists = get_posts( array(
-                    'post_type'      => 'spin_wheel',
-                    'post_status'    => array( 'publish', 'draft', 'private', 'pending' ),
-                    'author'         => $user_id,
-                    'title'          => $title,
-                    'posts_per_page' => 1,
-                    'fields'         => 'ids',
-                ) );
-
-                if ( ! empty( $exists ) ) {
-                    $duplicate++;
-                    continue;
-                }
-
                 // Map theme → settings của plugin
                 $border  = isset( $theme['border'] ) && is_array( $theme['border'] ) ? $theme['border'] : array();
                 $colors  = isset( $theme['colors'] ) && is_array( $theme['colors'] ) ? $theme['colors'] : array();
@@ -836,6 +821,29 @@ class WP_Spin_Wheel_Admin {
                         'weight' => $prize_weights[ $i ],
                         'stock' => 9999,
                     );
+                }
+
+                // Trùng tên -> TỰ PHỤC HỒI bản cũ bị lỗi Unicode (ghi đè tiêu đề + meta sạch)
+                $exists = get_posts( array(
+                    'post_type'      => 'spin_wheel',
+                    'post_status'    => array( 'publish', 'draft', 'private', 'pending' ),
+                    'author'         => $user_id,
+                    'title'          => $title,
+                    'posts_per_page' => 1,
+                    'fields'         => 'ids',
+                ) );
+
+                if ( ! empty( $exists ) ) {
+                    $old_id = absint( $exists[0] );
+                    wp_update_post( array( 'ID' => $old_id, 'post_title' => $title ) );
+                    update_post_meta( $old_id, '_spin_wheel_overrides', wp_json_encode( $settings, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
+                    update_post_meta( $old_id, '_spin_wheel_design', wp_json_encode( $settings, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
+                    update_post_meta( $old_id, '_spin_wheel_prizes_json', wp_json_encode( $prizes, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
+                    if ( ! empty( $prizes ) ) {
+                        WP_Spin_Wheel_Prize::sync_prizes( $old_id, $prizes );
+                    }
+                    $duplicate++;
+                    continue;
                 }
 
                 $wheel_id = WP_Spin_Wheel_Wheel::create_user_wheel( $user_id, $title, $settings, $prizes );
@@ -882,7 +890,10 @@ class WP_Spin_Wheel_Admin {
                 continue;
             }
 
-            // Tránh tạo trùng tên nếu đã import trước đó
+            $settings = isset( $box['settings'] ) && is_array( $box['settings'] ) ? $box['settings'] : array();
+            $gifts    = isset( $box['gifts'] ) && is_array( $box['gifts'] ) ? $box['gifts'] : array();
+
+            // Trùng tên -> TỰ PHỤC HỒI bản cũ bị lỗi Unicode (ghi đè tiêu đề + meta sạch)
             $exists = get_posts( array(
                 'post_type'      => 'spin_box',
                 'post_status'    => array( 'publish', 'draft', 'private', 'pending' ),
@@ -893,12 +904,21 @@ class WP_Spin_Wheel_Admin {
             ) );
 
             if ( ! empty( $exists ) ) {
+                $old_id = absint( $exists[0] );
+                wp_update_post( array( 'ID' => $old_id, 'post_title' => $title ) );
+                update_post_meta( $old_id, '_spin_box_overrides', wp_json_encode( $settings, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
+                update_post_meta( $old_id, '_spin_box_design', wp_json_encode( $settings, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
+                update_post_meta( $old_id, '_spin_box_gifts_json', wp_json_encode( $gifts, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
+                if ( ! empty( $gifts ) ) {
+                    $prizes_formatted = array_map( function( $g ) {
+                        $t = is_array( $g ) ? ( $g['title'] ?? '' ) : $g;
+                        return array( 'title' => $t, 'color' => '#dc3545', 'weight' => 10, 'stock' => 9999 );
+                    }, $gifts );
+                    WP_Spin_Wheel_Prize::sync_prizes( $old_id, $prizes_formatted );
+                }
                 $duplicate++;
                 continue;
             }
-
-            $settings = isset( $box['settings'] ) && is_array( $box['settings'] ) ? $box['settings'] : array();
-            $gifts    = isset( $box['gifts'] ) && is_array( $box['gifts'] ) ? $box['gifts'] : array();
 
             $box_id = WP_Spin_Wheel_Box::create_user_box( $user_id, $title, $settings, $gifts );
             if ( $box_id ) {

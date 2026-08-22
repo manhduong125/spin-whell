@@ -146,37 +146,7 @@ class WP_Spin_Wheel_Box {
      * @return mixed
      */
     public static function fix_mangled_unicode( $value ) {
-        if ( is_string( $value ) ) {
-            // Chỉ can thiệp khi chuỗi chứa mẫu "uXXXX" với mã nằm trong vùng dấu tiếng Việt
-            // (Latin-1 Supplement, Latin Extended-A/B, Latin Extended Additional)
-            $has_vietnamese_escape = preg_match( '/[^\x5C]u(00[c-fC-F][0-9a-fA-F]|0[1-9a-bA-B][0-9a-fA-F]{2}|1e[a-fA-F][0-9a-fA-F])/', $value )
-                || preg_match( '/^u(00[c-fC-F][0-9a-fA-F]|0[1-9a-bA-B][0-9a-fA-F]{2}|1e[a-fA-F][0-9a-fA-F])/', $value );
-
-            if ( $has_vietnamese_escape ) {
-                $value = preg_replace_callback(
-                    '/(^|[^\x5C])u((?:00[c-fC-F][0-9a-fA-F])|(?:0[1-9a-bA-B][0-9a-fA-F]{2})|(?:1e[a-fA-F][0-9a-fA-F]))/',
-                    function ( $m ) {
-                        $cp  = hexdec( $m[2] );
-                        $chr = '';
-                        if ( $cp > 0 && $cp <= 0x10FFFF ) {
-                            $chr = mb_convert_encoding( '&#x' . dechex( $cp ) . ';', 'UTF-8', 'HTML-ENTITIES' );
-                        }
-                        return $m[1] . $chr;
-                    },
-                    $value
-                );
-            }
-            return $value;
-        }
-
-        if ( is_array( $value ) ) {
-            foreach ( $value as $k => $v ) {
-                $value[ $k ] = self::fix_mangled_unicode( $v );
-            }
-            return $value;
-        }
-
-        return $value;
+        return wp_spin_wheel_fix_mangled_unicode( $value );
     }
 
     /**
@@ -380,7 +350,7 @@ class WP_Spin_Wheel_Box {
                 $pid = get_the_ID();
                 $list[] = array(
                     'id'           => $pid,
-                    'title'        => get_the_title(),
+                    'title'        => wp_spin_wheel_fix_mangled_unicode( get_the_title() ),
                     'permalink'    => get_permalink(),
                     'created_at'   => get_the_date( 'd/m/Y H:i', $pid ),
                     'gift_count'   => count( self::get_box_gifts( $pid ) ),

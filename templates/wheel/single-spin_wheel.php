@@ -40,9 +40,6 @@ do_action( 'flatsome_after_header' );
             the_post();
             $wheel_id = get_the_ID();
             $wheel_template = WP_SPIN_WHEEL_PATH . 'templates/wheel/wheel-user.php';
-            if ( ! file_exists( $wheel_template ) ) {
-                $wheel_template = WP_SPIN_WHEEL_PATH . 'templates/wheel-user.php';
-            }
             include $wheel_template;
         endwhile;
         ?>

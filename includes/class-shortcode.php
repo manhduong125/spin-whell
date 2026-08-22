@@ -527,7 +527,7 @@ class WP_Spin_Wheel_Shortcode {
 
                 $wheels[] = array(
                     'id'            => $post_id,
-                    'title'         => get_the_title() ?: sprintf( __( 'Vòng quay #%d', 'wp-spin-wheel' ), $post_id ),
+                    'title'         => wp_spin_wheel_fix_mangled_unicode( get_the_title() ) ?: sprintf( __( 'Vòng quay #%d', 'wp-spin-wheel' ), $post_id ),
                     'permalink'     => get_permalink( $post_id ),
                     'views'         => $views,
                     'author_id'     => $author_id,
@@ -781,7 +781,7 @@ class WP_Spin_Wheel_Shortcode {
 
                 $boxes[] = array(
                     'id'            => $post_id,
-                    'title'         => get_the_title() ?: sprintf( __( 'Hộp quà #%d', 'wp-spin-wheel' ), $post_id ),
+                    'title'         => wp_spin_wheel_fix_mangled_unicode( get_the_title() ) ?: sprintf( __( 'Hộp quà #%d', 'wp-spin-wheel' ), $post_id ),
                     'permalink'     => get_permalink( $post_id ),
                     'views'         => $views,
                     'author_id'     => $author_id,

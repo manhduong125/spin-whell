@@ -19,12 +19,13 @@ class WP_Spin_Wheel_Prize {
             if ( ! empty( $meta ) ) {
                 $decoded = is_array( $meta ) ? $meta : json_decode( $meta, true );
                 if ( ! empty( $decoded ) && is_array( $decoded ) ) {
-                    return $decoded;
+                    return wp_spin_wheel_fix_mangled_unicode( $decoded );
                 }
             }
             return array();
         }
-        return $results;
+        // Tự phục hồi tiêu đề giải thưởng bị hỏng Unicode dạng "Hu1ed8P"
+        return wp_spin_wheel_fix_mangled_unicode( $results );
     }
 
     public static function decrease_stock( $prize_id ) {
