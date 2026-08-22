@@ -42,7 +42,7 @@ class WP_Spin_Wheel_Wheel {
             $prizes = $client_prizes;
             if ( $wheel_id ) {
                 WP_Spin_Wheel_Prize::sync_prizes( $wheel_id, $client_prizes );
-                update_post_meta( $wheel_id, '_spin_wheel_prizes_json', wp_json_encode( $client_prizes ) );
+                update_post_meta( $wheel_id, '_spin_wheel_prizes_json', wp_json_encode( $client_prizes, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
                 $prizes = WP_Spin_Wheel_Prize::get_prizes( $wheel_id ) ?: $client_prizes;
             }
         }
@@ -59,7 +59,7 @@ class WP_Spin_Wheel_Wheel {
             );
             if ( $wheel_id ) {
                 WP_Spin_Wheel_Prize::sync_prizes( $wheel_id, $default_prizes );
-                update_post_meta( $wheel_id, '_spin_wheel_prizes_json', wp_json_encode( $default_prizes ) );
+                update_post_meta( $wheel_id, '_spin_wheel_prizes_json', wp_json_encode( $default_prizes, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
                 $prizes = WP_Spin_Wheel_Prize::get_prizes( $wheel_id ) ?: $default_prizes;
             } else {
                 $prizes = $default_prizes;
@@ -217,7 +217,7 @@ class WP_Spin_Wheel_Wheel {
                     array( 'title' => 'Giải 6', 'color' => '#f472b6', 'weight' => 10, 'stock' => 9999 ),
                 );
                 WP_Spin_Wheel_Prize::sync_prizes( $post_id, $default_prizes );
-                update_post_meta( $post_id, '_spin_wheel_prizes_json', wp_json_encode( $default_prizes ) );
+                update_post_meta( $post_id, '_spin_wheel_prizes_json', wp_json_encode( $default_prizes, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
 
                 return absint( $post_id );
             }
@@ -295,13 +295,13 @@ class WP_Spin_Wheel_Wheel {
                 update_post_meta( $post_id, '_spin_wheel_total_spins', 0 );
 
                 if ( ! empty( $settings ) && is_array( $settings ) ) {
-                    update_post_meta( $post_id, '_spin_wheel_overrides', wp_json_encode( $settings ) );
-                    update_post_meta( $post_id, '_spin_wheel_design', wp_json_encode( $settings ) );
+                    update_post_meta( $post_id, '_spin_wheel_overrides', wp_json_encode( $settings, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
+                    update_post_meta( $post_id, '_spin_wheel_design', wp_json_encode( $settings, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
                 }
 
                 if ( ! empty( $prizes ) && is_array( $prizes ) ) {
                     WP_Spin_Wheel_Prize::sync_prizes( $post_id, $prizes );
-                    update_post_meta( $post_id, '_spin_wheel_prizes_json', wp_json_encode( $prizes ) );
+                    update_post_meta( $post_id, '_spin_wheel_prizes_json', wp_json_encode( $prizes, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
                 } else {
                     $default_prizes = array(
                         array( 'title' => 'Giải 1', 'color' => '#f87171', 'weight' => 10, 'stock' => 9999 ),
@@ -312,7 +312,7 @@ class WP_Spin_Wheel_Wheel {
                         array( 'title' => 'Giải 6', 'color' => '#f472b6', 'weight' => 10, 'stock' => 9999 ),
                     );
                     WP_Spin_Wheel_Prize::sync_prizes( $post_id, $default_prizes );
-                    update_post_meta( $post_id, '_spin_wheel_prizes_json', wp_json_encode( $default_prizes ) );
+                    update_post_meta( $post_id, '_spin_wheel_prizes_json', wp_json_encode( $default_prizes, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
                 }
 
                 return absint( $post_id );

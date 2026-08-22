@@ -352,7 +352,7 @@ class WP_Spin_Wheel_REST_API {
         }
 
         if ( ! empty( $settings['overrides'] ) && is_array( $settings['overrides'] ) ) {
-            update_post_meta( $post_id, '_spin_wheel_overrides', wp_json_encode( $settings['overrides'] ) );
+            update_post_meta( $post_id, '_spin_wheel_overrides', wp_json_encode( $settings['overrides'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
         }
 
         // sync prizes to db
@@ -388,7 +388,7 @@ class WP_Spin_Wheel_REST_API {
         wp_update_post( $update );
 
         if ( isset( $settings['overrides'] ) && is_array( $settings['overrides'] ) ) {
-            update_post_meta( $wheel_id, '_spin_wheel_overrides', wp_json_encode( $settings['overrides'] ) );
+            update_post_meta( $wheel_id, '_spin_wheel_overrides', wp_json_encode( $settings['overrides'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
         }
 
         if ( is_array( $prizes ) ) {
@@ -479,13 +479,13 @@ class WP_Spin_Wheel_REST_API {
         wp_update_post( $update_post );
 
         if ( ! empty( $settings ) && is_array( $settings ) ) {
-            update_post_meta( $wheel_id, '_spin_wheel_overrides', wp_json_encode( $settings ) );
-            update_post_meta( $wheel_id, '_spin_wheel_design', wp_json_encode( $settings ) );
+            update_post_meta( $wheel_id, '_spin_wheel_overrides', wp_json_encode( $settings, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
+            update_post_meta( $wheel_id, '_spin_wheel_design', wp_json_encode( $settings, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
         }
 
         if ( is_array( $prizes ) ) {
             $this->sync_prizes_db( $wheel_id, $prizes );
-            update_post_meta( $wheel_id, '_spin_wheel_prizes_json', wp_json_encode( $prizes ) );
+            update_post_meta( $wheel_id, '_spin_wheel_prizes_json', wp_json_encode( $prizes, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
         }
 
         return rest_ensure_response( array(
@@ -570,13 +570,13 @@ class WP_Spin_Wheel_REST_API {
         wp_update_post( $update_post );
 
         if ( ! empty( $settings ) && is_array( $settings ) ) {
-            update_post_meta( $wheel_id, '_spin_wheel_overrides', wp_json_encode( $settings ) );
-            update_post_meta( $wheel_id, '_spin_wheel_design', wp_json_encode( $settings ) );
+            update_post_meta( $wheel_id, '_spin_wheel_overrides', wp_json_encode( $settings, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
+            update_post_meta( $wheel_id, '_spin_wheel_design', wp_json_encode( $settings, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
         }
 
         if ( ! empty( $prizes ) && is_array( $prizes ) ) {
             $this->sync_prizes_db( $wheel_id, $prizes );
-            update_post_meta( $wheel_id, '_spin_wheel_prizes_json', wp_json_encode( $prizes ) );
+            update_post_meta( $wheel_id, '_spin_wheel_prizes_json', wp_json_encode( $prizes, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
         }
 
         return rest_ensure_response( array(
@@ -837,12 +837,12 @@ class WP_Spin_Wheel_REST_API {
         wp_update_post( $update_post );
 
         if ( ! empty( $settings ) && is_array( $settings ) ) {
-            update_post_meta( $box_id, '_spin_box_overrides', wp_json_encode( $settings ) );
-            update_post_meta( $box_id, '_spin_box_design', wp_json_encode( $settings ) );
+            update_post_meta( $box_id, '_spin_box_overrides', wp_json_encode( $settings, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
+            update_post_meta( $box_id, '_spin_box_design', wp_json_encode( $settings, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
         }
 
         if ( ! empty( $gifts ) && is_array( $gifts ) ) {
-            update_post_meta( $box_id, '_spin_box_gifts_json', wp_json_encode( $gifts ) );
+            update_post_meta( $box_id, '_spin_box_gifts_json', wp_json_encode( $gifts, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
             $prizes_formatted = array_map( function( $g ) {
                 $t = is_array( $g ) ? ( $g['title'] ?? '' ) : $g;
                 return array( 'title' => $t, 'color' => '#dc3545', 'weight' => 10, 'stock' => 9999 );
@@ -901,12 +901,12 @@ class WP_Spin_Wheel_REST_API {
         wp_update_post( $update_post );
 
         if ( ! empty( $settings ) && is_array( $settings ) ) {
-            update_post_meta( $box_id, '_spin_box_overrides', wp_json_encode( $settings ) );
-            update_post_meta( $box_id, '_spin_box_design', wp_json_encode( $settings ) );
+            update_post_meta( $box_id, '_spin_box_overrides', wp_json_encode( $settings, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
+            update_post_meta( $box_id, '_spin_box_design', wp_json_encode( $settings, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
         }
 
         if ( ! empty( $gifts ) && is_array( $gifts ) ) {
-            update_post_meta( $box_id, '_spin_box_gifts_json', wp_json_encode( $gifts ) );
+            update_post_meta( $box_id, '_spin_box_gifts_json', wp_json_encode( $gifts, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
             $prizes_formatted = array_map( function( $g ) {
                 $t = is_array( $g ) ? ( $g['title'] ?? '' ) : $g;
                 return array( 'title' => $t, 'color' => '#dc3545', 'weight' => 10, 'stock' => 9999 );

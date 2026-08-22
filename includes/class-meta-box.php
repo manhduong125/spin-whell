@@ -143,16 +143,24 @@ class WP_Spin_Wheel_Meta_Box {
             $raw_json = wp_unslash( $_POST['spin_wheel_options_json'] );
             $data = json_decode( $raw_json, true );
 
+            // Fallback: thử decode bản chưa gỡ slash để tránh làm hỏng \uXXXX / \" trong JSON
+            if ( ! is_array( $data ) ) {
+                $data = json_decode( $_POST['spin_wheel_options_json'], true );
+            }
+
             if ( is_array( $data ) ) {
+                // Tự phục hồi chuỗi Unicode bị hỏng dạng "Hu1ed8P"
+                $data = WP_Spin_Wheel_Box::fix_mangled_unicode( $data );
+
                 // Tách settings
                 $settings = isset( $data['settings'] ) && is_array( $data['settings'] ) ? $data['settings'] : $data;
-                update_post_meta( $post_id, '_spin_wheel_overrides', wp_json_encode( $settings ) );
-                update_post_meta( $post_id, '_spin_wheel_design', wp_json_encode( $settings ) );
+                update_post_meta( $post_id, '_spin_wheel_overrides', wp_json_encode( $settings, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
+                update_post_meta( $post_id, '_spin_wheel_design', wp_json_encode( $settings, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
 
                 // Tách prizes và đồng bộ vào DB
                 if ( isset( $data['prizes'] ) && is_array( $data['prizes'] ) ) {
                     $this->sync_prizes_to_db( $post_id, $data['prizes'] );
-                    update_post_meta( $post_id, '_spin_wheel_prizes_json', wp_json_encode( $data['prizes'] ) );
+                    update_post_meta( $post_id, '_spin_wheel_prizes_json', wp_json_encode( $data['prizes'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
                 }
             }
         }
@@ -161,13 +169,21 @@ class WP_Spin_Wheel_Meta_Box {
             $raw_json = wp_unslash( $_POST['spin_box_options_json'] );
             $data = json_decode( $raw_json, true );
 
+            // Fallback: thử decode bản chưa gỡ slash để tránh làm hỏng \uXXXX / \" trong JSON
+            if ( ! is_array( $data ) ) {
+                $data = json_decode( $_POST['spin_box_options_json'], true );
+            }
+
             if ( is_array( $data ) ) {
+                // Tự phục hồi chuỗi Unicode bị hỏng dạng "Hu1ed8P"
+                $data = WP_Spin_Wheel_Box::fix_mangled_unicode( $data );
+
                 $settings = isset( $data['settings'] ) && is_array( $data['settings'] ) ? $data['settings'] : array();
                 $gifts    = isset( $data['gifts'] ) && is_array( $data['gifts'] ) ? $data['gifts'] : ( isset( $data['prizes'] ) && is_array( $data['prizes'] ) ? $data['prizes'] : array() );
 
-                update_post_meta( $post_id, '_spin_box_overrides', wp_json_encode( $settings ) );
-                update_post_meta( $post_id, '_spin_box_design', wp_json_encode( $settings ) );
-                update_post_meta( $post_id, '_spin_box_gifts_json', wp_json_encode( $gifts ) );
+                update_post_meta( $post_id, '_spin_box_overrides', wp_json_encode( $settings, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
+                update_post_meta( $post_id, '_spin_box_design', wp_json_encode( $settings, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
+                update_post_meta( $post_id, '_spin_box_gifts_json', wp_json_encode( $gifts, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
 
                 if ( ! empty( $gifts ) ) {
                     $prizes_formatted = array_map( function( $g ) {

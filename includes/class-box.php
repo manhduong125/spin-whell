@@ -128,11 +128,55 @@ class WP_Spin_Wheel_Box {
             $settings = array();
         }
 
+        // Tự phục hồi chuỗi Unicode bị hỏng dạng "Hu1ed8P" (mất backslash trước uXXXX)
+        $settings = self::fix_mangled_unicode( $settings );
+
         if ( ! empty( $settings['bg_img'] ) ) {
             $settings['bg_img'] = WP_Spin_Wheel_Helper::resolve_asset_url( $settings['bg_img'] );
         }
 
         return array_replace_recursive( self::get_default_settings(), $settings );
+    }
+
+    /**
+     * Khôi phục chuỗi Unicode bị lỗi escape dạng "Hu1ed8P QUu00c0"
+     * (ký tự \uXXXX mất backslash do wp_unslash/stripslashes chạy sau json_encode)
+     *
+     * @param mixed $value Giá trị bất kỳ (string/array)
+     * @return mixed
+     */
+    public static function fix_mangled_unicode( $value ) {
+        if ( is_string( $value ) ) {
+            // Chỉ can thiệp khi chuỗi chứa mẫu "uXXXX" với mã nằm trong vùng dấu tiếng Việt
+            // (Latin-1 Supplement, Latin Extended-A/B, Latin Extended Additional)
+            $has_vietnamese_escape = preg_match( '/[^\x5C]u(00[c-fC-F][0-9a-fA-F]|0[1-9a-bA-B][0-9a-fA-F]{2}|1e[a-fA-F][0-9a-fA-F])/', $value )
+                || preg_match( '/^u(00[c-fC-F][0-9a-fA-F]|0[1-9a-bA-B][0-9a-fA-F]{2}|1e[a-fA-F][0-9a-fA-F])/', $value );
+
+            if ( $has_vietnamese_escape ) {
+                $value = preg_replace_callback(
+                    '/(^|[^\x5C])u((?:00[c-fC-F][0-9a-fA-F])|(?:0[1-9a-bA-B][0-9a-fA-F]{2})|(?:1e[a-fA-F][0-9a-fA-F]))/',
+                    function ( $m ) {
+                        $cp  = hexdec( $m[2] );
+                        $chr = '';
+                        if ( $cp > 0 && $cp <= 0x10FFFF ) {
+                            $chr = mb_convert_encoding( '&#x' . dechex( $cp ) . ';', 'UTF-8', 'HTML-ENTITIES' );
+                        }
+                        return $m[1] . $chr;
+                    },
+                    $value
+                );
+            }
+            return $value;
+        }
+
+        if ( is_array( $value ) ) {
+            foreach ( $value as $k => $v ) {
+                $value[ $k ] = self::fix_mangled_unicode( $v );
+            }
+            return $value;
+        }
+
+        return $value;
     }
 
     /**
@@ -148,7 +192,7 @@ class WP_Spin_Wheel_Box {
         if ( ! empty( $raw ) ) {
             $gifts = json_decode( $raw, true );
             if ( is_array( $gifts ) && ! empty( $gifts ) ) {
-                return $gifts;
+                return self::fix_mangled_unicode( $gifts );
             }
         }
 
@@ -191,12 +235,12 @@ class WP_Spin_Wheel_Box {
         update_post_meta( $post_id, '_spin_box_total_opens', 0 );
 
         if ( ! empty( $settings ) && is_array( $settings ) ) {
-            update_post_meta( $post_id, '_spin_box_overrides', wp_json_encode( $settings ) );
-            update_post_meta( $post_id, '_spin_box_design', wp_json_encode( $settings ) );
+            update_post_meta( $post_id, '_spin_box_overrides', wp_json_encode( $settings, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
+            update_post_meta( $post_id, '_spin_box_design', wp_json_encode( $settings, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
         }
 
         if ( ! empty( $gifts ) && is_array( $gifts ) ) {
-            update_post_meta( $post_id, '_spin_box_gifts_json', wp_json_encode( $gifts ) );
+            update_post_meta( $post_id, '_spin_box_gifts_json', wp_json_encode( $gifts, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
             // Đồng bộ format prizes
             $prizes_formatted = array_map( function( $g ) {
                 $t = is_array( $g ) ? ( $g['title'] ?? '' ) : $g;
@@ -205,7 +249,7 @@ class WP_Spin_Wheel_Box {
             WP_Spin_Wheel_Prize::sync_prizes( $post_id, $prizes_formatted );
         } else {
             $default_gifts = self::get_default_gifts();
-            update_post_meta( $post_id, '_spin_box_gifts_json', wp_json_encode( $default_gifts ) );
+            update_post_meta( $post_id, '_spin_box_gifts_json', wp_json_encode( $default_gifts, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES ) );
         }
 
         return absint( $post_id );
