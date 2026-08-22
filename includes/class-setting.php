@@ -463,7 +463,7 @@ class WP_Spin_Wheel_Settings
                         🎡 <?php esc_html_e('Dữ liệu demo Vòng quay', 'wp-spin-wheel'); ?>
                     </h2>
                     <p class="description" style="margin-bottom: 16px; color: #64748b;">
-                        <?php esc_html_e('Nhấn nút bên dưới để tạo nhanh 3 vòng quay mẫu (Giáng sinh, Tết, Halloween) kèm giải thưởng và giao diện tương ứng từ file assets/data/wheel-demo.json.', 'wp-spin-wheel'); ?>
+                        <?php esc_html_e('Nhấn nút bên dưới để import TOÀN BỘ theme từ thư viện themes.json (Mặc định, Mạng xã hội, Học sinh, Phụ nữ, Chủ đề, Theo mùa, Màu cờ...). Mỗi theme sẽ tạo 1 vòng quay với màu viền/kim, ảnh nền, âm thanh và giải thưởng lấy màu từ palette của theme đó. Theme đã import trước đó sẽ được bỏ qua (trùng lặp).', 'wp-spin-wheel'); ?>
                     </p>
                     <button type="button" class="button button-primary" id="sw-import-wheel-demo-btn">
                         <span class="dashicons dashicons-download" style="vertical-align: middle; margin-right: 4px;"></span>

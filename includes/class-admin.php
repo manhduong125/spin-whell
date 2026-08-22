@@ -29,7 +29,11 @@ class WP_Spin_Wheel_Admin {
             'spin_box',
         );
 
-        if ( ! in_array( $screen_id, $allowed_screens, true ) && strpos( $hook, 'spin_wheel' ) === false ) {
+        if (
+            ! in_array( $screen_id, $allowed_screens, true )
+            && strpos( $hook, 'spin_wheel' ) === false
+            && strpos( $hook, 'spin_box' ) === false
+        ) {
             return;
         }
 
@@ -746,7 +750,9 @@ class WP_Spin_Wheel_Admin {
     }
 
     /**
-     * Import Dữ liệu Demo Vòng quay từ file assets/data/wheel-demo.json
+     * Import Dữ liệu Demo Vòng quay — đồng bộ TOÀN BỘ theme từ assets/data/themes.json
+     * Mỗi theme trong thư viện sẽ tạo 1 vòng quay với màu viền/kim, ảnh nền, âm thanh
+     * và giải thưởng lấy màu từ palette của theme đó.
      */
     public function ajax_import_wheel_demo() {
         if ( ! current_user_can( 'manage_options' ) ) {
@@ -754,49 +760,89 @@ class WP_Spin_Wheel_Admin {
         }
         check_ajax_referer( 'spin_wheel_admin', 'nonce' );
 
-        $file = WP_SPIN_WHEEL_PATH . 'assets/data/wheel-demo.json';
+        $file = WP_SPIN_WHEEL_PATH . 'assets/data/themes.json';
         if ( ! file_exists( $file ) ) {
-            wp_send_json_error( array( 'message' => __( 'Không tìm thấy file dữ liệu demo Vòng quay.', 'wp-spin-wheel' ) ) );
+            wp_send_json_error( array( 'message' => __( 'Không tìm thấy file thư viện themes.json.', 'wp-spin-wheel' ) ) );
         }
 
         $raw  = file_get_contents( $file );
         $data = json_decode( $raw, true );
-        if ( ! is_array( $data ) || empty( $data ) ) {
-            wp_send_json_error( array( 'message' => __( 'File dữ liệu demo Vòng quay không hợp lệ.', 'wp-spin-wheel' ) ) );
+        if ( empty( $data['categories'] ) || ! is_array( $data['categories'] ) ) {
+            wp_send_json_error( array( 'message' => __( 'File themes.json không hợp lệ.', 'wp-spin-wheel' ) ) );
         }
 
         $user_id   = get_current_user_id();
         $imported  = 0;
         $duplicate = 0;
 
-        foreach ( $data as $wheel ) {
-            $title = isset( $wheel['title'] ) ? sanitize_text_field( $wheel['title'] ) : '';
-            if ( empty( $title ) ) {
+        foreach ( $data['categories'] as $category ) {
+            $cat_name = isset( $category['name'] ) ? $category['name'] : '';
+            if ( empty( $category['items'] ) || ! is_array( $category['items'] ) ) {
                 continue;
             }
 
-            // Tránh tạo trùng tên nếu đã import trước đó
-            $exists = get_posts( array(
-                'post_type'      => 'spin_wheel',
-                'post_status'    => array( 'publish', 'draft', 'private', 'pending' ),
-                'author'         => $user_id,
-                'title'          => $title,
-                'posts_per_page' => 1,
-                'fields'         => 'ids',
-            ) );
+            foreach ( $category['items'] as $theme ) {
+                $theme_title = isset( $theme['title'] ) ? trim( $theme['title'] ) : '';
+                if ( empty( $theme_title ) ) {
+                    continue;
+                }
 
-            if ( ! empty( $exists ) ) {
-                $duplicate++;
-                continue;
-            }
+                $title = sprintf( __( 'Vòng quay %s', 'wp-spin-wheel' ), $theme_title );
 
-            $settings = isset( $wheel['settings'] ) && is_array( $wheel['settings'] ) ? $wheel['settings'] : array();
-            $prizes   = isset( $wheel['prizes'] ) && is_array( $wheel['prizes'] ) ? $wheel['prizes'] : array();
+                // Tránh tạo trùng tên nếu đã import trước đó
+                $exists = get_posts( array(
+                    'post_type'      => 'spin_wheel',
+                    'post_status'    => array( 'publish', 'draft', 'private', 'pending' ),
+                    'author'         => $user_id,
+                    'title'          => $title,
+                    'posts_per_page' => 1,
+                    'fields'         => 'ids',
+                ) );
 
-            $wheel_id = WP_Spin_Wheel_Wheel::create_user_wheel( $user_id, $title, $settings, $prizes );
-            if ( $wheel_id ) {
-                update_post_meta( $wheel_id, '_spin_wheel_views', wp_rand( 10, 120 ) );
-                $imported++;
+                if ( ! empty( $exists ) ) {
+                    $duplicate++;
+                    continue;
+                }
+
+                // Map theme → settings của plugin
+                $border  = isset( $theme['border'] ) && is_array( $theme['border'] ) ? $theme['border'] : array();
+                $colors  = isset( $theme['colors'] ) && is_array( $theme['colors'] ) ? $theme['colors'] : array();
+
+                $settings = array(
+                    'duration'                => '6',
+                    'show_confetti'           => 1,
+                    'auto_remove'             => 0,
+                    'show_popup'              => 1,
+                    'popup_label'             => __( 'Bạn đã quay vào ô', 'wp-spin-wheel' ),
+                    'show_remove_button'      => 1,
+                    'start_sound'             => isset( $theme['start_sound'] ) ? sanitize_text_field( $theme['start_sound'] ) : '',
+                    'end_sound'               => isset( $theme['end_sound'] ) ? sanitize_text_field( $theme['end_sound'] ) : '',
+                    'wheel_background_image'  => isset( $theme['bg_img'] ) ? $theme['bg_img'] : '',
+                    'wheel_border_color'      => ! empty( $border[0] ) ? $border[0] : '#ff4d00',
+                    'wheel_diamond_color'     => ! empty( $border[1] ) ? $border[1] : '#f6fa00',
+                    'wheel_button_text'       => isset( $theme['spin_label'] ) ? $theme['spin_label'] : 'Quay',
+                    'wheel_button_color'      => ! empty( $colors[0] ) ? $colors[0] : '#d6392e',
+                    'wheel_button_text_color' => '#ffffff',
+                );
+
+                // Tạo 6 giải thưởng lấy màu từ palette colors của theme
+                $prize_titles = array( '10%', '50k', 'Bút Montblanc', 'Chúc bạn may mắn', '200k', 'Ví da 500k' );
+                $prize_weights = array( 15, 12, 5, 30, 8, 3 );
+                $prizes = array();
+                for ( $i = 0; $i < 6; $i++ ) {
+                    $prizes[] = array(
+                        'title' => $prize_titles[ $i ],
+                        'color' => ! empty( $colors ) ? $colors[ $i % count( $colors ) ] : '#d6392e',
+                        'weight' => $prize_weights[ $i ],
+                        'stock' => 9999,
+                    );
+                }
+
+                $wheel_id = WP_Spin_Wheel_Wheel::create_user_wheel( $user_id, $title, $settings, $prizes );
+                if ( $wheel_id ) {
+                    update_post_meta( $wheel_id, '_spin_wheel_views', wp_rand( 10, 120 ) );
+                    $imported++;
+                }
             }
         }
 
