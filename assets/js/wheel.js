@@ -664,6 +664,8 @@ jQuery(document).ready(function ($) {
                 var bgGradient = item.bg_gradient || '';
                 var title = item.title || '';
                 var tcsw = item.tcsw || '';
+                var startSound = item.start_sound || item.audio_start || item.music_start || '';
+                var endSound = item.end_sound || item.audio_end || item.music_end || '';
 
                 var svgIcons = '';
                 colors.forEach(function (color) {
@@ -680,6 +682,8 @@ jQuery(document).ready(function ($) {
                     ' data-is_stroke="' + escapeAttr(isStroke) + '"' +
                     ' data-bg_img="' + escapeAttr(bgImg) + '"' +
                     ' data-bg_gradient="' + escapeAttr(bgGradient) + '"' +
+                    ' data-start_sound="' + escapeAttr(startSound) + '"' +
+                    ' data-end_sound="' + escapeAttr(endSound) + '"' +
                     ' data-title="' + escapeAttr(title) + '"' +
                     ' data-tcsw="' + escapeAttr(tcsw) + '">' +
                     '<div class="d-flex justify-content-between item">' +
@@ -1694,6 +1698,20 @@ jQuery(document).ready(function ($) {
             $('#bgr-preview-wrap').show();
             $('#bg-gradient').val('');
             $('#gradient-preview-box').css('background', 'transparent');
+        }
+
+        // Áp dụng nhạc bắt đầu và nhạc kết thúc từ theme nếu có
+        var startSound = $(this).attr('data-start_sound') || '';
+        var endSound = $(this).attr('data-end_sound') || '';
+        if (startSound) {
+            $('#start_sound').val(startSound);
+            if (!wheelSettings.audio) wheelSettings.audio = {};
+            wheelSettings.audio.start_sound = startSound;
+        }
+        if (endSound) {
+            $('#end_sound').val(endSound);
+            if (!wheelSettings.audio) wheelSettings.audio = {};
+            wheelSettings.audio.end_sound = endSound;
         }
 
         // Sync hội màu
