@@ -12,6 +12,8 @@ class WP_Spin_Wheel_Admin {
         add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
         add_action( 'admin_menu', array( $this, 'register_dashboard_page' ) );
         add_action( 'wp_ajax_spin_wheel_get_stats', array( $this, 'ajax_get_stats' ) );
+        add_action( 'wp_ajax_spin_wheel_import_box_demo', array( $this, 'ajax_import_box_demo' ) );
+        add_action( 'wp_ajax_spin_wheel_import_wheel_demo', array( $this, 'ajax_import_wheel_demo' ) );
     }
 
     public function enqueue_assets( $hook ) {
@@ -741,5 +743,127 @@ class WP_Spin_Wheel_Admin {
         }
         $history = new WP_Spin_Wheel_History();
         wp_send_json_success( $history->get_stats() );
+    }
+
+    /**
+     * Import Dữ liệu Demo Vòng quay từ file assets/data/wheel-demo.json
+     */
+    public function ajax_import_wheel_demo() {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( array( 'message' => __( 'Bạn không có quyền thực hiện thao tác này.', 'wp-spin-wheel' ) ) );
+        }
+        check_ajax_referer( 'spin_wheel_admin', 'nonce' );
+
+        $file = WP_SPIN_WHEEL_PATH . 'assets/data/wheel-demo.json';
+        if ( ! file_exists( $file ) ) {
+            wp_send_json_error( array( 'message' => __( 'Không tìm thấy file dữ liệu demo Vòng quay.', 'wp-spin-wheel' ) ) );
+        }
+
+        $raw  = file_get_contents( $file );
+        $data = json_decode( $raw, true );
+        if ( ! is_array( $data ) || empty( $data ) ) {
+            wp_send_json_error( array( 'message' => __( 'File dữ liệu demo Vòng quay không hợp lệ.', 'wp-spin-wheel' ) ) );
+        }
+
+        $user_id   = get_current_user_id();
+        $imported  = 0;
+        $duplicate = 0;
+
+        foreach ( $data as $wheel ) {
+            $title = isset( $wheel['title'] ) ? sanitize_text_field( $wheel['title'] ) : '';
+            if ( empty( $title ) ) {
+                continue;
+            }
+
+            // Tránh tạo trùng tên nếu đã import trước đó
+            $exists = get_posts( array(
+                'post_type'      => 'spin_wheel',
+                'post_status'    => array( 'publish', 'draft', 'private', 'pending' ),
+                'author'         => $user_id,
+                'title'          => $title,
+                'posts_per_page' => 1,
+                'fields'         => 'ids',
+            ) );
+
+            if ( ! empty( $exists ) ) {
+                $duplicate++;
+                continue;
+            }
+
+            $settings = isset( $wheel['settings'] ) && is_array( $wheel['settings'] ) ? $wheel['settings'] : array();
+            $prizes   = isset( $wheel['prizes'] ) && is_array( $wheel['prizes'] ) ? $wheel['prizes'] : array();
+
+            $wheel_id = WP_Spin_Wheel_Wheel::create_user_wheel( $user_id, $title, $settings, $prizes );
+            if ( $wheel_id ) {
+                update_post_meta( $wheel_id, '_spin_wheel_views', wp_rand( 10, 120 ) );
+                $imported++;
+            }
+        }
+
+        wp_send_json_success( array(
+            'imported'  => $imported,
+            'duplicate' => $duplicate,
+        ) );
+    }
+
+    /**
+     * Import Dữ liệu Demo Hộp quà từ file assets/data/box-demo.json
+     */
+    public function ajax_import_box_demo() {
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( array( 'message' => __( 'Bạn không có quyền thực hiện thao tác này.', 'wp-spin-wheel' ) ) );
+        }
+        check_ajax_referer( 'spin_wheel_admin', 'nonce' );
+
+        $file = WP_SPIN_WHEEL_PATH . 'assets/data/box-demo.json';
+        if ( ! file_exists( $file ) ) {
+            wp_send_json_error( array( 'message' => __( 'Không tìm thấy file dữ liệu demo Hộp quà.', 'wp-spin-wheel' ) ) );
+        }
+
+        $raw  = file_get_contents( $file );
+        $data = json_decode( $raw, true );
+        if ( ! is_array( $data ) || empty( $data ) ) {
+            wp_send_json_error( array( 'message' => __( 'File dữ liệu demo Hộp quà không hợp lệ.', 'wp-spin-wheel' ) ) );
+        }
+
+        $user_id   = get_current_user_id();
+        $imported  = 0;
+        $duplicate = 0;
+
+        foreach ( $data as $box ) {
+            $title = isset( $box['title'] ) ? sanitize_text_field( $box['title'] ) : '';
+            if ( empty( $title ) ) {
+                continue;
+            }
+
+            // Tránh tạo trùng tên nếu đã import trước đó
+            $exists = get_posts( array(
+                'post_type'      => 'spin_box',
+                'post_status'    => array( 'publish', 'draft', 'private', 'pending' ),
+                'author'         => $user_id,
+                'title'          => $title,
+                'posts_per_page' => 1,
+                'fields'         => 'ids',
+            ) );
+
+            if ( ! empty( $exists ) ) {
+                $duplicate++;
+                continue;
+            }
+
+            $settings = isset( $box['settings'] ) && is_array( $box['settings'] ) ? $box['settings'] : array();
+            $gifts    = isset( $box['gifts'] ) && is_array( $box['gifts'] ) ? $box['gifts'] : array();
+
+            $box_id = WP_Spin_Wheel_Box::create_user_box( $user_id, $title, $settings, $gifts );
+            if ( $box_id ) {
+                update_post_meta( $box_id, '_spin_box_views', wp_rand( 10, 120 ) );
+                $imported++;
+            }
+        }
+
+        wp_send_json_success( array(
+            'imported'  => $imported,
+            'duplicate' => $duplicate,
+        ) );
     }
 }

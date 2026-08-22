@@ -23,6 +23,26 @@ class WP_Spin_Wheel_Settings
         if (! is_admin()) {
             return;
         }
+
+        // Trang Cài đặt Vòng quay (Spin Wheel)
+        add_submenu_page(
+            'edit.php?post_type=spin_wheel',
+            __('Cài đặt Spin Wheel', 'wp-spin-wheel'),
+            __('Cài đặt', 'wp-spin-wheel'),
+            'manage_options',
+            'wp-spin-wheel-settings',
+            array($this, 'render_settings_page')
+        );
+
+        // Trang Cài đặt Hộp quà may mắn (Lucky Box)
+        add_submenu_page(
+            'edit.php?post_type=spin_box',
+            __('Cài đặt Hộp quà', 'wp-spin-wheel'),
+            __('Cài đặt', 'wp-spin-wheel'),
+            'manage_options',
+            'wp-spin-box-settings',
+            array($this, 'render_box_settings_page')
+        );
     }
 
     public function register_settings()
@@ -435,6 +455,68 @@ class WP_Spin_Wheel_Settings
                     <?php submit_button(__('Lưu cài đặt Vòng quay', 'wp-spin-wheel'), 'primary', 'submit_wheel'); ?>
                 </form>
 
+                <!-- ══════════════════════════════════════════════════ -->
+                <!-- IMPORT DỮ LIỆU DEMO VÒNG QUAY                   -->
+                <!-- ══════════════════════════════════════════════════ -->
+                <div class="card" style="max-width: 900px; margin-top: 20px; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,.08);">
+                    <h2 class="title" style="margin-top: 0; padding-bottom: 10px; border-bottom: 1px solid #eee; color: #1d2327;">
+                        🎡 <?php esc_html_e('Dữ liệu demo Vòng quay', 'wp-spin-wheel'); ?>
+                    </h2>
+                    <p class="description" style="margin-bottom: 16px; color: #64748b;">
+                        <?php esc_html_e('Nhấn nút bên dưới để tạo nhanh 3 vòng quay mẫu (Giáng sinh, Tết, Halloween) kèm giải thưởng và giao diện tương ứng từ file assets/data/wheel-demo.json.', 'wp-spin-wheel'); ?>
+                    </p>
+                    <button type="button" class="button button-primary" id="sw-import-wheel-demo-btn">
+                        <span class="dashicons dashicons-download" style="vertical-align: middle; margin-right: 4px;"></span>
+                        <?php esc_html_e('Import dữ liệu demo Vòng quay', 'wp-spin-wheel'); ?>
+                    </button>
+                    <span id="sw-import-wheel-demo-status" style="margin-left: 10px; font-weight: 600; color: #22c55e;"></span>
+                </div>
+
+                <script>
+                (function() {
+                    var btn = document.getElementById('sw-import-wheel-demo-btn');
+                    var status = document.getElementById('sw-import-wheel-demo-status');
+                    if (!btn) return;
+
+                    btn.addEventListener('click', function() {
+                        var params = (typeof wp_spin_wheel_admin_params !== 'undefined') ? wp_spin_wheel_admin_params : {};
+                        if (!params.ajax_url || !params.nonce) {
+                            status.style.color = '#dc2626';
+                            status.textContent = '<?php echo esc_js(__('Thiếu cấu hình AJAX.', 'wp-spin-wheel')); ?>';
+                            return;
+                        }
+
+                        btn.disabled = true;
+                        btn.textContent = '<?php echo esc_js(__('Đang import...', 'wp-spin-wheel')); ?>';
+                        status.textContent = '';
+
+                        jQuery.post(params.ajax_url, {
+                            action: 'spin_wheel_import_wheel_demo',
+                            nonce: params.nonce
+                        }).done(function(res) {
+                            if (res && res.success) {
+                                var imported = res.data.imported || 0;
+                                var duplicate = res.data.duplicate || 0;
+                                status.style.color = '#22c55e';
+                                status.textContent = '✓ ' +
+                                    '<?php echo esc_js(__('Đã import thành công', 'wp-spin-wheel')); ?>: ' + imported +
+                                    ' | ' + '<?php echo esc_js(__('Trùng lặp', 'wp-spin-wheel')); ?>: ' + duplicate;
+                                setTimeout(function() { window.location.reload(); }, 1200);
+                            } else {
+                                status.style.color = '#dc2626';
+                                status.textContent = (res && res.data && res.data.message) ? res.data.message : '<?php echo esc_js(__('Import thất bại.', 'wp-spin-wheel')); ?>';
+                            }
+                        }).fail(function() {
+                            status.style.color = '#dc2626';
+                            status.textContent = '<?php echo esc_js(__('Lỗi kết nối máy chủ.', 'wp-spin-wheel')); ?>';
+                        }).always(function() {
+                            btn.disabled = false;
+                            btn.textContent = '<?php echo esc_js(__('Import dữ liệu demo Vòng quay', 'wp-spin-wheel')); ?>';
+                        });
+                    });
+                })();
+                </script>
+
             <?php else : ?>
                 <!-- ══════════════════════════════════════════════════ -->
                 <!-- TAB 2: CÀI ĐẶT HỘP QUÀ (LUCKY BOX)                 -->
@@ -577,6 +659,68 @@ class WP_Spin_Wheel_Settings
 
                     <?php submit_button(__('Lưu cài đặt Hộp quà', 'wp-spin-wheel'), 'primary', 'submit_box'); ?>
                 </form>
+
+                <!-- ══════════════════════════════════════════════════ -->
+                <!-- IMPORT DỮ LIỆU DEMO HỘP QUÀ                      -->
+                <!-- ══════════════════════════════════════════════════ -->
+                <div class="card" style="max-width: 900px; margin-top: 20px; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,.08);">
+                    <h2 class="title" style="margin-top: 0; padding-bottom: 10px; border-bottom: 1px solid #eee; color: #1d2327;">
+                        🎁 <?php esc_html_e('Dữ liệu demo Hộp quà', 'wp-spin-wheel'); ?>
+                    </h2>
+                    <p class="description" style="margin-bottom: 16px; color: #64748b;">
+                        <?php esc_html_e('Nhấn nút bên dưới để tạo nhanh 5 hộp quà mẫu (Shiratori, Giáng sinh, Tết, Halloween, Mùa hè) kèm quà tặng và giao diện tương ứng từ file assets/data/box-demo.json.', 'wp-spin-wheel'); ?>
+                    </p>
+                    <button type="button" class="button button-primary" id="sw-import-box-demo-btn">
+                        <span class="dashicons dashicons-download" style="vertical-align: middle; margin-right: 4px;"></span>
+                        <?php esc_html_e('Import dữ liệu demo Hộp quà', 'wp-spin-wheel'); ?>
+                    </button>
+                    <span id="sw-import-box-demo-status" style="margin-left: 10px; font-weight: 600; color: #22c55e;"></span>
+                </div>
+
+                <script>
+                (function() {
+                    var btn = document.getElementById('sw-import-box-demo-btn');
+                    var status = document.getElementById('sw-import-box-demo-status');
+                    if (!btn) return;
+
+                    btn.addEventListener('click', function() {
+                        var params = (typeof wp_spin_wheel_admin_params !== 'undefined') ? wp_spin_wheel_admin_params : {};
+                        if (!params.ajax_url || !params.nonce) {
+                            status.style.color = '#dc2626';
+                            status.textContent = '<?php echo esc_js(__('Thiếu cấu hình AJAX.', 'wp-spin-wheel')); ?>';
+                            return;
+                        }
+
+                        btn.disabled = true;
+                        btn.textContent = '<?php echo esc_js(__('Đang import...', 'wp-spin-wheel')); ?>';
+                        status.textContent = '';
+
+                        jQuery.post(params.ajax_url, {
+                            action: 'spin_wheel_import_box_demo',
+                            nonce: params.nonce
+                        }).done(function(res) {
+                            if (res && res.success) {
+                                var imported = res.data.imported || 0;
+                                var duplicate = res.data.duplicate || 0;
+                                status.style.color = '#22c55e';
+                                status.textContent = '✓ ' +
+                                    '<?php echo esc_js(__('Đã import thành công', 'wp-spin-wheel')); ?>: ' + imported +
+                                    ' | ' + '<?php echo esc_js(__('Trùng lặp', 'wp-spin-wheel')); ?>: ' + duplicate;
+                                setTimeout(function() { window.location.reload(); }, 1200);
+                            } else {
+                                status.style.color = '#dc2626';
+                                status.textContent = (res && res.data && res.data.message) ? res.data.message : '<?php echo esc_js(__('Import thất bại.', 'wp-spin-wheel')); ?>';
+                            }
+                        }).fail(function() {
+                            status.style.color = '#dc2626';
+                            status.textContent = '<?php echo esc_js(__('Lỗi kết nối máy chủ.', 'wp-spin-wheel')); ?>';
+                        }).always(function() {
+                            btn.disabled = false;
+                            btn.textContent = '<?php echo esc_js(__('Import dữ liệu demo Hộp quà', 'wp-spin-wheel')); ?>';
+                        });
+                    });
+                })();
+                </script>
             <?php endif; ?>
         </div>
         <?php

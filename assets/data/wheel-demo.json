@@ -1,0 +1,59 @@
+[
+    {
+        "title": "VÒNG QUAY GIÁNG SINH",
+        "settings": {
+            "template": "tpl-christmas",
+            "duration": 6,
+            "show_confetti": 1,
+            "auto_remove": 0,
+            "show_popup": 1,
+            "popup_label": "Chúc mừng Giáng Sinh!",
+            "show_remove_button": 1,
+            "start_sound": "jingle",
+            "end_sound": "complete",
+            "border_color": "#c0392b",
+            "diamond_color": "#27ae60",
+            "button_label": "QUAY",
+            "button_color": "#27ae60",
+            "button_text_color": "#ffffff",
+            "bg": "red",
+            "bg_img": "/assets/img/christmas-3.jpg",
+            "bg_gradient": ""
+        },
+        "prizes": [
+            { "title": "20%", "color": "#e74c3c" },
+            { "title": "50k", "color": "#f39c12" },
+            { "title": "BÚT MONTBLANC", "color": "#2ecc71" },
+            { "title": "10k", "color": "#3498db" },
+            { "title": "Quà tặng", "color": "#9b59b6" }
+        ]
+    },
+    {
+        "title": "VÒNG QUAY TẾT 2026",
+        "settings": {
+            "template": "tpl-money",
+            "duration": 4,
+            "confetti": true,
+            "popup": "Chúc Mừng Năm Mới!",
+            "button": "DỰ QUAY",
+            "prize": "100k ÔNG ĐỊA"
+        },
+        "prizes": [
+            { "title": "50k", "color": "#e74c3c" },
+            { "title": "100k", "color": "#f1c40f" },
+            { "title": "Voucher 500k", "color": "#8e44ad" }
+        ]
+    },
+    {
+        "title": "VÒNG QUAY HALLOWEEN",
+        "settings": {
+            "template": "tpl-ghost",
+            "duration": 5,
+            "auto_remove": true
+        },
+        "prizes": [
+            { "title": "Kẹo Bí Ngô", "color": "#d35400" },
+            { "title": "Mặt Nạ", "color": "#2ecc71" }
+        ]
+    }
+]

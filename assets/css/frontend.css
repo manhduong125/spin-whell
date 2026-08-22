@@ -310,9 +310,17 @@
   display: none;
 }
 
+@media screen and (min-width: 1400px) {
+  #wheel {
+    height: 700px !important;
+    width: 700px !important;
+  }
+}
+
 @media screen and (max-width: 991px) {
   #wheel {
-    height: 600px;
+    height: 600px !important;
+    width: 600px !important;
   }
 }
 

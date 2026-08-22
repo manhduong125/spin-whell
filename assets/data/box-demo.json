@@ -1,0 +1,117 @@
+[
+    {
+        "title": "HỘP QUÀ MAY MẮN SHIRATORI",
+        "template": "tpl-blind-bag",
+        "luotchoi": 3,
+        "gifts": ["10%", "20%", "30%", "liu liu k có quà", "10.000", "Tặng 1 sp cùng loại"],
+        "settings": {
+            "template": "tpl-blind-bag",
+            "luotchoi": 3,
+            "sound": "winner",
+            "sound_file": "",
+            "noti_sound": "concainit",
+            "noti_sound_file": "",
+            "popup_title": "Hộp quà có",
+            "confetti": true,
+            "bg_color": "#dc3545",
+            "color": "#ffffff",
+            "bg_img": "",
+            "bg_gradient": "conic-gradient(from 90deg, rgb(59, 0, 0) 0deg, rgb(45, 0, 0) 55.385deg, rgb(26, 0, 0) 83.077deg, rgb(4, 0, 0) 110.769deg, rgb(0, 0, 30) 166.154deg, rgb(0, 38, 62) 221.538deg, rgb(0, 77, 88) 249.231deg, rgb(0, 104, 106) 276.923deg, rgb(0, 116, 115) 304.615deg, rgb(0, 112, 112) 332.308deg, rgb(8, 91, 99) 360deg)",
+            "btn_bg_color": "#4c92a9",
+            "btn_color": "#ffffff",
+            "show_particle": true
+        }
+    },
+    {
+        "title": "HỘP QUÀ GIÁNG SINH",
+        "template": "tpl-christmas",
+        "luotchoi": 5,
+        "gifts": ["Áo len Giáng sinh", "Ly giữ nhiệt", "10.000đ", "Bánh quy gừng", "Vớ Giáng sinh", "Mũ ông già Noel"],
+        "settings": {
+            "template": "tpl-christmas",
+            "luotchoi": 5,
+            "sound": "congratulation",
+            "sound_file": "",
+            "noti_sound": "complete",
+            "noti_sound_file": "",
+            "popup_title": "Quà Giáng sinh của bạn là",
+            "confetti": true,
+            "bg_color": "#1e5631",
+            "color": "#ffffff",
+            "bg_img": "",
+            "bg_gradient": "linear-gradient(135deg, #c0392b, #8e44ad)",
+            "btn_bg_color": "#c0392b",
+            "btn_color": "#ffffff",
+            "show_particle": true
+        }
+    },
+    {
+        "title": "HỘP QUÀ TẾT 2026",
+        "template": "tpl-money",
+        "luotchoi": 2,
+        "gifts": ["Bao lì xì 50k", "Bao lì xì 20k", "Chúc may mắn", "Voucher 100k", "Mứt Tết", "Bút lông mực"],
+        "settings": {
+            "template": "tpl-money",
+            "luotchoi": 2,
+            "sound": "bell",
+            "sound_file": "",
+            "noti_sound": "fanfare",
+            "noti_sound_file": "",
+            "popup_title": "Lì xì của bạn",
+            "confetti": true,
+            "bg_color": "#9e3d30",
+            "color": "#ffd700",
+            "bg_img": "",
+            "bg_gradient": "linear-gradient(180deg, #c0392b, #f39c12)",
+            "btn_bg_color": "#c0392b",
+            "btn_color": "#ffd700",
+            "show_particle": true
+        }
+    },
+    {
+        "title": "HỘP QUÀ HALLOWEEN",
+        "template": "tpl-ghost",
+        "luotchoi": 4,
+        "gifts": ["Kẹo bí ngô", "Mặt nạ ma", "Trang phục ma", "Voucher 50k", "Bóng bay ma", "Sô cô la"],
+        "settings": {
+            "template": "tpl-ghost",
+            "luotchoi": 4,
+            "sound": "pendulum",
+            "sound_file": "",
+            "noti_sound": "horror-scream",
+            "noti_sound_file": "",
+            "popup_title": "Bạn nhận được",
+            "confetti": true,
+            "bg_color": "#1a1a2e",
+            "color": "#ffa502",
+            "bg_img": "",
+            "bg_gradient": "linear-gradient(160deg, #2c003e, #7b2cbf)",
+            "btn_bg_color": "#7b2cbf",
+            "btn_color": "#ffffff",
+            "show_particle": true
+        }
+    },
+    {
+        "title": "HỘP QUÀ MÙA HÈ",
+        "template": "tpl-jib",
+        "luotchoi": 6,
+        "gifts": ["Kem", "Trà sữa", "Voucher 20k", "Áo phông", "Nón", "Nước suối"],
+        "settings": {
+            "template": "tpl-jib",
+            "luotchoi": 6,
+            "sound": "happy",
+            "sound_file": "",
+            "noti_sound": "concainit",
+            "noti_sound_file": "",
+            "popup_title": "Phần quà là",
+            "confetti": true,
+            "bg_color": "#0984e3",
+            "color": "#ffffff",
+            "bg_img": "",
+            "bg_gradient": "linear-gradient(120deg, #0984e3, #00cec9)",
+            "btn_bg_color": "#0984e3",
+            "btn_color": "#ffffff",
+            "show_particle": true
+        }
+    }
+]
